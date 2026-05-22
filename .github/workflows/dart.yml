@@ -1,43 +1,206 @@
+name: "Portfolio Build"
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Dart
+# ✅ REQUIRED FOR RELEASE CREATION
+permissions:
+  contents: write
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main, master ]
+
+  workflow_dispatch:
+    inputs:
+      run_build:
+        description: "Force build?"
+        required: false
+        default: "false"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PUB_CACHE: ~/.pub-cache
 
 jobs:
-  build:
+
+  # =========================
+  # 📱 ANDROID BUILD
+  # =========================
+  android-build:
+    name: "📱 Android APK"
     runs-on: ubuntu-latest
 
+    if: |
+      contains(github.event.head_commit.message, '#build') ||
+      github.event.inputs.run_build == 'true'
+
+    outputs:
+      version_name: ${{ steps.version.outputs.VERSION_NAME }}
+      build_number: ${{ steps.version.outputs.BUILD_NUMBER }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-      # Note: This workflow uses the latest stable version of the Dart SDK.
-      # You can specify other versions if desired, see documentation here:
-      # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      # - uses: dart-lang/setup-dart@v1
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+      # 🔥 EXTRACT VERSION FROM pubspec.yaml
+      - name: 📦 Extract Version
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | cut -d ' ' -f2)
+          VERSION_NAME=$(echo $VERSION | cut -d '+' -f1)
+          BUILD_NUMBER=$(echo $VERSION | cut -d '+' -f2)
+          
+          echo "VERSION_NAME=$VERSION_NAME"
+          echo "BUILD_NUMBER=$BUILD_NUMBER"
+          
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
 
-      - name: Install dependencies
-        run: dart pub get
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
-      # Uncomment this step to verify the use of 'dart format' on each commit.
-      # - name: Verify formatting
-      #   run: dart format --output=none --set-exit-if-changed .
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
-      - name: Analyze project source
-        run: dart analyze
+      - name: ⚡ Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            build
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
 
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
-      - name: Run tests
-        run: dart test
+      - name: 🧹 Clean Project
+        run: flutter clean
+
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      - name: 🏗️ Build APK
+        run: flutter build apk --release
+
+      # 🔍 Debug (helps avoid path issues)
+      - name: 🔍 Check APK
+        run: ls build/app/outputs/flutter-apk/
+
+      - name: 🔥 Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: 🚀 Distribute APK to Firebase
+        run: |
+          firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
+          --app ${{ secrets.FIREBASE_APP_ID }} \
+          --token ${{ secrets.FIREBASE_TOKEN }} \
+          --groups "qa-team" \
+          --release-notes "New build from GitHub Actions"
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/*
+
+
+  # =========================
+  # 🍎 IOS BUILD
+  # =========================
+  ios-build:
+    name: "🍎 iOS IPA"
+    runs-on: macos-latest
+
+    if: |
+      contains(github.event.head_commit.message, '#build') ||
+      github.event.inputs.run_build == 'true'
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: ⚡ Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            build
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+
+      - name: 🧹 Clean Project
+        run: flutter clean
+
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      - name: 🏗️ Build iOS
+        run: flutter build ios --no-codesign
+
+      - name: 📦 Create IPA
+        run: |
+          cd build/ios/iphoneos
+          mkdir Payload
+          cd Payload
+          ln -s ../Runner.app
+          cd ..
+          zip -r app.ipa Payload
+
+      - name: 📤 Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: build/ios/iphoneos/app.ipa
+
+
+  # =========================
+  # 🚀 CREATE RELEASE
+  # =========================
+  create-release:
+    name: "🚀 Create Release"
+    needs: [ android-build, ios-build ]
+    runs-on: ubuntu-latest
+
+    if: |
+      contains(github.event.head_commit.message, '#build') ||
+      github.event.inputs.run_build == 'true'
+
+    steps:
+      - name: 📥 Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: artifacts/android
+
+      - name: 📥 Download iOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-ipa
+          path: artifacts/ios
+
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.android-build.outputs.version_name }}
+          name: Release v${{ needs.android-build.outputs.version_name }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/android/*
+            artifacts/ios/*.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
