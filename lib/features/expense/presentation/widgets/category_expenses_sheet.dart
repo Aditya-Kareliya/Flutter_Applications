@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/utils/platform_info.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -53,7 +53,7 @@ class CategoryExpensesSheet extends StatelessWidget {
                      fontWeight: FontWeight.bold,
                    ),
                  ),
-                 Platform.isIOS 
+                 PlatformInfo.isIOS 
                  ? CupertinoButton(
                      padding: EdgeInsets.zero,
                      child: const Icon(CupertinoIcons.clear_circled_solid),
@@ -134,7 +134,7 @@ class CategoryExpensesSheet extends StatelessWidget {
   }
 
   Future<bool?> _showConfirmDeleteDialog(BuildContext context) async {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
        return await showCupertinoDialog<bool>(
         context: context,
         builder: (context) => CupertinoAlertDialog(

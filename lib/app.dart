@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -87,6 +88,13 @@ class ExpenseTrackerApp extends StatelessWidget {
                 darkTheme: AppTheme.darkTheme(settings.primaryColor),
                 themeMode: themeProvider.themeMode,
                 debugShowCheckedModeBanner: false,
+                scrollBehavior: const MaterialScrollBehavior().copyWith(
+                  dragDevices: {
+                    PointerDeviceKind.touch,
+                    PointerDeviceKind.mouse,
+                    PointerDeviceKind.trackpad,
+                  },
+                ),
                 localizationsDelegates: const [
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,

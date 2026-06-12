@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/platform/platform_scaffold.dart';
 import '../../../../core/widgets/platform/platform_button.dart';
+import '../../../../core/utils/platform_info.dart';
 import '../provider/auth_provider.dart';
 import '../../../../core/settings/settings_provider.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -103,7 +103,7 @@ class _LoginPageContentState extends State<_LoginPageContent> with TickerProvide
   }
 
   void _showForgotPassword(BuildContext context) {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
@@ -236,7 +236,7 @@ class _LoginPageContentState extends State<_LoginPageContent> with TickerProvide
                                             SizedBox(height: 1.h),
                                             Row(
                                               children: [
-                                                if (Platform.isIOS)
+                                                if (PlatformInfo.isIOS)
                                                   Transform.scale(
                                                     scale: 0.8,
                                                     child: CupertinoSwitch(

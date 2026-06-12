@@ -1,52 +1,52 @@
 import '../../domain/entities/expense.dart';
 
 import '../../domain/repositories/expense_repository.dart';
-import '../datasources/expense_local_data_source.dart';
+import '../datasources/expense_firebase_data_source.dart';
 import '../models/category_model.dart';
 import '../models/expense_model.dart';
 
 class ExpenseRepositoryImpl implements ExpenseRepository {
-  final ExpenseLocalDataSource localDataSource;
+  final ExpenseDataSource dataSource;
 
-  ExpenseRepositoryImpl({required this.localDataSource});
+  ExpenseRepositoryImpl({required this.dataSource});
 
   @override
   Future<List<Expense>> getExpenses() async {
-    return await localDataSource.getExpenses();
+    return await dataSource.getExpenses();
   }
 
   @override
   Future<void> addExpense(Expense expense) async {
-    await localDataSource.addExpense(ExpenseModel.fromEntity(expense));
+    await dataSource.addExpense(ExpenseModel.fromEntity(expense));
   }
 
   @override
   Future<void> deleteExpense(String id) async {
-    await localDataSource.deleteExpense(id);
+    await dataSource.deleteExpense(id);
   }
 
   @override
   Future<void> updateExpense(Expense expense) async {
-    await localDataSource.updateExpense(ExpenseModel.fromEntity(expense));
+    await dataSource.updateExpense(ExpenseModel.fromEntity(expense));
   }
 
   @override
   Future<List<Category>> getCategories() async {
-    return await localDataSource.getCategories();
+    return await dataSource.getCategories();
   }
 
   @override
   Future<void> addCategory(Category category) async {
-    await localDataSource.addCategory(CategoryModel.fromEntity(category));
+    await dataSource.addCategory(CategoryModel.fromEntity(category));
   }
 
   @override
   Future<void> deleteCategory(String id) async {
-    await localDataSource.deleteCategory(id);
+    await dataSource.deleteCategory(id);
   }
 
   @override
   Future<void> updateCategory(Category category) async {
-    await localDataSource.updateCategory(CategoryModel.fromEntity(category));
+    await dataSource.updateCategory(CategoryModel.fromEntity(category));
   }
 }

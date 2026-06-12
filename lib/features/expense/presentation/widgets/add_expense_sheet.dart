@@ -1,8 +1,7 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/utils/platform_info.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/settings/settings_provider.dart';
@@ -34,18 +33,33 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
     // Load categories if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<ExpenseProvider>();
+      final settings = context.read<SettingsProvider>();
       if (provider.categories.isEmpty) {
         provider.loadCategories().then((_) {
-           if (mounted && _selectedCategory == null && provider.categories.isNotEmpty) {
+           if (mounted && _selectedCategory == null) {
+             final validCategories = provider.categories.where((c) =>
+               !settings.hiddenCategories.contains(c.name) && c.type == _selectedType.name
+             ).toList();
              setState(() {
-               _selectedCategory = provider.categories.first;
+               if (validCategories.isNotEmpty) {
+                 _selectedCategory = validCategories.first;
+               } else if (provider.categories.isNotEmpty) {
+                 _selectedCategory = provider.categories.first;
+               }
              });
            }
         });
       } else {
          if (_selectedCategory == null) {
+           final validCategories = provider.categories.where((c) =>
+             !settings.hiddenCategories.contains(c.name) && c.type == _selectedType.name
+           ).toList();
            setState(() {
-             _selectedCategory = provider.categories.first; 
+             if (validCategories.isNotEmpty) {
+               _selectedCategory = validCategories.first;
+             } else if (provider.categories.isNotEmpty) {
+               _selectedCategory = provider.categories.first;
+             }
            });
          }
       }
@@ -105,7 +119,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
   }
 
   void _showDatePicker() async {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
       showCupertinoModalPopup(
         context: context,
         builder: (_) => Container(
@@ -159,7 +173,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Container(
-        padding: EdgeInsets.all(6.w),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: isDark ? Colors.grey[900] : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -175,23 +189,28 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                   Text(
                     widget.expenseToEdit != null ? 'Edit Transaction' : 'New Transaction',
                     style: GoogleFonts.outfit(
-                      fontSize: 18.sp,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
-                  if (Platform.isIOS)
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
+                  if (PlatformInfo.isIOS || PlatformInfo.isWeb)
+                    PlatformInfo.isIOS 
+                    ? CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      )
+                    : TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
                 ],
               ),
-              SizedBox(height: 3.h),
+              const SizedBox(height: 20),
               
               Center(
-                child: Platform.isIOS 
+                child: PlatformInfo.isIOS 
                 ? CupertinoSlidingSegmentedControl<TransactionType>(
                     groupValue: _selectedType,
                      onValueChanged: (v) {
@@ -211,9 +230,9 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                          }
                        });
                      },
-                    children: {
-                      TransactionType.expense: Padding(padding: EdgeInsets.symmetric(horizontal: 4.w), child: const Text('Expense')),
-                      TransactionType.income: Padding(padding: EdgeInsets.symmetric(horizontal: 4.w), child: const Text('Income')),
+                    children: const {
+                      TransactionType.expense: Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Expense')),
+                      TransactionType.income: Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Income')),
                     },
                   )
                 : SegmentedButton<TransactionType>(
@@ -242,7 +261,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                   ),
               ),
               
-              SizedBox(height: 3.h),
+              const SizedBox(height: 20),
               
               PlatformTextField(
                 controller: _amountController,
@@ -257,7 +276,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 24,
-                        color: Platform.isIOS ? CupertinoColors.systemGrey : Colors.grey,
+                        color: PlatformInfo.isIOS ? CupertinoColors.systemGrey : Colors.grey,
                       ),
                     ),
                   ),
@@ -265,25 +284,25 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 placeholder: '0.00',
               ),
               
-              SizedBox(height: 2.h),
+              const SizedBox(height: 16),
               
               PlatformTextField(
                 controller: _titleController,
                 label: 'Description',
                 placeholder: 'What was this for?',
-                prefixIcon: Platform.isIOS ? CupertinoIcons.pencil : Icons.edit_note_rounded,
+                prefixIcon: PlatformInfo.isIOS ? CupertinoIcons.pencil : Icons.edit_note_rounded,
               ),
               
-              SizedBox(height: 3.h),
+              const SizedBox(height: 20),
               
               Text(
                 'Category',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16.sp),
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
               ),
-              SizedBox(height: 1.h),
+              const SizedBox(height: 8),
               
               SizedBox(
-                height: 6.h,
+                height: 48,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: categories.length,
@@ -291,9 +310,9 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                     final category = categories[index];
                     final isSelected = _selectedCategory == category;
                     return Padding(
-                      padding: EdgeInsets.only(right: 2.w),
+                      padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
-                        label: Text(category.name, style: GoogleFonts.outfit(fontSize: 14.sp)),
+                        label: Text(category.name, style: GoogleFonts.outfit(fontSize: 14)),
                         selected: isSelected,
                         onSelected: (selected) {
                           if (selected) setState(() => _selectedCategory = category);
@@ -309,23 +328,23 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 ),
               ),
               
-              SizedBox(height: 3.h),
+              const SizedBox(height: 20),
               
               GestureDetector(
                 onTap: _showDatePicker,
                 child: Container(
-                  padding: EdgeInsets.all(4.w),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey[100],
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
-                      Icon(Platform.isIOS ? CupertinoIcons.calendar : Icons.calendar_today_rounded, color: settings.primaryColor),
-                      SizedBox(width: 4.w),
+                      Icon(PlatformInfo.isIOS ? CupertinoIcons.calendar : Icons.calendar_today_rounded, color: settings.primaryColor),
+                      const SizedBox(width: 16),
                       Text(
                         'Date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                        style: GoogleFonts.outfit(fontSize: 16.sp),
+                        style: GoogleFonts.outfit(fontSize: 16),
                       ),
                       const Spacer(),
                       const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
@@ -334,7 +353,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 ),
               ),
               
-              SizedBox(height: 4.h),
+              const SizedBox(height: 24),
               
               SizedBox(
                 width: double.infinity,
@@ -347,7 +366,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                   ),
                 ),
               ),
-              SizedBox(height: 2.h),
+              const SizedBox(height: 16),
             ],
           ),
         ),

@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/settings/settings_provider.dart';
+import '../../../../core/utils/platform_info.dart';
 import '../../../../core/widgets/platform/platform_scaffold.dart';
 import '../provider/expense_provider.dart';
 import '../provider/search_provider.dart';
@@ -15,7 +15,7 @@ class SearchPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
        return PlatformScaffold(
          cupertinoNavigationBar: const CupertinoNavigationBar(
            middle: Text('Search'),

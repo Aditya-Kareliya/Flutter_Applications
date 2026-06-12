@@ -9,13 +9,13 @@ class CategoryModel extends Category {
     required super.type,
   });
 
-  factory CategoryModel.fromJson(Map<String, dynamic> json) {
+  factory CategoryModel.fromJson(Map<String, dynamic> json, {String? fallbackId}) {
     return CategoryModel(
-      id: json['id'],
-      name: json['name'],
+      id: json['id'] ?? fallbackId ?? '',
+      name: json['name'] ?? 'Unknown',
       icon: json['icon'] ?? 'help',
       color: json['color'] ?? '0xFF9E9E9E',
-      type: json['type'],
+      type: json['type'] ?? 'expense',
     );
   }
 

@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/utils/platform_info.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -35,7 +35,7 @@ class _StatsPageState extends State<StatsPage> {
         return PlatformScaffold(
           extendBodyBehindAppBar: true,
           
-          appBar: Platform.isAndroid ? AppBar(
+          appBar: !PlatformInfo.isIOS ? AppBar(
             title: Text(
               'Analytics', 
               style: GoogleFonts.outfit(
@@ -49,7 +49,7 @@ class _StatsPageState extends State<StatsPage> {
             iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
           ) : null,
           
-          cupertinoNavigationBar: Platform.isIOS ? CupertinoNavigationBar(
+          cupertinoNavigationBar: PlatformInfo.isIOS ? CupertinoNavigationBar(
              middle: Text('Analytics', style: TextStyle(fontFamily: GoogleFonts.outfit().fontFamily)),
              backgroundColor: Colors.transparent, 
              border: null,
@@ -150,7 +150,7 @@ class _StatsPageState extends State<StatsPage> {
     TransactionType currentType,
   ) {
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(4.w, Platform.isAndroid ? 0 : 2.h, 4.w, 4.w),
+      padding: EdgeInsets.fromLTRB(4.w, !PlatformInfo.isIOS ? 0 : 2.h, 4.w, 4.w),
       child: Column(
         children: [
           if (showToggle) ...[
@@ -250,7 +250,7 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Widget _buildToggle(SettingsProvider settings, bool isDark) {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
        return SizedBox(
          width: double.infinity,
          child: CupertinoSlidingSegmentedControl<TransactionType>(
@@ -331,7 +331,7 @@ class _StatsPageState extends State<StatsPage> {
 
 
   Widget _buildCategoryList(BuildContext context, Map<Category, double> filteredCategoryTotals, SettingsProvider settings, bool isDark) {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
        return CupertinoListSection.insetGrouped(
           header: Text('CATEGORY BREAKDOWN', style: GoogleFonts.outfit(fontSize: 12.sp, fontWeight: FontWeight.w600)),
           backgroundColor: Colors.transparent,

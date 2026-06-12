@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/utils/platform_info.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -23,7 +23,19 @@ class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   void _showAddExpenseSheet(BuildContext context) {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isWeb) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: SizedBox(
+            width: 500,
+            child: const AddExpenseSheet(),
+          ),
+        ),
+      );
+    } else if (PlatformInfo.isIOS) {
       PlatformBottomSheet.show(
         context: context,
         child: const AddExpenseSheet(),
@@ -63,8 +75,8 @@ class DashboardPage extends StatelessWidget {
         return PlatformScaffold(
           extendBodyBehindAppBar: true,
           backgroundColor: isDark ? Colors.black : Colors.grey[50], // Keep basic bg, but body has gradient/custom scroll
-          // Android Floating Action Button
-          floatingActionButton: Platform.isAndroid ? FloatingActionButton.extended(
+          // Floating Action Button for Android, Web, and Desktop
+          floatingActionButton: !PlatformInfo.isIOS ? FloatingActionButton.extended(
             onPressed: () => _showAddExpenseSheet(context),
             icon: const Icon(Icons.add_rounded),
             label: Text('Transaction', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
@@ -75,7 +87,7 @@ class DashboardPage extends StatelessWidget {
           
           body: CustomScrollView(
             slivers: [
-              if (Platform.isIOS)
+              if (PlatformInfo.isIOS)
                 CupertinoSliverNavigationBar(
                   largeTitle: Text('Dashboard', style: TextStyle(fontFamily: GoogleFonts.outfit().fontFamily)),
                   backgroundColor: isDark ? Colors.black : Colors.white,
@@ -222,7 +234,7 @@ class DashboardPage extends StatelessWidget {
                 ),
               
               // On iOS, we need to show the Balance Card explicitly in the body since it's not in the AppBar
-              if (Platform.isIOS)
+              if (PlatformInfo.isIOS)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(4.w),
@@ -269,7 +281,7 @@ class DashboardPage extends StatelessWidget {
                         onPressed: () {
                            Navigator.push(
                              context,
-                              Platform.isIOS 
+                              PlatformInfo.isIOS 
                               ? CupertinoPageRoute(builder: (context) => const SearchPage()) 
                               : MaterialPageRoute(builder: (context) => const SearchPage()),
                            );
@@ -366,11 +378,11 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildTotalBalance(BuildContext context, {required bool isIOS}) {
     // If iOS content is inside a card, minimal padding needed.
-    // If Android content is inside SliverAppBar, needs SafeArea and more padding.
+    // If Android/Web content is inside SliverAppBar, needs SafeArea and more padding.
     return Padding(
         padding: isIOS 
             ? EdgeInsets.zero 
-            : EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+            : const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SafeArea(
           top: !isIOS, 
           bottom: false,
@@ -379,16 +391,16 @@ class DashboardPage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   if (!isIOS) SizedBox(height: 2.h), // Spacer for Android status bar area visual
+                   if (!isIOS) const SizedBox(height: 6), 
                   Text(
                     'Total Balance',
                     style: GoogleFonts.outfit(
                       color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 16.sp,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 1.h),
+                  const SizedBox(height: 4), 
                   Consumer2<ExpenseProvider, SettingsProvider>(
                     builder: (context, provider, settings, _) {
                       final visibleExpenses = provider.expenses.where((e) => !settings.hiddenCategories.contains(e.category.name));
@@ -400,13 +412,13 @@ class DashboardPage extends StatelessWidget {
                         '${settings.currency}${visibleBalance.toStringAsFixed(2)}',
                         style: GoogleFonts.outfit(
                           color: Colors.white,
-                          fontSize: 26.sp,
+                          fontSize: 28.0,
                           fontWeight: FontWeight.bold,
                         ),
                       );
                     },
                   ),
-                  SizedBox(height: 3.h),
+                  const SizedBox(height: 8), 
                   Consumer2<ExpenseProvider, SettingsProvider>(
                     builder: (context, provider, settings, _) {
                       final visibleExpenses = provider.expenses.where((e) => !settings.hiddenCategories.contains(e.category.name));
@@ -420,15 +432,15 @@ class DashboardPage extends StatelessWidget {
                             context,
                             'Income',
                             '${settings.currency}${income.toStringAsFixed(2)}',
-                            Platform.isIOS ? CupertinoIcons.arrow_up_circle_fill : Icons.arrow_circle_up_rounded,
+                            PlatformInfo.isIOS ? CupertinoIcons.arrow_up_circle_fill : Icons.arrow_circle_up_rounded,
                             Colors.greenAccent,
                           ),
-                          Container(height: 4.h, width: 1, color: Colors.white24, margin: EdgeInsets.symmetric(horizontal: 6.w)),
+                          Container(height: 24, width: 1, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 16)), 
                           _buildIncomeExpenseItem(
                             context,
                             'Expense',
                             '${settings.currency}${expense.toStringAsFixed(2)}',
-                            Platform.isIOS ? CupertinoIcons.arrow_down_circle_fill : Icons.arrow_circle_down_rounded,
+                            PlatformInfo.isIOS ? CupertinoIcons.arrow_down_circle_fill : Icons.arrow_circle_down_rounded,
                             const Color(0xFFFF8A80), // Softer red
                           ),
                         ],
@@ -453,14 +465,14 @@ class DashboardPage extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: color, size: 18.sp),
+          child: Icon(icon, color: color, size: 16.0),
         ),
-        SizedBox(width: 3.w),
+        const SizedBox(width: 8.0),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -468,7 +480,7 @@ class DashboardPage extends StatelessWidget {
               label,
               style: GoogleFonts.outfit(
                 color: Colors.white.withValues(alpha: 0.7),
-                fontSize: 13.sp,
+                fontSize: 12.0,
               ),
             ),
             Text(
@@ -476,7 +488,7 @@ class DashboardPage extends StatelessWidget {
               style: GoogleFonts.outfit(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
-                fontSize: 15.sp,
+                fontSize: 14.0,
               ),
             ),
           ],

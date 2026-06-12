@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/utils/platform_info.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -38,7 +37,7 @@ class SettingsPage extends StatelessWidget {
           final textColor = isDark ? Colors.white : Colors.black;
           final subtitleColor = isDark ? Colors.grey[400] : Colors.grey[600];
 
-          if (Platform.isIOS) {
+          if (PlatformInfo.isIOS) {
             return ListView(
               padding: EdgeInsets.symmetric(vertical: 2.h),
               children: [
@@ -54,7 +53,7 @@ class SettingsPage extends StatelessWidget {
                       ),
                       trailing: CupertinoSwitch(
                         value: themeProvider.themeMode == ThemeMode.dark,
-                        activeColor: settings.primaryColor,
+                        activeTrackColor: settings.primaryColor,
                         onChanged: (val) {
                           final newMode = val ? ThemeMode.dark : ThemeMode.light;
                           themeProvider.setThemeMode(newMode);
@@ -154,7 +153,7 @@ class SettingsPage extends StatelessWidget {
                 title: Text('Dark Mode', style: GoogleFonts.outfit(color: textColor)),
                 secondary: Icon(Icons.dark_mode, color: settings.primaryColor),
                 value: themeProvider.themeMode == ThemeMode.dark,
-                activeColor: settings.primaryColor,
+                activeThumbColor: settings.primaryColor,
                 onChanged: (val) {
                   final newMode = val ? ThemeMode.dark : ThemeMode.light;
                   themeProvider.setThemeMode(newMode);
@@ -246,7 +245,7 @@ class SettingsPage extends StatelessWidget {
       Colors.blue, Colors.red, Colors.green, Colors.orange, Colors.purple, Colors.teal, Colors.pink, Colors.indigo
     ];
 
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
        showCupertinoModalPopup(
         context: context,
         builder: (ctx) => Container(
@@ -301,7 +300,7 @@ class SettingsPage extends StatelessWidget {
   void _showCurrencyPicker(BuildContext context, SettingsProvider settings, AuthProvider auth, ThemeProvider themeProvider) {
      final currencies = ['₹', '\$', '€', '£', '¥', 'Custom'];
      
-     if (Platform.isIOS) {
+     if (PlatformInfo.isIOS) {
        showCupertinoModalPopup(
         context: context,
         builder: (ctx) => CupertinoActionSheet(
@@ -358,7 +357,7 @@ class SettingsPage extends StatelessWidget {
     // but AlertDialog.adaptive usually handles fields poorly on iOS (CupertinoAlertDialog doesn't natively support TextFormField easily without tricks).
     // So for consistency, let's use a Material dialog or explicit CupertinoDialog with a CupertinoTextField.
     
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
        showCupertinoDialog(
          context: context, 
          builder: (ctx) => CupertinoAlertDialog(

@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../utils/platform_info.dart';
 
 class PlatformTextField extends StatelessWidget {
   final TextEditingController? controller;
@@ -30,7 +30,7 @@ class PlatformTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isIOS) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

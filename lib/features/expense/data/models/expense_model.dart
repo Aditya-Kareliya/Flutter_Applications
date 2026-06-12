@@ -13,43 +13,19 @@ class ExpenseModel extends Expense {
   });
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) {
-    // If the JSON (or SQLite row) contains nested category object or flattened fields
-    // For SQLite JOIN, we expected flattened fields usually prefixed or we have to construct it.
-    // Let's assume the query returns joined fields like 'category_name', 'category_icon', etc.
-    // OR we will update the DataSource to return a cleaner map.
-    // For now, let's assume the map passed here contains category data.
-    
     // Check if 'category' is a map (nested) or we are reading flat columns.
-    // LocalDataSource will likely build a nested map or we handle it here.
-    
-    // Let's assume we pass a nested map for category if possible, OR
-    // we construct the CategoryModel here.
-    
-    // Handle specific logic for 'category' field.
-    // If it comes from partial SQLite row, it might be tricky.
-    // Ideally, DataSource shapes the data.
-    
+    final categoryData = json['category'] is Map<String, dynamic>
+        ? Map<String, dynamic>.from(json['category'])
+        : <String, dynamic>{};
+
     return ExpenseModel(
-      id: json['id'],
-      title: json['title'] ?? json['description'] ?? '', // SQLite column is description?
-      amount: (json['amount'] as num).toDouble(),
-      date: DateTime.parse(json['date']),
-      category: CategoryModel.fromJson(json['category'] is Map<String, dynamic> 
-          ? json['category'] 
-          : Map<String, dynamic>.from(json)), // Fallback if flattened?
-          // Actually, if we JOIN, we get columns.
-          // e.g. amount, date, c.name, c.icon.
-          // It's cleaner if DataSource maps it to:
-          // { ...expense, category: { ...category } }
+      id: json['id'] ?? '',
+      title: json['title'] ?? json['description'] ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+      date: json['date'] != null ? DateTime.parse(json['date']) : DateTime.now(),
+      category: CategoryModel.fromJson(categoryData),
       type: _typeFromString(json['type']),
-      note: json['note'] ?? json['description'], // 'description' column in DB acts as title or note?
-      // In DB schema I wrote: description (nullable). And NO title column?
-      // Wait, schema:
-      // expenses: id, user_id, amount, date, category_id, description, type.
-      // My Expense entity has: title, note.
-      // User request "description" usually maps to title/note.
-      // Let's map 'description' to 'title' and leave note empty or same?
-      // I'll update ExpenseModel mapping to use 'description' as 'title'.
+      note: json['note'] ?? json['description'],
     );
   }
   

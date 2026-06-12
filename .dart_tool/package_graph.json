@@ -7,8 +7,10 @@
       "name": "expense_tracker_app",
       "version": "1.0.0+1",
       "dependencies": [
+        "cloud_firestore",
         "cupertino_icons",
         "equatable",
+        "firebase_auth",
         "firebase_core",
         "fl_chart",
         "flutter",
@@ -16,11 +18,9 @@
         "flutter_localizations",
         "google_fonts",
         "intl",
-        "path",
         "provider",
         "responsive_sizer",
         "shared_preferences",
-        "sqflite",
         "top_snackbar_flutter",
         "uuid"
       ],
@@ -55,30 +55,38 @@
       ]
     },
     {
-      "name": "firebase_core",
-      "version": "4.9.0",
+      "name": "cloud_firestore",
+      "version": "6.5.0",
       "dependencies": [
+        "cloud_firestore_platform_interface",
+        "cloud_firestore_web",
+        "collection",
+        "firebase_core",
         "firebase_core_platform_interface",
-        "firebase_core_web",
         "flutter",
         "meta"
       ]
     },
     {
-      "name": "path",
-      "version": "1.9.1",
-      "dependencies": []
+      "name": "firebase_auth",
+      "version": "6.5.2",
+      "dependencies": [
+        "firebase_auth_platform_interface",
+        "firebase_auth_web",
+        "firebase_core",
+        "firebase_core_platform_interface",
+        "flutter",
+        "meta"
+      ]
     },
     {
-      "name": "sqflite",
-      "version": "2.4.2",
+      "name": "firebase_core",
+      "version": "4.10.0",
       "dependencies": [
+        "firebase_core_platform_interface",
+        "firebase_core_web",
         "flutter",
-        "path",
-        "sqflite_android",
-        "sqflite_common",
-        "sqflite_darwin",
-        "sqflite_platform_interface"
+        "meta"
       ]
     },
     {
@@ -255,6 +263,11 @@
       ]
     },
     {
+      "name": "path",
+      "version": "1.9.1",
+      "dependencies": []
+    },
+    {
       "name": "matcher",
       "version": "0.12.19",
       "dependencies": [
@@ -281,17 +294,6 @@
       ]
     },
     {
-      "name": "firebase_core_web",
-      "version": "3.7.0",
-      "dependencies": [
-        "firebase_core_platform_interface",
-        "flutter",
-        "flutter_web_plugins",
-        "meta",
-        "web"
-      ]
-    },
-    {
       "name": "firebase_core_platform_interface",
       "version": "7.0.1",
       "dependencies": [
@@ -303,44 +305,66 @@
       ]
     },
     {
-      "name": "sqflite_common",
-      "version": "2.5.6",
+      "name": "cloud_firestore_web",
+      "version": "5.5.0",
       "dependencies": [
-        "meta",
-        "path",
-        "synchronized"
+        "_flutterfire_internals",
+        "cloud_firestore_platform_interface",
+        "collection",
+        "firebase_core",
+        "firebase_core_web",
+        "flutter",
+        "flutter_web_plugins"
       ]
     },
     {
-      "name": "sqflite_platform_interface",
-      "version": "2.4.0",
+      "name": "cloud_firestore_platform_interface",
+      "version": "8.0.2",
       "dependencies": [
+        "_flutterfire_internals",
+        "collection",
+        "firebase_core",
         "flutter",
         "meta",
-        "platform",
-        "plugin_platform_interface",
-        "sqflite_common"
+        "plugin_platform_interface"
       ]
     },
     {
-      "name": "sqflite_darwin",
-      "version": "2.4.2",
+      "name": "firebase_auth_web",
+      "version": "6.2.2",
       "dependencies": [
+        "firebase_auth_platform_interface",
+        "firebase_core",
+        "firebase_core_web",
         "flutter",
+        "flutter_web_plugins",
+        "http_parser",
         "meta",
-        "path",
-        "sqflite_common",
-        "sqflite_platform_interface"
+        "web"
       ]
     },
     {
-      "name": "sqflite_android",
-      "version": "2.4.2+2",
+      "name": "firebase_auth_platform_interface",
+      "version": "9.0.2",
       "dependencies": [
+        "_flutterfire_internals",
+        "collection",
+        "firebase_core",
         "flutter",
-        "path",
-        "sqflite_common",
-        "sqflite_platform_interface"
+        "http",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "firebase_core_web",
+      "version": "3.8.0",
+      "dependencies": [
+        "firebase_core_platform_interface",
+        "flutter",
+        "flutter_web_plugins",
+        "meta",
+        "web"
       ]
     },
     {
@@ -525,9 +549,11 @@
       ]
     },
     {
-      "name": "web",
-      "version": "1.1.1",
-      "dependencies": []
+      "name": "plugin_platform_interface",
+      "version": "2.1.8",
+      "dependencies": [
+        "meta"
+      ]
     },
     {
       "name": "flutter_web_plugins",
@@ -537,21 +563,30 @@
       ]
     },
     {
-      "name": "plugin_platform_interface",
-      "version": "2.1.8",
+      "name": "_flutterfire_internals",
+      "version": "1.3.72",
       "dependencies": [
+        "collection",
+        "firebase_core",
+        "firebase_core_platform_interface",
+        "flutter",
         "meta"
       ]
     },
     {
-      "name": "synchronized",
-      "version": "3.4.0",
+      "name": "web",
+      "version": "1.1.1",
       "dependencies": []
     },
     {
-      "name": "platform",
-      "version": "3.1.6",
-      "dependencies": []
+      "name": "http_parser",
+      "version": "4.1.2",
+      "dependencies": [
+        "collection",
+        "source_span",
+        "string_scanner",
+        "typed_data"
+      ]
     },
     {
       "name": "path_provider_windows",
@@ -602,16 +637,6 @@
       ]
     },
     {
-      "name": "http_parser",
-      "version": "4.1.2",
-      "dependencies": [
-        "collection",
-        "source_span",
-        "string_scanner",
-        "typed_data"
-      ]
-    },
-    {
       "name": "typed_data",
       "version": "1.4.0",
       "dependencies": [
@@ -634,6 +659,11 @@
     {
       "name": "ffi",
       "version": "2.1.5",
+      "dependencies": []
+    },
+    {
+      "name": "platform",
+      "version": "3.1.6",
       "dependencies": []
     },
     {

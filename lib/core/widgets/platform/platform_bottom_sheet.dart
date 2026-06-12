@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../utils/platform_info.dart';
 
 class PlatformBottomSheet {
   static Future<T?> show<T>({
@@ -8,7 +8,20 @@ class PlatformBottomSheet {
     required Widget child,
     bool isScrollControlled = true,
   }) async {
-    if (Platform.isIOS) {
+    if (PlatformInfo.isWeb) {
+      return await showDialog<T>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: SizedBox(
+            width: 500,
+            child: child,
+          ),
+        ),
+      );
+    }
+    if (PlatformInfo.isIOS) {
       return await showCupertinoModalPopup<T>(
         context: context,
         builder: (context) => Container(

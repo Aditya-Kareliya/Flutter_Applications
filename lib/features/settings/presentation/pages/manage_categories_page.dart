@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/utils/platform_info.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -55,14 +54,14 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> with Single
         foregroundColor: isDark ? Colors.white : Colors.black,
         elevation: 0,
         actions: [
-          if (Platform.isIOS)
+          if (PlatformInfo.isIOS)
             CupertinoButton(
               padding: EdgeInsets.zero,
               child: const Icon(CupertinoIcons.add),
               onPressed: () => _showAddEditCategoryDialog(context, type: _selectedType),
             )
         ],
-        bottom: Platform.isAndroid ? TabBar(
+        bottom: !PlatformInfo.isIOS ? TabBar(
           controller: _tabController,
           labelColor: theme.primaryColor,
           indicatorColor: theme.primaryColor,
@@ -82,7 +81,7 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> with Single
           onPressed: () => _showAddEditCategoryDialog(context, type: _selectedType),
         ),
       ),
-      floatingActionButton: Platform.isAndroid
+      floatingActionButton: !PlatformInfo.isIOS
           ? FloatingActionButton(
               onPressed: () => _showAddEditCategoryDialog(context, type: _selectedType),
               child: const Icon(Icons.add),
@@ -94,7 +93,7 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> with Single
 
           return Column(
               children: [
-                if (Platform.isIOS) ...[
+                if (PlatformInfo.isIOS) ...[
                   SizedBox(height: 1.h),
                    Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4.w),
@@ -129,7 +128,7 @@ class _ManageCategoriesPageState extends State<ManageCategoriesPage> with Single
                         final category = categories[index];
                         final isHidden = settings.hiddenCategories.contains(category.name);
 
-                        if (Platform.isIOS) {
+                        if (PlatformInfo.isIOS) {
                           return Container(
                             margin: EdgeInsets.only(bottom: 1.h),
                             decoration: BoxDecoration(

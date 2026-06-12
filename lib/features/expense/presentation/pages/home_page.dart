@@ -1,19 +1,39 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/utils/platform_info.dart';
 import '../provider/navigation_provider.dart';
 import 'dashboard_page.dart';
 import 'stats_page.dart';
+import '../../../auth/presentation/provider/auth_provider.dart';
+import '../../../../core/settings/settings_provider.dart';
+import '../../../../core/theme/theme_provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.user != null) {
+        Provider.of<SettingsProvider>(context, listen: false).syncWithUser(auth.user!);
+        Provider.of<ThemeProvider>(context, listen: false).syncWithUser(auth.user!);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<NavigationProvider>(
       builder: (context, nav, child) {
-        if (Platform.isIOS) {
+        if (PlatformInfo.isIOS) {
           return CupertinoTabScaffold(
             tabBar: CupertinoTabBar(
               currentIndex: nav.currentIndex,
