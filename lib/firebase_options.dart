@@ -41,49 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBwhD6fawTjhZlbC9j5pKxAg6x0oTWIFYY',
-    appId: '1:182769311613:web:59f66211b29ce90ea5f614',
-    messagingSenderId: '182769311613',
-    projectId: 'project1-e4867',
-    authDomain: 'project1-e4867.firebaseapp.com',
-    storageBucket: 'project1-e4867.firebasestorage.app',
-    measurementId: 'G-C712CF4709',
+    apiKey: 'AIzaSyDDvX_l1aCTh9V3qN_PNJbrl1NB1su_5y4',
+    appId: '1:18547901578:web:4ed656af2547d54bcd5973',
+    messagingSenderId: '18547901578',
+    projectId: 'project2-aditya-kareliya',
+    authDomain: 'project2-aditya-kareliya.firebaseapp.com',
+    storageBucket: 'project2-aditya-kareliya.firebasestorage.app',
+    measurementId: 'G-N5WLB99SPR',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBPnPcrXYVZLepDJJB07AEf4-wJlu1qrGI',
-    appId: '1:182769311613:android:fab592011c60022ea5f614',
-    messagingSenderId: '182769311613',
-    projectId: 'project1-e4867',
-    storageBucket: 'project1-e4867.firebasestorage.app',
+    apiKey: 'AIzaSyAdRbbDnmhtp_9t4UI04HmO1ol6IAepzXs',
+    appId: '1:18547901578:android:4886277565123720cd5973',
+    messagingSenderId: '18547901578',
+    projectId: 'project2-aditya-kareliya',
+    storageBucket: 'project2-aditya-kareliya.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB01s4_rvZn26qIKNfrgSvrG78RtegDC08',
-    appId: '1:182769311613:ios:fa1f73eb6b7473ada5f614',
-    messagingSenderId: '182769311613',
-    projectId: 'project1-e4867',
-    storageBucket: 'project1-e4867.firebasestorage.app',
-    iosBundleId: 'com.example.portfolio',
+    apiKey: 'AIzaSyDLudIlM106gNf4GCGbGZFX8CVQLX9Gk54',
+    appId: '1:18547901578:ios:88df9841b01de279cd5973',
+    messagingSenderId: '18547901578',
+    projectId: 'project2-aditya-kareliya',
+    storageBucket: 'project2-aditya-kareliya.firebasestorage.app',
+    iosBundleId: 'com.example.expenseTrackerApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyB01s4_rvZn26qIKNfrgSvrG78RtegDC08',
-    appId: '1:182769311613:ios:fa1f73eb6b7473ada5f614',
-    messagingSenderId: '182769311613',
-    projectId: 'project1-e4867',
-    storageBucket: 'project1-e4867.firebasestorage.app',
-    iosBundleId: 'com.example.portfolio',
+    apiKey: 'AIzaSyDLudIlM106gNf4GCGbGZFX8CVQLX9Gk54',
+    appId: '1:18547901578:ios:88df9841b01de279cd5973',
+    messagingSenderId: '18547901578',
+    projectId: 'project2-aditya-kareliya',
+    storageBucket: 'project2-aditya-kareliya.firebasestorage.app',
+    iosBundleId: 'com.example.expenseTrackerApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBwhD6fawTjhZlbC9j5pKxAg6x0oTWIFYY',
-    appId: '1:182769311613:web:54838a9c2e79cfaaa5f614',
-    messagingSenderId: '182769311613',
-    projectId: 'project1-e4867',
-    authDomain: 'project1-e4867.firebaseapp.com',
-    storageBucket: 'project1-e4867.firebasestorage.app',
-    measurementId: 'G-MZ2DNQ7X2M',
+    apiKey: 'AIzaSyDDvX_l1aCTh9V3qN_PNJbrl1NB1su_5y4',
+    appId: '1:18547901578:web:f161803fadfcc9a2cd5973',
+    messagingSenderId: '18547901578',
+    projectId: 'project2-aditya-kareliya',
+    authDomain: 'project2-aditya-kareliya.firebaseapp.com',
+    storageBucket: 'project2-aditya-kareliya.firebasestorage.app',
+    measurementId: 'G-ST71GXN7XQ',
   );
-
 }

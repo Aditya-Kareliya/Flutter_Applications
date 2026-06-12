@@ -1,89 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
-import 'package:url_strategy/url_strategy.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'app.dart';
+import 'features/auth/data/datasources/auth_local_data_source.dart';
+import 'features/auth/data/repositories/auth_repository_impl.dart';
+import 'features/expense/data/datasources/expense_local_data_source.dart';
+import 'features/expense/data/repositories/expense_repository_impl.dart';
+import 'features/expense/domain/usecases/add_expense.dart';
+import 'features/expense/domain/usecases/delete_expense.dart';
+import 'features/expense/domain/usecases/get_expenses.dart';
 
-import 'src/core/theme/app_theme.dart';
-import 'src/core/theme/theme_provider.dart';
-import 'src/routes/app_router.dart';
-import 'src/features/portfolio/logic/portfolio_provider.dart';
-import 'src/features/preview_app/logic/preview_provider.dart';
-import 'src/features/preview_app/features/color_palette/logic/color_palette_provider.dart';
-import 'src/features/preview_app/features/password_generator/logic/password_provider.dart';
-import 'src/features/preview_app/features/qr_module/logic/qr_provider.dart';
-import 'src/features/preview_app/features/bmi_calculator/logic/bmi_provider.dart';
-import 'src/features/preview_app/features/tip_calculator/logic/tip_provider.dart';
-import 'src/features/preview_app/features/unit_converter/logic/unit_provider.dart';
+import 'features/expense/domain/usecases/update_expense.dart';
+import 'features/expense/domain/usecases/get_categories.dart';
+import 'features/expense/domain/usecases/add_category.dart';
+import 'features/expense/domain/usecases/delete_category.dart';
+import 'features/expense/domain/usecases/update_category.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  /// Removes # from web URLs
-  setPathUrlStrategy();
+  // 1. Initialize External
+  final sharedPreferences = await SharedPreferences.getInstance();
 
-  /// Load saved theme before app starts
-  final themeProvider = ThemeProvider();
-  await themeProvider.load();
+  // 2. Initialize Data Source
+  final expenseLocalDataSource = ExpenseLocalDataSourceImpl(sharedPreferences: sharedPreferences);
 
-  runApp(
-    MultiProvider(
-      providers: [
-        /// Theme
-        ChangeNotifierProvider.value(value: themeProvider),
+  // 3. Initialize Repository
+  final expenseRepository = ExpenseRepositoryImpl(localDataSource: expenseLocalDataSource);
 
-        /// Core Features
-        ChangeNotifierProvider(create: (_) => PortfolioProvider()),
-        ChangeNotifierProvider(create: (_) => PlatformProvider()),
+  // Auth Dependency Injection
+  final authLocalDataSource = AuthLocalDataSourceImpl(sharedPreferences: sharedPreferences);
+  final authRepository = AuthRepositoryImpl(localDataSource: authLocalDataSource);
 
-        /// Utility Modules
-        ChangeNotifierProvider(create: (_) => QRProvider()),
-        ChangeNotifierProvider(create: (_) => ColorPaletteProvider()),
-        ChangeNotifierProvider(create: (_) => PasswordProvider()),
-        ChangeNotifierProvider(create: (_) => BmiProvider()),
-        ChangeNotifierProvider(create: (_) => TipProvider()),
-        ChangeNotifierProvider(create: (_) => UnitProvider()),
-      ],
-      child: const MyApp(),
-    ),
-  );
-}
+  // 4. Initialize Usecases
+  final getCategories = GetCategories(expenseRepository);
+  final getExpenses = GetExpenses(expenseRepository);
+  final addExpense = AddExpense(expenseRepository);
+  final deleteExpense = DeleteExpense(expenseRepository);
+  final updateExpense = UpdateExpense(expenseRepository);
+  final addCategory = AddCategory(expenseRepository);
+  final deleteCategory = DeleteCategory(expenseRepository);
+  final updateCategory = UpdateCategory(expenseRepository);
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ResponsiveSizer(
-      builder: (context, orientation, deviceType) {
-        return Consumer<ThemeProvider>(
-          builder: (context, themeProvider, _) {
-            return MaterialApp.router(
-              debugShowCheckedModeBanner: false,
-
-              /// App name
-              title: 'Portfolio',
-
-              /// Light Theme
-              theme: MaterialAppTheme.lightTheme(themeProvider.seedColor),
-
-              /// Dark Theme
-              darkTheme: MaterialAppTheme.darkTheme(themeProvider.seedColor),
-
-              /// Theme mode
-              themeMode: themeProvider.themeMode,
-
-              /// Localization
-              localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
-
-              supportedLocales: const [Locale('en', 'US')],
-
-              /// Router
-              routerConfig: appRouter,
-            );
-          },
-        );
-      },
-    );
-  }
+  runApp(ExpenseTrackerApp(
+    getCategories: getCategories,
+    getExpenses: getExpenses,
+    addExpense: addExpense,
+    deleteExpense: deleteExpense,
+    updateExpense: updateExpense,
+    addCategory: addCategory,
+    deleteCategory: deleteCategory,
+    updateCategory: updateCategory,
+    sharedPreferences: sharedPreferences,
+    authRepository: authRepository,
+  ));
 }
