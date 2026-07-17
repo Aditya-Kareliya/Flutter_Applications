@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "portfolio",
-      "version": "0.0.12+1",
+      "version": "0.0.13+1",
       "dependencies": [
         "audioplayers",
         "auto_size_text",
@@ -372,7 +372,7 @@
     },
     {
       "name": "meta",
-      "version": "1.17.0",
+      "version": "1.18.0",
       "dependencies": []
     },
     {
@@ -434,7 +434,7 @@
     },
     {
       "name": "test_api",
-      "version": "0.7.10",
+      "version": "0.7.11",
       "dependencies": [
         "async",
         "boolean_selector",
