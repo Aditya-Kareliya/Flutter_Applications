@@ -18,7 +18,6 @@ on:
         default: "false"
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PUB_CACHE: ~/.pub-cache
 
 jobs:
@@ -31,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
 
     if: |
-      contains(github.event.head_commit.message, '#build') ||
+      (github.event.head_commit != null && contains(github.event.head_commit.message, '#build')) ||
       github.event.inputs.run_build == 'true'
 
     outputs:
@@ -56,25 +55,18 @@ jobs:
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
 
-      - name: ☕ Setup Java
+      - name: ☕ Setup Java & Gradle Cache
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
 
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-
-      - name: ⚡ Cache Dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            build
-          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
 
       - name: 🧹 Clean Project
         run: flutter clean
@@ -106,7 +98,6 @@ jobs:
           name: android-apk
           path: build/app/outputs/flutter-apk/*
 
-
   # =========================
   # 🍎 IOS BUILD
   # =========================
@@ -115,35 +106,18 @@ jobs:
     runs-on: macos-latest
 
     if: |
-      contains(github.event.head_commit.message, '#build') ||
+      (github.event.head_commit != null && contains(github.event.head_commit.message, '#build')) ||
       github.event.inputs.run_build == 'true'
 
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: ☕ Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-
-      - name: ⚡ Cache Dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            build
-          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
-
-      - name: 🧹 Clean Project
-        run: flutter clean
 
       - name: 📦 Install Dependencies
         run: flutter pub get
@@ -155,9 +129,7 @@ jobs:
         run: |
           cd build/ios/iphoneos
           mkdir Payload
-          cd Payload
-          ln -s ../Runner.app
-          cd ..
+          cp -R Runner.app Payload/
           zip -r app.ipa Payload
 
       - name: 📤 Upload IPA Artifact
@@ -165,7 +137,6 @@ jobs:
         with:
           name: ios-ipa
           path: build/ios/iphoneos/app.ipa
-
 
   # =========================
   # 🚀 CREATE RELEASE
@@ -176,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
 
     if: |
-      contains(github.event.head_commit.message, '#build') ||
+      (github.event.head_commit != null && contains(github.event.head_commit.message, '#build')) ||
       github.event.inputs.run_build == 'true'
 
     steps:
@@ -199,6 +170,7 @@ jobs:
           name: Release v${{ needs.android-build.outputs.version_name }}
           draft: false
           prerelease: false
+          allowUpdates: true
           files: |
             artifacts/android/*
             artifacts/ios/*.ipa
