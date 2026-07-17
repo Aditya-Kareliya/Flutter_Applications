@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "portfolio",
-      "version": "0.0.13+1",
+      "version": "0.0.1+1",
       "dependencies": [
         "audioplayers",
         "auto_size_text",
