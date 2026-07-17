@@ -6,9 +6,9 @@ permissions:
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
   workflow_dispatch:
     inputs:
@@ -89,9 +89,9 @@ jobs:
       - name: ☕ Setup Java & Gradle Cache
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
 
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
@@ -166,9 +166,7 @@ jobs:
         run: |
           cd build/ios/iphoneos
           mkdir Payload
-          cd Payload
-          ln -s ../Runner.app
-          cd ..
+          cp -R Runner.app Payload/
           zip -r app.ipa Payload
 
       - name: 📤 Upload IPA Artifact
@@ -178,10 +176,51 @@ jobs:
           path: build/ios/iphoneos/app.ipa
 
   # =========================
+  # 🚀 CREATE RELEASE
+  # =========================
+  create-release:
+    name: "🚀 Create Release"
+    needs: [android-build, ios-build]
+    runs-on: ubuntu-latest
+
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event.inputs.run_build == 'true'
+
+    steps:
+      - name: 📥 Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: artifacts/android
+
+      - name: 📥 Download iOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-ipa
+          path: artifacts/ios
+
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.android-build.outputs.version_name }}
+          name: Release v${{ needs.android-build.outputs.version_name }}
+          draft: false
+          prerelease: false
+          allowUpdates: true
+          files: |
+            artifacts/android/*
+            artifacts/ios/*.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+  # =========================
   # 🌐 WEB BUILD & DEPLOY
   # =========================
   web-build-deploy:
     name: "🌐 Web Build & Deploy"
+    needs: create-release
     runs-on: ubuntu-latest
 
     if: |
@@ -223,43 +262,3 @@ jobs:
         if: ${{ env.FIREBASE_TOKEN != '' }}
         run: |
           firebase deploy --only hosting --token ${{ env.FIREBASE_TOKEN }}
-
-  # =========================
-  # 🚀 CREATE RELEASE
-  # =========================
-  create-release:
-    name: "🚀 Create Release"
-    needs: [ android-build, ios-build ]
-    runs-on: ubuntu-latest
-
-    if: |
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_dispatch' ||
-      github.event.inputs.run_build == 'true'
-
-    steps:
-      - name: 📥 Download Android Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: android-apk
-          path: artifacts/android
-
-      - name: 📥 Download iOS Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ios-ipa
-          path: artifacts/ios
-
-      - name: 🏷️ Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ needs.android-build.outputs.version_name }}
-          name: Release v${{ needs.android-build.outputs.version_name }}
-          draft: false
-          prerelease: false
-          files: |
-            artifacts/android/*
-            artifacts/ios/*.ipa
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          
