@@ -18,7 +18,6 @@ on:
         default: "false"
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PUB_CACHE: ~/.pub-cache
 
 jobs:
@@ -217,7 +216,7 @@ jobs:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         if: ${{ env.FIREBASE_TOKEN != '' }}
         run: |
-          firebase deploy --only hosting --token ${{ env.FIREBASE_TOKEN }}
+          firebase deploy --only hosting --project project1-e4867 --token ${{ env.FIREBASE_TOKEN }}
 
   # =========================
   # 🚀 CREATE RELEASE
