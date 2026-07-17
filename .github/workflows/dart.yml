@@ -139,6 +139,39 @@ jobs:
           path: build/ios/iphoneos/app.ipa
 
   # =========================
+  # 🌐 WEB BUILD & DEPLOY
+  # =========================
+  web-build-deploy:
+    name: "🌐 Web Build & Deploy"
+    runs-on: ubuntu-latest
+
+    if: |
+      (github.event.head_commit != null && contains(github.event.head_commit.message, '#build')) ||
+      github.event.inputs.run_build == 'true'
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      - name: 🏗️ Build Web
+        run: flutter build web --release
+
+      - name: 🔥 Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: 🚀 Deploy to Firebase Hosting
+        run: firebase deploy --only hosting --project project1-e4867 --token ${{ secrets.FIREBASE_TOKEN }}
+
+  # =========================
   # 🚀 CREATE RELEASE
   # =========================
   create-release:
