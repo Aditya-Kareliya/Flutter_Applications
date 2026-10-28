@@ -41,17 +41,19 @@ class MyAppHeader extends StatelessWidget {
           child: ClipRRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
-              constraints: BoxConstraints(
-                minHeight: 72,
-                maxHeight: isMobile ? 120 : 88,
-              ),
-              width: 100.w,
-              color: colors.getBackgroundColor(context).withValues(alpha: 0.85),
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 16 : 28,
-                vertical: 10,
-              ),
+              child: Stack(
+                children: [
+                  Container(
+                    constraints: BoxConstraints(
+                      minHeight: 72,
+                      maxHeight: isMobile ? 120 : 88,
+                    ),
+                    width: 100.w,
+                    color: colors.getBackgroundColor(context).withValues(alpha: 0.85),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 16 : 28,
+                      vertical: 10,
+                    ),
           child: Row(
             children: [
               // Mandal Brand Emblem & Title
@@ -154,6 +156,47 @@ class MyAppHeader extends StatelessWidget {
               _ThemeModeMenu(currentMode: state.themeMode),
               const SizedBox(width: 8),
 
+              // Content Refresh Action Button
+              Tooltip(
+                message: isGujarati ? 'નવું કન્ટેન્ટ રિફ્રેશ કરો' : 'Refresh Content',
+                child: InkWell(
+                  onTap: AdminDataStore.instance.isBusy
+                      ? null
+                      : () async {
+                          await AdminDataStore.instance.refreshAllData();
+                        },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: colors.getAccentColor(context).withValues(alpha: 0.08),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: colors.heritageGold.withValues(alpha: 0.6),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: AdminDataStore.instance.isBusy
+                        ? SizedBox(
+                            width: 15,
+                            height: 15,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                colors.getAccentColor(context),
+                              ),
+                            ),
+                          )
+                        : Icon(
+                            Icons.refresh_rounded,
+                            size: 15,
+                            color: colors.getAccentColor(context),
+                          ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
               // Language Switcher Button (English <-> Gujarati)
               Tooltip(
                 message: isGujarati
@@ -231,9 +274,24 @@ class MyAppHeader extends StatelessWidget {
             ],
           ),
         ),
-      ),
+        if (AdminDataStore.instance.isBusy)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              height: 2.5,
+              child: LinearProgressIndicator(
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(colors.heritageGold),
+              ),
+            ),
+          ),
+      ],
     ),
-  );
+  ),
+),
+);
         },
       ),
     );

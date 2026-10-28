@@ -106,16 +106,39 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         selectedTab: _selectedTab,
                         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
                       ),
+                      ListenableBuilder(
+                        listenable: _store,
+                        builder: (context, _) {
+                          if (!_store.isBusy) return const SizedBox(height: 2);
+                          return SizedBox(
+                            height: 3,
+                            child: LinearProgressIndicator(
+                              backgroundColor: Colors.transparent,
+                              valueColor: AlwaysStoppedAnimation<Color>(colors.heritageGold),
+                            ),
+                          );
+                        },
+                      ),
                       Expanded(
-                        child: SingleChildScrollView(
-                          physics: const ClampingScrollPhysics(),
-                          padding: EdgeInsets.fromLTRB(
-                            isMobile ? 14 : 28,
-                            20,
-                            isMobile ? 14 : 28,
-                            isMobile ? 16 : 24,
+                        child: RefreshIndicator(
+                          color: colors.heritageGold,
+                          backgroundColor: colors.getCardBackgroundColor(context),
+                          displacement: 20,
+                          onRefresh: () async {
+                            await _store.refreshAllData();
+                          },
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(
+                              parent: ClampingScrollPhysics(),
+                            ),
+                            padding: EdgeInsets.fromLTRB(
+                              isMobile ? 14 : 28,
+                              20,
+                              isMobile ? 14 : 28,
+                              isMobile ? 16 : 24,
+                            ),
+                            child: _buildCurrentTabContent(context),
                           ),
-                          child: _buildCurrentTabContent(context),
                         ),
                       ),
                     ],

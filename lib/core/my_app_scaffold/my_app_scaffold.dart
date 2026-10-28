@@ -10,6 +10,7 @@ import '../my_app_footer/my_app_footer.dart';
 import '../my_app_header/my_app_header.dart';
 import '../widgets/my_app_blurred_loader.dart';
 import '../my_app_scaffold/my_app_drawer.dart';
+import '../../modules/admin_module/dashboard/data/admin_data_store.dart';
 
 class MyAppScaffold extends StatelessWidget {
   const MyAppScaffold({required this.body, super.key});
@@ -27,15 +28,23 @@ class MyAppScaffold extends StatelessWidget {
         children: [
           ScrollConfiguration(
             behavior: const _DesktopScrollBehavior(),
-            child: CustomScrollView(
-              physics: const ClampingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
+            child: RefreshIndicator(
+              color: colors.heritageGold,
+              backgroundColor: colors.getCardBackgroundColor(context),
+              displacement: 100,
+              onRefresh: () async {
+                await AdminDataStore.instance.refreshAllData();
+              },
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
+                slivers: [
+                  const SliverToBoxAdapter(child: SizedBox(height: 88)),
+                  SliverToBoxAdapter(child: body),
+                  const SliverToBoxAdapter(child: MyAppFooter()),
+                ],
               ),
-              slivers: [
-                const SliverToBoxAdapter(child: SizedBox(height: 88)),
-                SliverToBoxAdapter(child: body),
-                const SliverToBoxAdapter(child: MyAppFooter()),
-              ],
             ),
           ),
           const Positioned(
