@@ -15,6 +15,9 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Pavan Putra Garbi | Rajkot">
   <meta property="og:description" content="A digital heritage archive of Pavan Putra Garbi Mandal, Rajkot — photographs, videos, stories and yearly memories.">
+  <meta property="og:image" content="/android-chrome-512x512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="/android-chrome-512x512.png">
 
   <!-- Favicon & Touch Icons -->
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -51,11 +54,15 @@
   </script>
 
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      overflow-x: hidden;
       background-color: #FAF7F0;
       font-family: 'Inter', 'Noto Sans Gujarati', sans-serif;
+      -webkit-text-size-adjust: 100%;
+      touch-action: manipulation;
     }
     #app-loader {
       position: fixed;
