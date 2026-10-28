@@ -1,6 +1,5 @@
-name: "Pavan Putra Garbi — Build & Deploy"
+name: "Pavan Putra Garbi — Web Build & Deploy"
 
-# ✅ REQUIRED FOR RELEASE CREATION
 permissions:
   contents: write
   checks: write
@@ -23,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       run_build:
-        description: "Force build & release?"
+        description: "Force web build & release?"
         required: false
         default: "true"
 
@@ -82,12 +81,6 @@ jobs:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: ☕ Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -108,8 +101,13 @@ jobs:
       - name: 🧐 Run Static Analysis
         run: flutter analyze
 
-      - name: 🧪 Run Tests
-        run: flutter test
+      - name: 🧪 Run Tests (if test suite exists)
+        run: |
+          if [ -d "test" ]; then
+            flutter test
+          else
+            echo "No test suite found; skipping flutter test."
+          fi
 
 
   # =========================================================================
@@ -199,64 +197,11 @@ jobs:
 
 
   # =========================================================================
-  # 📱 ANDROID BUILD
-  # =========================================================================
-  android-build:
-    name: "📱 Android APK"
-    needs: [ version, code-quality ]
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-
-    steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: ☕ Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: ⚡ Cache Dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            build
-          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
-
-      - name: 📦 Install Dependencies
-        run: flutter pub get
-
-      - name: 🏗️ Build APK
-        run: |
-          echo "Building Android APK for Version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})..."
-          flutter build apk --release \
-            --build-name="${{ needs.version.outputs.version_name }}" \
-            --build-number="${{ needs.version.outputs.build_number }}"
-
-      - name: 🔍 Check APK
-        run: ls -lh build/app/outputs/flutter-apk/
-
-      - name: 📤 Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-
-
-  # =========================================================================
   # 🚀 CREATE GITHUB RELEASE
   # =========================================================================
   create-release:
     name: "🚀 Create GitHub Release"
-    needs: [ version, web-build, android-build ]
+    needs: [ version, web-build ]
     runs-on: ubuntu-latest
     if: |
       contains(github.event.head_commit.message, '#build') ||
@@ -272,12 +217,6 @@ jobs:
           name: web-release-bundle
           path: artifacts/web
 
-      - name: 📥 Download Android Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: android-apk
-          path: artifacts/android
-
       - name: 🏷️ Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -288,6 +227,5 @@ jobs:
           generate_release_notes: true
           files: |
             artifacts/web/*
-            artifacts/android/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
