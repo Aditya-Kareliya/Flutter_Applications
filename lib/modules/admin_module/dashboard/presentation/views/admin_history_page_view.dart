@@ -206,9 +206,11 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
     final titleGuCtrl = TextEditingController(text: milestone?.titleGu ?? '');
     final descEnCtrl = TextEditingController(text: milestone?.descEn ?? '');
     final descGuCtrl = TextEditingController(text: milestone?.descGu ?? '');
-    final orderCtrl = TextEditingController(
-      text: (milestone?.order ?? (widget.store.historyMilestones.length + 1)).toString(),
-    );
+    final maxOrder = widget.store.historyMilestones.isEmpty
+        ? 0
+        : widget.store.historyMilestones.map((m) => m.order).reduce((a, b) => a > b ? a : b);
+    final assignedOrder = milestone?.order ?? (maxOrder + 1);
+    final orderCtrl = TextEditingController(text: '#$assignedOrder (Auto-assigned)');
     String imgUrl = milestone?.imageUrl ?? 'assets/images/pavan_putra_logo.jpg';
     String selectedIcon = milestone?.iconName ?? 'local_fire_department_rounded';
     bool isTranslatingDialog = false;
@@ -295,9 +297,10 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                         flex: 2,
                         child: MyAppTextFormField(
                           controller: orderCtrl,
-                          keyboardType: TextInputType.number,
                           labelText: 'Display Sequence',
-                          prefixIcon: const Icon(Icons.format_list_numbered_rounded, size: 18),
+                          readOnly: true,
+                          enabled: false,
+                          prefixIcon: const Icon(Icons.drag_indicator_rounded, size: 18),
                         ),
                       ),
                     ],
@@ -441,7 +444,7 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                   return;
                 }
 
-                final order = int.tryParse(orderCtrl.text.trim()) ?? 1;
+                final order = assignedOrder;
 
                 if (milestone == null) {
                   widget.store.addHistoryMilestone(
@@ -903,20 +906,36 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                     ),
                   )
                 else
-                  Column(
-                    children: [
-                      for (int i = 0; i < widget.store.historyMilestones.length; i++) ...[
-                        _buildMilestoneAdminCard(
-                          widget.store.historyMilestones[i],
-                          i,
-                          widget.store.historyMilestones.length,
-                          colors,
-                          styles,
-                          isMobile,
-                        ),
-                        if (i < widget.store.historyMilestones.length - 1) const SizedBox(height: 12),
-                      ],
-                    ],
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      canvasColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                    ),
+                    child: ReorderableListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      buildDefaultDragHandles: false,
+                      itemCount: widget.store.historyMilestones.length,
+                      onReorderItem: (oldIndex, newIndex) {
+                        widget.store.reorderHistoryMilestones(oldIndex, newIndex);
+                        setState(() {});
+                      },
+                      itemBuilder: (context, i) {
+                        final item = widget.store.historyMilestones[i];
+                        return Container(
+                          key: ValueKey(item.id),
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: _buildMilestoneAdminCard(
+                            item,
+                            i,
+                            widget.store.historyMilestones.length,
+                            colors,
+                            styles,
+                            isMobile,
+                          ),
+                        );
+                      },
+                    ),
                   ),
               ],
             ),
@@ -1075,6 +1094,16 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ReorderableDragStartListener(
+            index: index,
+            child: Tooltip(
+              message: 'Drag to reorder',
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8, top: 12),
+                child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 22),
+              ),
+            ),
+          ),
           // Archival Thumbnail or Icon Avatar
           Container(
             width: 48,

@@ -9,9 +9,12 @@ import 'core/my_app_text_style/my_app_text_styles.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   usePathUrlStrategy();
+
   await FirebaseBootstrap.initialize();
   await initDependencyInjection();
+
   unawaited(MyAppTextStyles.preloadAllFonts());
   runApp(const PavanPutraApp());
 }

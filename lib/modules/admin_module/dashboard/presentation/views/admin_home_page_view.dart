@@ -2970,10 +2970,24 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                   ),
                 )
               else
-                Column(
-                  children: [
-                    for (final pillar in widget.store.pillars)
-                      Container(
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    canvasColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                  ),
+                  child: ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    buildDefaultDragHandles: false,
+                    itemCount: widget.store.pillars.length,
+                    onReorderItem: (oldIndex, newIndex) {
+                      widget.store.reorderHomePillars(oldIndex, newIndex);
+                      setState(() {});
+                    },
+                    itemBuilder: (context, index) {
+                      final pillar = widget.store.pillars[index];
+                      return Container(
+                        key: ValueKey(pillar.id),
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -2983,6 +2997,16 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                         ),
                         child: Row(
                           children: [
+                            ReorderableDragStartListener(
+                              index: index,
+                              child: Tooltip(
+                                message: 'Drag to reorder',
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 22),
+                                ),
+                              ),
+                            ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
@@ -3047,8 +3071,9 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                             ),
                           ],
                         ),
-                      ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
               const SizedBox(height: 8),
             ],
@@ -3255,63 +3280,93 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                         child: Text('No artist cards added. Click "Add Artist" to create one.', style: styles.bodySmall(context)),
                       ),
                     )
-                  : ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.store.homeSingers.length,
-                      separatorBuilder: (_, _) => const Divider(height: 16),
-                      itemBuilder: (context, index) {
-                        final singer = widget.store.homeSingers[index];
-                        return Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: colors.heritageGold, width: 1.5),
-                              ),
-                              child: ClipOval(
-                                child: singer.imageUrl.startsWith('http')
-                                    ? Image.network(singer.imageUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg'))
-                                    : Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                              ),
+                  : Theme(
+                      data: Theme.of(context).copyWith(
+                        canvasColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                      ),
+                      child: ReorderableListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        buildDefaultDragHandles: false,
+                        itemCount: widget.store.homeSingers.length,
+                        onReorderItem: (oldIndex, newIndex) {
+                          widget.store.reorderHomeSingers(oldIndex, newIndex);
+                          setState(() {});
+                        },
+                        itemBuilder: (context, index) {
+                          final singer = widget.store.homeSingers[index];
+                          return Container(
+                            key: ValueKey(singer.id),
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: colors.getBackgroundColor(context),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: colors.getBorderColor(context)),
                             ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(singer.nameEn, style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700)),
-                                  Text(
-                                    singer.roleEn,
-                                    style: styles.cleanSans(context, size: 12, color: colors.heritageGold, fontWeight: FontWeight.w600),
-                                  ),
-                                  if (singer.descEn.isNotEmpty)
-                                    Text(
-                                      singer.descEn,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                            child: Row(
+                              children: [
+                                ReorderableDragStartListener(
+                                  index: index,
+                                  child: Tooltip(
+                                    message: 'Drag to reorder',
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 22),
                                     ),
-                                ],
-                              ),
+                                  ),
+                                ),
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: colors.heritageGold, width: 1.5),
+                                  ),
+                                  child: ClipOval(
+                                    child: singer.imageUrl.startsWith('http')
+                                        ? Image.network(singer.imageUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg'))
+                                        : Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(singer.nameEn, style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700)),
+                                      Text(
+                                        singer.roleEn,
+                                        style: styles.cleanSans(context, size: 12, color: colors.heritageGold, fontWeight: FontWeight.w600),
+                                      ),
+                                      if (singer.descEn.isNotEmpty)
+                                        Text(
+                                          singer.descEn,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  tooltip: 'Edit Artist',
+                                  icon: const Icon(Icons.edit_outlined, size: 19),
+                                  color: colors.heritageGold,
+                                  onPressed: () => _openSingerDialog(singer),
+                                ),
+                                IconButton(
+                                  tooltip: 'Delete Artist',
+                                  icon: const Icon(Icons.delete_outline_rounded, size: 19),
+                                  color: Colors.redAccent,
+                                  onPressed: () => _confirmDeleteSinger(singer),
+                                ),
+                              ],
                             ),
-                            IconButton(
-                              tooltip: 'Edit Artist',
-                              icon: const Icon(Icons.edit_outlined, size: 19),
-                              color: colors.heritageGold,
-                              onPressed: () => _openSingerDialog(singer),
-                            ),
-                            IconButton(
-                              tooltip: 'Delete Artist',
-                              icon: const Icon(Icons.delete_outline_rounded, size: 19),
-                              color: Colors.redAccent,
-                              onPressed: () => _confirmDeleteSinger(singer),
-                            ),
-                          ],
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
             ],
           ),
@@ -3500,10 +3555,24 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                   ),
                 )
               else
-                Column(
-                  children: [
-                    for (final blessing in widget.store.blessings)
-                      Container(
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    canvasColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                  ),
+                  child: ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    buildDefaultDragHandles: false,
+                    itemCount: widget.store.blessings.length,
+                    onReorderItem: (oldIndex, newIndex) {
+                      widget.store.reorderHomeBlessings(oldIndex, newIndex);
+                      setState(() {});
+                    },
+                    itemBuilder: (context, index) {
+                      final blessing = widget.store.blessings[index];
+                      return Container(
+                        key: ValueKey(blessing.id),
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -3513,6 +3582,16 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                         ),
                         child: Row(
                           children: [
+                            ReorderableDragStartListener(
+                              index: index,
+                              child: Tooltip(
+                                message: 'Drag to reorder',
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 22),
+                                ),
+                              ),
+                            ),
                             Container(
                               width: 44,
                               height: 44,
@@ -3578,8 +3657,9 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                             ),
                           ],
                         ),
-                      ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
               const SizedBox(height: 8),
             ],

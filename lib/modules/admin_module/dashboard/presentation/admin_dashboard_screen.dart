@@ -7,7 +7,9 @@ import '../../../../core/my_app_colors/my_app_colors.dart';
 import '../../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/widgets/heritage_badge.dart';
+import '../../../../core/widgets/brand_logo/brand_logo_widget.dart';
 import '../../../../core/widgets/my_app_blurred_loader.dart';
+import '../../../../core/widgets/toast/my_app_toast_message.dart';
 import '../../../../core/widgets/my_app_ui_components.dart';
 import '../../../../utils/navigation_manager.dart';
 import '../../auth/presentation/admin_auth_cubit.dart';
@@ -178,6 +180,7 @@ class _AdminTopNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
     final isMobile = context.isMobile;
 
     return Container(
@@ -216,6 +219,46 @@ class _AdminTopNavBar extends StatelessWidget {
                 textColor: colors.getAccentColor(context),
               ),
             ),
+          ),
+          const SizedBox(width: 8),
+          ListenableBuilder(
+            listenable: AdminDataStore.instance,
+            builder: (context, _) {
+              if (AdminDataStore.instance.isBusy) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(colors.heritageGold),
+                        ),
+                      ),
+                      if (!isMobile) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          AdminDataStore.instance.busyMessage ?? 'Syncing...',
+                          style: styles.cleanSans(context, size: 11, color: colors.heritageGold),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              }
+              return MyAppIconButton(
+                tooltip: 'Refresh cloud data',
+                icon: const Icon(Icons.refresh_rounded, size: 19),
+                color: colors.heritageGold,
+                onPressed: () {
+                  AdminDataStore.instance.refreshAllData(forceRefresh: true);
+                  MyAppToastMessage.info(context, title: 'Refreshing', description: 'Synchronizing with cloud...');
+                },
+              );
+            },
           ),
           const SizedBox(width: 8),
           if (isMobile)
@@ -334,25 +377,16 @@ class _AdminSidebarContent extends StatelessWidget {
                 Center(
                   child: Column(
                     children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: colors.heritageGold, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.heritageGold.withValues(alpha: isDark ? 0.25 : 0.15),
-                              blurRadius: 16,
-                            ),
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/images/pavan_putra_logo.jpg',
-                            fit: BoxFit.cover,
+                      BrandLogoWidget(
+                        size: 64,
+                        isCircular: true,
+                        border: Border.all(color: colors.heritageGold, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.heritageGold.withValues(alpha: isDark ? 0.25 : 0.15),
+                            blurRadius: 16,
                           ),
-                        ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Text(

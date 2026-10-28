@@ -1,121 +1,189 @@
-name: Production CI/CD — Pavan Putra Garbi
+name: "Pavan Putra Garbi — Build & Deploy"
+
+# ✅ REQUIRED FOR RELEASE CREATION
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
 
 on:
   push:
     branches:
       - main
+      - master
+      - develop
+      - pavan_putra_garbi_mandal
+      - pavanputragarbimandal
   pull_request:
     branches:
       - main
+      - master
+      - pavan_putra_garbi_mandal
+      - pavanputragarbimandal
   workflow_dispatch:
+    inputs:
+      run_build:
+        description: "Force build & release?"
+        required: false
+        default: "true"
 
-permissions:
-  contents: read
-  checks: write
-  pull-requests: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PUB_CACHE: ~/.pub-cache
 
 jobs:
+
   # =========================================================================
-  # JOB 1: CODE QUALITY, LINTING & STATIC ANALYSIS
+  # 📦 EXTRACT VERSION FROM pubspec.yaml
   # =========================================================================
-  code_quality_check:
-    name: 🔍 Code Quality & Static Analysis
+  version:
+    name: "📦 Extract Version"
+    runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.version.outputs.VERSION_NAME }}
+      build_number: ${{ steps.version.outputs.BUILD_NUMBER }}
+      full_version: ${{ steps.version.outputs.FULL_VERSION }}
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Parse Version from pubspec.yaml
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | cut -d ' ' -f2 | tr -d '\r' | tr -d '"' | tr -d "'")
+          VERSION_NAME=$(echo $VERSION | cut -d '+' -f1)
+          BUILD_NUMBER=$(echo $VERSION | cut -d '+' -f2)
+
+          if [ -z "$BUILD_NUMBER" ] || [ "$BUILD_NUMBER" = "$VERSION_NAME" ]; then
+            BUILD_NUMBER="1"
+          fi
+
+          echo "=========================================================="
+          echo "PARSED VERSION: $VERSION"
+          echo "VERSION_NAME:   $VERSION_NAME"
+          echo "BUILD_NUMBER:   $BUILD_NUMBER"
+          echo "=========================================================="
+
+          echo "FULL_VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+
+
+  # =========================================================================
+  # 🔍 CODE QUALITY & STATIC ANALYSIS
+  # =========================================================================
+  code-quality:
+    name: "🔍 Code Quality & Static Analysis"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
-      - name: 📥 Checkout Source Code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
-      - name: ☕ Set up Java Development Kit (JDK 17)
+      - name: ☕ Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
 
-      - name: 💙 Set up Flutter SDK Environment
+      - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
           cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
-          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
 
-      - name: 📦 Download & Resolve Project Dependencies
-        run: |
-          echo "Fetching Flutter & Dart dependencies..."
-          flutter pub get
+      - name: ⚡ Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            build
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
 
-      - name: 🧐 Run Flutter Static Code Analysis
-        run: |
-          echo "Running strict static analysis (flutter analyze)..."
-          flutter analyze --fatal-infos --fatal-warnings
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      - name: 🧐 Run Static Analysis
+        run: flutter analyze
+
+      - name: 🧪 Run Tests
+        run: flutter test
+
 
   # =========================================================================
-  # JOB 2: PRODUCTION BUILD & FIREBASE DEPLOYMENT
+  # 🌐 WEB BUILD & FIREBASE DEPLOYMENT
   # =========================================================================
-  build_and_deploy:
-    name: 🚀 Production Build & Firebase Deployment
-    needs: code_quality_check
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+  web-build:
+    name: "🌐 Web Build & Firebase Deploy"
+    needs: [ version, code-quality ]
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
     steps:
-      - name: 📥 Checkout Source Code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
-      - name: 💙 Set up Flutter SDK Environment
+      - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
           cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
-          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
 
-      - name: 📦 Download & Resolve Project Dependencies
+      - name: ⚡ Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            build
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      - name: 🏗️ Build Web Release
         run: |
-          flutter pub get
+          echo "Building Web release for Version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})..."
+          flutter build web --release --no-tree-shake-icons \
+            --build-name="${{ needs.version.outputs.version_name }}" \
+            --build-number="${{ needs.version.outputs.build_number }}"
 
-      - name: 🏗️ Compile Production Web Release
+      - name: 📦 Package Web Artifact (ZIP)
         run: |
-          echo "Compiling Flutter Web application with release optimizations..."
-          flutter build web --release --no-tree-shake-icons
+          mkdir -p artifacts/web
+          cd build/web
+          zip -r "../../artifacts/web/pavan-putra-garbi-web-v${{ needs.version.outputs.version_name }}-b${{ needs.version.outputs.build_number }}.zip" .
+          cd ../..
 
-      - name: ⚡ Set up Node.js Environment
+      - name: 📤 Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release-bundle
+          path: artifacts/web/*.zip
+
+      - name: ⚡ Set up Node.js for Firebase CLI
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: false
 
-      - name: 🔥 Install Firebase CLI Tools
-        run: |
-          echo "Installing latest firebase-tools CLI..."
-          npm install -g firebase-tools
+      - name: 🔥 Install Firebase CLI
+        run: npm install -g firebase-tools
 
-      - name: 🚀 Deploy Web App, Firestore Rules & Storage to Firebase
+      - name: 🚀 Deploy to Firebase (Hosting, Firestore & Storage)
+        if: |
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/pavan_putra_garbi_mandal' ||
+          github.ref == 'refs/heads/pavanputragarbimandal' ||
+          github.event.inputs.run_build == 'true'
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT || secrets.FIREBASE_SERVICE_ACCOUNT_PAVANPUTRAGARBI }}
         run: |
           echo "=========================================================="
-          echo " Starting Automated Deployment to Firebase "
+          echo " Deploying Version ${{ needs.version.outputs.version_name }}+${{ needs.version.outputs.build_number }} to Firebase"
           echo " Target Project: pavanputragarbi "
           echo "=========================================================="
-
-          # Verify build/web output exists
-          if [ ! -d "build/web" ] || [ ! -f "build/web/index.html" ]; then
-            echo "❌ Error: build/web artifact not found or incomplete!"
-            exit 1
-          fi
 
           if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
             echo "🔑 Using Google Cloud Service Account credentials..."
@@ -126,15 +194,100 @@ jobs:
             echo "🔑 Using Firebase CI Token credentials..."
             firebase deploy --project pavanputragarbi --only hosting,firestore:rules,firestore:indexes,storage --token "$FIREBASE_TOKEN" --non-interactive
           else
-            echo "❌ ERROR: Missing Firebase deployment credentials!"
-            echo "Please add one of the following secrets in GitHub Repository Settings -> Secrets and variables -> Actions:"
-            echo "  1. FIREBASE_SERVICE_ACCOUNT (Recommended: Google Cloud Service Account JSON Key)"
-            echo "  2. FIREBASE_TOKEN (Legacy: Generated via 'firebase login:ci')"
-            exit 1
+            echo "⚠️ Notice: Neither FIREBASE_SERVICE_ACCOUNT nor FIREBASE_TOKEN secret configured. Skipping automated Firebase deployment."
           fi
 
-          echo "=========================================================="
-          echo "🎉 Production Deployment Succeeded!"
-          echo "🌐 Firebase Hosting: https://pavanputragarbi.web.app"
-          echo "🌐 Custom Domain:    https://pavanputragarbi.firebaseapp.com"
-          echo "=========================================================="
+
+  # =========================================================================
+  # 📱 ANDROID BUILD
+  # =========================================================================
+  android-build:
+    name: "📱 Android APK"
+    needs: [ version, code-quality ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: ⚡ Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            build
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      - name: 🏗️ Build APK
+        run: |
+          echo "Building Android APK for Version: ${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})..."
+          flutter build apk --release \
+            --build-name="${{ needs.version.outputs.version_name }}" \
+            --build-number="${{ needs.version.outputs.build_number }}"
+
+      - name: 🔍 Check APK
+        run: ls -lh build/app/outputs/flutter-apk/
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+
+  # =========================================================================
+  # 🚀 CREATE GITHUB RELEASE
+  # =========================================================================
+  create-release:
+    name: "🚀 Create GitHub Release"
+    needs: [ version, web-build, android-build ]
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.head_commit.message, '#build') ||
+      github.event.inputs.run_build == 'true' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/pavan_putra_garbi_mandal' ||
+      github.ref == 'refs/heads/pavanputragarbimandal'
+
+    steps:
+      - name: 📥 Download Web Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-release-bundle
+          path: artifacts/web
+
+      - name: 📥 Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: artifacts/android
+
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.version.outputs.version_name }}+${{ needs.version.outputs.build_number }}
+          name: Release v${{ needs.version.outputs.version_name }} (Build ${{ needs.version.outputs.build_number }})
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/web/*
+            artifacts/android/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

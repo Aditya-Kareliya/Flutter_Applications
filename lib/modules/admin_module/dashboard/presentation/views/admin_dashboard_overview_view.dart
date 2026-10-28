@@ -6,6 +6,7 @@ import '../../../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../../../core/responsive/responsive.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../../core/widgets/heritage_badge.dart';
+import '../../../../../core/widgets/brand_logo/brand_logo_widget.dart';
 import '../../../../../core/widgets/toast/my_app_toast_message.dart';
 import '../../../../../core/widgets/my_app_ui_components.dart';
 import '../../data/admin_data_store.dart';
@@ -37,14 +38,10 @@ class AdminDashboardOverviewView extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: isMobile ? 48 : 58,
-                    height: isMobile ? 48 : 58,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colors.heritageGold, width: 2),
-                    ),
-                    child: ClipOval(child: Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover)),
+                  BrandLogoWidget(
+                    size: isMobile ? 48 : 58,
+                    isCircular: true,
+                    border: Border.all(color: colors.heritageGold, width: 2),
                   ),
                   const SizedBox(width: 16),
                   Expanded(

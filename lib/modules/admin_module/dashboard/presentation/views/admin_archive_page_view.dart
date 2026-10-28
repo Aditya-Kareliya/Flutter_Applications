@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/dependency_injection/dependency_injection.dart';
@@ -168,6 +169,371 @@ class _AdminArchivePageViewState extends State<AdminArchivePageView> {
     );
   }
 
+  void _showYearDetailDialog(AdminGarbiYear year) {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+    final isMobile = MediaQuery.sizeOf(context).width < 768;
+
+    final linkedAlbums = widget.store.albums.where((a) => a.year == year.year.toString()).toList();
+    final linkedVideos = widget.store.videos.where((v) => v.year == year.year.toString()).toList();
+
+    showMyAppDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          final isPub = year.isPublished;
+          return AlertDialog(
+            backgroundColor: colors.getCardBackgroundColor(context),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
+            ),
+            contentPadding: EdgeInsets.zero,
+            content: SizedBox(
+              width: isMobile ? double.infinity : 680,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // DIALOG HEADER
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: colors.deepMaroon,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colors.heritageMaroon,
+                              border: Border.all(color: colors.heritageGold, width: 2),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${year.year}',
+                                style: styles.editorialSerif(
+                                  context,
+                                  size: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: colors.heritageGold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        year.titleEn.isNotEmpty ? year.titleEn : 'Navratri Mahotsav ${year.year}',
+                                        style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.bold, color: colors.white),
+                                      ),
+                                    ),
+                                    HeritageBadge(label: isPub ? 'PUBLISHED' : 'DRAFT'),
+                                  ],
+                                ),
+                                if (year.titleGu.isNotEmpty) ...[
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    year.titleGu,
+                                    style: styles.devotionalMotto(context, size: 13, color: colors.lightGold),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                            onPressed: () => Navigator.pop(ctx),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // BODY CONTENT
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // SUMMARY STATS CHIPS
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              _buildInfoChip(
+                                context,
+                                icon: Icons.photo_library_outlined,
+                                label: 'Linked Albums',
+                                value: '${linkedAlbums.isNotEmpty ? linkedAlbums.length : year.albumCount}',
+                              ),
+                              _buildInfoChip(
+                                context,
+                                icon: Icons.videocam_outlined,
+                                label: 'Linked Videos',
+                                value: '${linkedVideos.length}',
+                              ),
+                              _buildInfoChip(
+                                context,
+                                icon: Icons.visibility_outlined,
+                                label: 'Visibility',
+                                value: isPub ? 'Public on Website' : 'Hidden / Draft',
+                              ),
+                              _buildInfoChip(
+                                context,
+                                icon: Icons.fingerprint_rounded,
+                                label: 'Record ID',
+                                value: year.id,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 18),
+
+                          // DESCRIPTION
+                          Text(
+                            'Historical Overview & Notes',
+                            style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.bold, color: colors.heritageGold),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: colors.getSurfaceColor(context),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: colors.heritageGold.withValues(alpha: 0.2)),
+                            ),
+                            child: Text(
+                              year.description.isNotEmpty
+                                  ? year.description
+                                  : 'No historical description or notes recorded for festival year ${year.year}. You can add descriptions via Edit Year.',
+                              style: styles.cleanSans(context, size: 13, color: colors.getPrimaryTextColor(context)),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // LINKED ALBUMS SECTION
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Associated Albums (${linkedAlbums.length})',
+                                style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          if (linkedAlbums.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: colors.getSurfaceColor(context),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: colors.getBorderColor(context)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.info_outline, size: 18, color: colors.heritageGold),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'No photo albums specifically linked to ${year.year} yet. Create albums in the Gallery & Media module with festival year "${year.year}".',
+                                      style: styles.cleanSans(context, size: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: linkedAlbums.length,
+                              separatorBuilder: (_, _) => const SizedBox(height: 8),
+                              itemBuilder: (context, idx) {
+                                final album = linkedAlbums[idx];
+                                return Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: colors.getSurfaceColor(context),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: colors.heritageGold.withValues(alpha: 0.2)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: SizedBox(
+                                          width: 48,
+                                          height: 48,
+                                          child: album.coverImageUrl.startsWith('http')
+                                              ? CachedNetworkImage(
+                                                  imageUrl: album.coverImageUrl,
+                                                  fit: BoxFit.cover,
+                                                  errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                                )
+                                              : Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(album.name, style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.bold)),
+                                            Text(
+                                              '${album.dayTag.isNotEmpty ? "${album.dayTag} • " : ""}${album.photoCount} Photos',
+                                              style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          const SizedBox(height: 18),
+
+                          // LINKED VIDEOS SECTION
+                          Text(
+                            'Associated Videos (${linkedVideos.length})',
+                            style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          if (linkedVideos.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: colors.getSurfaceColor(context),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: colors.getBorderColor(context)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.video_library_outlined, size: 18, color: colors.heritageGold),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'No videos linked to year ${year.year}. Link videos by entering "${year.year}" in the Video year field.',
+                                      style: styles.cleanSans(context, size: 12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: linkedVideos.length,
+                              separatorBuilder: (_, _) => const SizedBox(height: 8),
+                              itemBuilder: (context, idx) {
+                                final vid = linkedVideos[idx];
+                                return Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: colors.getSurfaceColor(context),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: colors.heritageGold.withValues(alpha: 0.2)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.play_circle_outline_rounded, color: colors.heritageGold, size: 28),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(vid.title, style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.bold)),
+                                            Text(
+                                              '${vid.tag.isNotEmpty ? "${vid.tag} • " : ""}${vid.duration}',
+                                              style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              MyAppTextButton.icon(
+                icon: Icon(isPub ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 16),
+                label: isPub ? 'Hide from Archive' : 'Publish to Archive',
+                onPressed: () {
+                  final updated = year.copyWith(isPublished: !isPub);
+                  widget.store.updateYear(updated);
+                  setDlgState(() {});
+                  setState(() {});
+                  MyAppToastMessage.info(
+                    context,
+                    title: 'Status Updated',
+                    description: '${year.year} is now ${!isPub ? "published" : "hidden"}.',
+                  );
+                },
+              ),
+              MyAppTextButton.icon(
+                icon: const Icon(Icons.edit_outlined, size: 16),
+                label: 'Edit Year',
+                color: colors.heritageGold,
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _openYearDialog(year);
+                },
+              ),
+              MyAppFillButton(
+                onPressed: () => Navigator.pop(ctx),
+                label: 'Close',
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(BuildContext context, {required IconData icon, required String label, required String value}) {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: colors.getSurfaceColor(context),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: colors.heritageGold),
+          const SizedBox(width: 6),
+          Text('$label: ', style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context))),
+          Text(value, style: styles.cleanSans(context, size: 11.5, fontWeight: FontWeight.bold, color: colors.heritageGold)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = serviceLocator<MyAppColors>();
@@ -228,199 +594,232 @@ class _AdminArchivePageViewState extends State<AdminArchivePageView> {
                   final year = widget.store.years[index];
                   if (isMobile) {
                     return CulturalFrameCard(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                      padding: EdgeInsets.zero,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => _showYearDetailDialog(year),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: colors.deepMaroon,
-                                  border: Border.all(color: colors.heritageGold, width: 1.5),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    '${year.year}',
-                                    style: styles.editorialSerif(
-                                      context,
-                                      size: 13.5,
-                                      fontWeight: FontWeight.w800,
-                                      color: colors.heritageGold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      year.titleEn,
-                                      style: styles.editorialSerif(context, size: 15.5, fontWeight: FontWeight.w700),
-                                    ),
-                                    if (year.titleGu.isNotEmpty)
-                                      Text(
-                                        year.titleGu,
-                                        style: styles.devotionalMotto(context, size: 12.5, color: colors.heritageGold),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            '${year.albumCount} Albums • ${year.description}',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
-                          ),
-                          const SizedBox(height: 8),
-                          Divider(height: 1, color: colors.getBorderColor(context)),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              HeritageBadge(label: year.isPublished ? 'PUBLISHED' : 'DRAFT'),
                               Row(
-                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Tooltip(
-                                    message: year.isPublished ? 'Published' : 'Hidden',
-                                    child: Switch(
-                                      value: year.isPublished,
-                                      activeThumbColor: colors.heritageGold,
-                                      activeTrackColor: colors.heritageMaroon,
-                                      onChanged: (val) {
-                                        widget.store.updateYear(year.copyWith(isPublished: val));
-                                        MyAppToastMessage.info(
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: colors.deepMaroon,
+                                      border: Border.all(color: colors.heritageGold, width: 1.5),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${year.year}',
+                                        style: styles.editorialSerif(
                                           context,
-                                          title: 'Status Updated',
-                                          description: '${year.year} is now ${val ? "published" : "hidden"}.',
-                                        );
-                                      },
+                                          size: 13.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: colors.heritageGold,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(width: 4),
-                                  MyAppIconButton(
-                                    icon: const Icon(Icons.edit_outlined, size: 19),
-                                    tooltip: 'Edit Year',
-                                    color: colors.heritageGold,
-                                    onPressed: () => _openYearDialog(year),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          year.titleEn,
+                                          style: styles.editorialSerif(context, size: 15.5, fontWeight: FontWeight.w700),
+                                        ),
+                                        if (year.titleGu.isNotEmpty)
+                                          Text(
+                                            year.titleGu,
+                                            style: styles.devotionalMotto(context, size: 12.5, color: colors.heritageGold),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(width: 4),
-                                  MyAppIconButton(
-                                    icon: const Icon(Icons.delete_outline_rounded, size: 19),
-                                    tooltip: 'Delete Year',
-                                    color: Colors.redAccent,
-                                    onPressed: () => _confirmDelete(year),
+                                  const Icon(Icons.info_outline_rounded, size: 18, color: Colors.white54),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                '${year.albumCount} Albums • ${year.description.isNotEmpty ? year.description : "No description"}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                              ),
+                              const SizedBox(height: 8),
+                              Divider(height: 1, color: colors.getBorderColor(context)),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  HeritageBadge(label: year.isPublished ? 'PUBLISHED' : 'DRAFT'),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Tooltip(
+                                        message: 'View Year Details',
+                                        child: MyAppIconButton(
+                                          icon: const Icon(Icons.visibility_outlined, size: 19),
+                                          color: colors.heritageGold,
+                                          onPressed: () => _showYearDetailDialog(year),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Tooltip(
+                                        message: year.isPublished ? 'Published' : 'Hidden',
+                                        child: Switch(
+                                          value: year.isPublished,
+                                          activeThumbColor: colors.heritageGold,
+                                          activeTrackColor: colors.heritageMaroon,
+                                          onChanged: (val) {
+                                            widget.store.updateYear(year.copyWith(isPublished: val));
+                                            MyAppToastMessage.info(
+                                              context,
+                                              title: 'Status Updated',
+                                              description: '${year.year} is now ${val ? "published" : "hidden"}.',
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      MyAppIconButton(
+                                        icon: const Icon(Icons.edit_outlined, size: 19),
+                                        tooltip: 'Edit Year',
+                                        color: colors.heritageGold,
+                                        onPressed: () => _openYearDialog(year),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      MyAppIconButton(
+                                        icon: const Icon(Icons.delete_outline_rounded, size: 19),
+                                        tooltip: 'Delete Year',
+                                        color: Colors.redAccent,
+                                        onPressed: () => _confirmDelete(year),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     );
                   }
 
                   return CulturalFrameCard(
-                    padding: const EdgeInsets.all(18),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 54,
-                          height: 54,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: colors.deepMaroon,
-                            border: Border.all(color: colors.heritageGold, width: 1.5),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${year.year}',
-                              style: styles.editorialSerif(
-                                context,
-                                size: 15,
-                                fontWeight: FontWeight.w800,
-                                color: colors.heritageGold,
+                    padding: EdgeInsets.zero,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => _showYearDetailDialog(year),
+                      child: Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 54,
+                              height: 54,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: colors.deepMaroon,
+                                border: Border.all(color: colors.heritageGold, width: 1.5),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${year.year}',
+                                  style: styles.editorialSerif(
+                                    context,
+                                    size: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: colors.heritageGold,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: 8,
-                                runSpacing: 4,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    year.titleEn,
-                                    style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.w700),
+                                  Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    runSpacing: 4,
+                                    children: [
+                                      Text(
+                                        year.titleEn,
+                                        style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.w700),
+                                      ),
+                                      HeritageBadge(label: year.isPublished ? 'PUBLISHED' : 'DRAFT'),
+                                    ],
                                   ),
-                                  HeritageBadge(label: year.isPublished ? 'PUBLISHED' : 'DRAFT'),
+                                  if (year.titleGu.isNotEmpty)
+                                    Text(
+                                      year.titleGu,
+                                      style: styles.devotionalMotto(context, size: 13, color: colors.heritageGold),
+                                    ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${year.albumCount} Albums • ${year.description.isNotEmpty ? year.description : "No description"}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                                  ),
                                 ],
                               ),
-                              if (year.titleGu.isNotEmpty)
-                                Text(
-                                  year.titleGu,
-                                  style: styles.devotionalMotto(context, size: 13, color: colors.heritageGold),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Tooltip(
+                                  message: 'View Year Details & Linked Media',
+                                  child: MyAppIconButton(
+                                    icon: const Icon(Icons.visibility_outlined, size: 19),
+                                    color: colors.heritageGold,
+                                    onPressed: () => _showYearDetailDialog(year),
+                                  ),
                                 ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${year.albumCount} Albums • ${year.description}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Tooltip(
-                              message: year.isPublished ? 'Published' : 'Hidden',
-                              child: Switch(
-                                value: year.isPublished,
-                                activeThumbColor: colors.heritageGold,
-                                activeTrackColor: colors.heritageMaroon,
-                                onChanged: (val) {
-                                  widget.store.updateYear(year.copyWith(isPublished: val));
-                                  MyAppToastMessage.info(
-                                    context,
-                                    title: 'Status Updated',
-                                    description: '${year.year} is now ${val ? "published" : "hidden"}.',
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            MyAppIconButton(
-                              icon: const Icon(Icons.edit_outlined, size: 19),
-                              tooltip: 'Edit Year',
-                              color: colors.heritageGold,
-                              onPressed: () => _openYearDialog(year),
-                            ),
-                            const SizedBox(width: 4),
-                            MyAppIconButton(
-                              icon: const Icon(Icons.delete_outline_rounded, size: 19),
-                              tooltip: 'Delete Year',
-                              color: Colors.redAccent,
-                              onPressed: () => _confirmDelete(year),
+                                const SizedBox(width: 4),
+                                Tooltip(
+                                  message: year.isPublished ? 'Published' : 'Hidden',
+                                  child: Switch(
+                                    value: year.isPublished,
+                                    activeThumbColor: colors.heritageGold,
+                                    activeTrackColor: colors.heritageMaroon,
+                                    onChanged: (val) {
+                                      widget.store.updateYear(year.copyWith(isPublished: val));
+                                      MyAppToastMessage.info(
+                                        context,
+                                        title: 'Status Updated',
+                                        description: '${year.year} is now ${val ? "published" : "hidden"}.',
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                MyAppIconButton(
+                                  icon: const Icon(Icons.edit_outlined, size: 19),
+                                  tooltip: 'Edit Year',
+                                  color: colors.heritageGold,
+                                  onPressed: () => _openYearDialog(year),
+                                ),
+                                const SizedBox(width: 4),
+                                MyAppIconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, size: 19),
+                                  tooltip: 'Delete Year',
+                                  color: Colors.redAccent,
+                                  onPressed: () => _confirmDelete(year),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   );
                 },

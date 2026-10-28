@@ -1424,160 +1424,202 @@ class _AdminFooterViewState extends State<AdminFooterView> {
                     ),
                   )
                 else
-                  Column(
-                    children: socialLinks.map((soc) {
-                      if (isMobile) {
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      canvasColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                    ),
+                    child: ReorderableListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      buildDefaultDragHandles: false,
+                      itemCount: socialLinks.length,
+                      onReorderItem: (oldIndex, newIndex) {
+                        widget.store.reorderFooterSocialLinks(oldIndex, newIndex);
+                        setState(() {});
+                      },
+                      itemBuilder: (context, index) {
+                        final soc = socialLinks[index];
+                        if (isMobile) {
+                          return Card(
+                            key: ValueKey(soc.id),
+                            margin: const EdgeInsets.only(bottom: 8),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: colors.getBorderColor(context)),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      ReorderableDragStartListener(
+                                        index: index,
+                                        child: Tooltip(
+                                          message: 'Drag to reorder',
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(right: 6),
+                                            child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 20),
+                                          ),
+                                        ),
+                                      ),
+                                      CircleAvatar(
+                                        radius: 14,
+                                        backgroundColor: colors.getCardBackgroundColor(context),
+                                        child: Icon(_getSocialIcon(soc.iconKey), color: colors.getAccentColor(context), size: 16),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          soc.platform,
+                                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: colors.getSurfaceColor(context),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text('Order: #${index + 1}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          soc.url.isNotEmpty ? soc.url : 'No URL provided',
+                                          style: TextStyle(fontSize: 11.5, color: colors.getSecondaryTextColor(context)),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            height: 28,
+                                            child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: Switch(
+                                                value: soc.isEnabled,
+                                                activeTrackColor: colors.heritageGold,
+                                                onChanged: (val) {
+                                                  widget.store.toggleFooterSocialLinkEnabled(soc.id);
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                          MyAppIconButton(
+                                            icon: const Icon(Icons.edit_outlined, size: 18),
+                                            tooltip: 'Edit Channel',
+                                            onPressed: () => _openFooterSocialDialog(soc),
+                                          ),
+                                          MyAppIconButton(
+                                            icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                                            color: Colors.redAccent,
+                                            tooltip: 'Delete Channel',
+                                            onPressed: () => _confirmDeleteSocial(soc),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
                         return Card(
+                          key: ValueKey(soc.id),
                           margin: const EdgeInsets.only(bottom: 8),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(color: colors.getBorderColor(context)),
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          child: ListTile(
+                            leading: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 14,
-                                      backgroundColor: colors.getCardBackgroundColor(context),
-                                      child: Icon(_getSocialIcon(soc.iconKey), color: colors.getAccentColor(context), size: 16),
+                                ReorderableDragStartListener(
+                                  index: index,
+                                  child: Tooltip(
+                                    message: 'Drag to reorder',
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 6),
+                                      child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 20),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        soc.platform,
-                                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: colors.getSurfaceColor(context),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text('Order: ${soc.order}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        soc.url.isNotEmpty ? soc.url : 'No URL provided',
-                                        style: TextStyle(fontSize: 11.5, color: colors.getSecondaryTextColor(context)),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          height: 28,
-                                          child: FittedBox(
-                                            fit: BoxFit.contain,
-                                            child: Switch(
-                                              value: soc.isEnabled,
-                                              activeTrackColor: colors.heritageGold,
-                                              onChanged: (val) {
-                                                widget.store.toggleFooterSocialLinkEnabled(soc.id);
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                        MyAppIconButton(
-                                          icon: const Icon(Icons.edit_outlined, size: 18),
-                                          tooltip: 'Edit Channel',
-                                          onPressed: () => _openFooterSocialDialog(soc),
-                                        ),
-                                        MyAppIconButton(
-                                          icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                                          color: Colors.redAccent,
-                                          tooltip: 'Delete Channel',
-                                          onPressed: () => _confirmDeleteSocial(soc),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                CircleAvatar(
+                                  backgroundColor: colors.getCardBackgroundColor(context),
+                                  child: Icon(_getSocialIcon(soc.iconKey), color: colors.getAccentColor(context), size: 20),
+                                ),
+                              ],
+                            ),
+                            title: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    soc.platform,
+                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: colors.getSurfaceColor(context),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text('Order: #${index + 1}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              soc.url.isNotEmpty ? soc.url : 'No URL provided',
+                              style: TextStyle(fontSize: 12, color: colors.getSecondaryTextColor(context)),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Switch(
+                                  value: soc.isEnabled,
+                                  activeTrackColor: colors.heritageGold,
+                                  onChanged: (val) {
+                                    widget.store.toggleFooterSocialLinkEnabled(soc.id);
+                                  },
+                                ),
+                                MyAppIconButton(
+                                  icon: const Icon(Icons.edit_outlined, size: 18),
+                                  tooltip: 'Edit Channel',
+                                  onPressed: () => _openFooterSocialDialog(soc),
+                                ),
+                                MyAppIconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                                  color: Colors.redAccent,
+                                  tooltip: 'Delete Channel',
+                                  onPressed: () => _confirmDeleteSocial(soc),
                                 ),
                               ],
                             ),
                           ),
                         );
-                      }
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: colors.getBorderColor(context)),
-                        ),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: colors.getCardBackgroundColor(context),
-                            child: Icon(_getSocialIcon(soc.iconKey), color: colors.getAccentColor(context), size: 20),
-                          ),
-                          title: Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  soc.platform,
-                                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: colors.getSurfaceColor(context),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text('Order: ${soc.order}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
-                              ),
-                            ],
-                          ),
-                          subtitle: Text(
-                            soc.url.isNotEmpty ? soc.url : 'No URL provided',
-                            style: TextStyle(fontSize: 12, color: colors.getSecondaryTextColor(context)),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Switch(
-                                value: soc.isEnabled,
-                                activeTrackColor: colors.heritageGold,
-                                onChanged: (val) {
-                                  widget.store.toggleFooterSocialLinkEnabled(soc.id);
-                                },
-                              ),
-                              MyAppIconButton(
-                                icon: const Icon(Icons.edit_outlined, size: 18),
-                                tooltip: 'Edit Channel',
-                                onPressed: () => _openFooterSocialDialog(soc),
-                              ),
-                              MyAppIconButton(
-                                icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                                color: Colors.redAccent,
-                                tooltip: 'Delete Channel',
-                                onPressed: () => _confirmDeleteSocial(soc),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                      },
+                    ),
                   ),
               ],
             ),

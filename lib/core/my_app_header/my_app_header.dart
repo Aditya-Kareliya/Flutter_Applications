@@ -13,6 +13,7 @@ import '../my_app_text_style/my_app_text_styles.dart';
 import 'package:go_router/go_router.dart';
 import '../../utils/navigation_manager.dart';
 import '../../modules/admin_module/dashboard/data/admin_data_store.dart';
+import '../widgets/brand_logo/brand_logo_widget.dart';
 import '../widgets/my_app_ui_components.dart';
 
 class MyAppHeader extends StatelessWidget {
@@ -67,32 +68,22 @@ class MyAppHeader extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          width: isMobile ? 42 : 48,
-                          height: isMobile ? 42 : 48,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: colors.heritageGold,
-                              width: 1.6,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colors.getAccentColor(context).withValues(
-                                  alpha: 0.18,
-                                ),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                        BrandLogoWidget(
+                          size: isMobile ? 42 : 48,
+                          isCircular: true,
+                          border: Border.all(
+                            color: colors.heritageGold,
+                            width: 1.6,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.getAccentColor(context).withValues(
+                                alpha: 0.18,
                               ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Image.asset(
-                              'assets/images/pavan_putra_logo.jpg',
-                              fit: BoxFit.cover,
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
+                          ],
                         ),
                         const SizedBox(width: 12),
                         Expanded(

@@ -21,8 +21,7 @@ class PavanPutraApp extends StatelessWidget {
     return BlocProvider<MyAppBloc>.value(
       value: serviceLocator<MyAppBloc>()..add(MyAppInitEvent()),
       child: BlocBuilder<MyAppBloc, MyAppState>(
-        buildWhen: (prev, curr) =>
-            prev.themeMode != curr.themeMode || prev.locale != curr.locale,
+        buildWhen: (prev, curr) => prev.themeMode != curr.themeMode || prev.locale != curr.locale,
         builder: (context, state) {
           return Sizer(
             builder: (context, orientation, deviceType) {

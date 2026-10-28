@@ -112,130 +112,256 @@ class _VideosScreenState extends State<VideosScreen> {
 
                     // Live Streaming Banner
                     CulturalFrameCard(
-                      padding: EdgeInsets.all(isMobile ? 20 : 30),
+                      padding: EdgeInsets.all(isMobile ? 16 : 30),
                       backgroundColor: isLiveNow
                           ? const Color(0xFF380309)
                           : colors.deepMaroon,
                       borderColor: isLiveNow
                           ? Colors.redAccent.withValues(alpha: 0.6)
                           : colors.heritageGold.withValues(alpha: 0.4),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isLiveNow
-                                  ? const Color(0xFFCC0000)
-                                  : const Color(0xFFB8860B),
-                              boxShadow: isLiveNow
-                                  ? [
-                                      BoxShadow(
-                                        color: Colors.red.withValues(alpha: 0.4),
-                                        blurRadius: 16,
-                                        spreadRadius: 2,
-                                      ),
-                                    ]
-                                  : null,
-                            ),
-                            child: Icon(
-                              isLiveNow
-                                  ? Icons.sensors_rounded
-                                  : Icons.play_arrow_rounded,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
+                      child: isMobile
+                          ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      liveBadge,
-                                      style: styles.cleanSans(
-                                        context,
+                                    Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
                                         color: isLiveNow
-                                            ? const Color(0xFFFF8A80)
-                                            : colors.lightGold,
-                                        size: 11,
-                                        fontWeight: FontWeight.w700,
+                                            ? const Color(0xFFCC0000)
+                                            : const Color(0xFFB8860B),
+                                        boxShadow: isLiveNow
+                                            ? [
+                                                BoxShadow(
+                                                  color: Colors.red.withValues(alpha: 0.4),
+                                                  blurRadius: 16,
+                                                  spreadRadius: 2,
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
+                                      child: Icon(
+                                        isLiveNow
+                                            ? Icons.sensors_rounded
+                                            : Icons.play_arrow_rounded,
+                                        color: Colors.white,
+                                        size: 26,
                                       ),
                                     ),
-                                    if (isLiveNow) ...[
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.redAccent,
-                                        ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                liveBadge,
+                                                style: styles.cleanSans(
+                                                  context,
+                                                  color: isLiveNow
+                                                      ? const Color(0xFFFF8A80)
+                                                      : colors.lightGold,
+                                                  size: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              if (isLiveNow) ...[
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                  width: 8,
+                                                  height: 8,
+                                                  decoration: const BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Colors.redAccent,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            liveTitle,
+                                            style: styles.editorialSerif(
+                                              context,
+                                              size: 17,
+                                              fontWeight: FontWeight.w700,
+                                              color: colors.white,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
                                   ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  liveTitle,
-                                  style: styles.editorialSerif(
-                                    context,
-                                    size: isMobile ? 16 : 22,
-                                    fontWeight: FontWeight.w700,
-                                    color: colors.white,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 10),
                                 Text(
                                   liveDesc,
                                   style: styles
                                       .bodySmall(context)
-                                      .copyWith(color: const Color(0xFFE2DDD1)),
+                                      .copyWith(color: const Color(0xFFE2DDD1), height: 1.4),
                                 ),
+                                if (isLiveNow && live.streamUrl.isNotEmpty) ...[
+                                  const SizedBox(height: 14),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: FilledButton.icon(
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: const Color(0xFFCC0000),
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        final vidId = YoutubeUrlHelper.extractVideoId(live.streamUrl);
+                                        if (vidId != null) {
+                                          _openVideoPlayerModal(
+                                            context,
+                                            AdminVideo(
+                                              id: 'live-stream',
+                                              youtubeVideoId: vidId,
+                                              title: live.title,
+                                              tag: 'Live Stream',
+                                              duration: 'LIVE',
+                                              youtubeUrl: live.streamUrl,
+                                              year: '2024',
+                                              sourceChannel: 'Ratnadeep Sound',
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      icon: const Icon(Icons.play_circle_fill_rounded, size: 20),
+                                      label: const Text(
+                                        'Watch Live Now',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isLiveNow
+                                        ? const Color(0xFFCC0000)
+                                        : const Color(0xFFB8860B),
+                                    boxShadow: isLiveNow
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.red.withValues(alpha: 0.4),
+                                              blurRadius: 16,
+                                              spreadRadius: 2,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Icon(
+                                    isLiveNow
+                                        ? Icons.sensors_rounded
+                                        : Icons.play_arrow_rounded,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            liveBadge,
+                                            style: styles.cleanSans(
+                                              context,
+                                              color: isLiveNow
+                                                  ? const Color(0xFFFF8A80)
+                                                  : colors.lightGold,
+                                              size: 11,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          if (isLiveNow) ...[
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              width: 8,
+                                              height: 8,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.redAccent,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        liveTitle,
+                                        style: styles.editorialSerif(
+                                          context,
+                                          size: 22,
+                                          fontWeight: FontWeight.w700,
+                                          color: colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        liveDesc,
+                                        style: styles
+                                            .bodySmall(context)
+                                            .copyWith(color: const Color(0xFFE2DDD1)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (isLiveNow && live.streamUrl.isNotEmpty) ...[
+                                  const SizedBox(width: 16),
+                                  FilledButton.icon(
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: const Color(0xFFCC0000),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 14,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      final vidId = YoutubeUrlHelper.extractVideoId(live.streamUrl);
+                                      if (vidId != null) {
+                                        _openVideoPlayerModal(
+                                          context,
+                                          AdminVideo(
+                                            id: 'live-stream',
+                                            youtubeVideoId: vidId,
+                                            title: live.title,
+                                            tag: 'Live Stream',
+                                            duration: 'LIVE',
+                                            youtubeUrl: live.streamUrl,
+                                            year: '2024',
+                                            sourceChannel: 'Ratnadeep Sound',
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    icon: const Icon(Icons.play_circle_fill_rounded, size: 20),
+                                    label: const Text(
+                                      'Watch Live Now',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                          ),
-                          if (isLiveNow && live.streamUrl.isNotEmpty) ...[
-                            const SizedBox(width: 16),
-                            FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFFCC0000),
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: isMobile ? 12 : 20,
-                                  vertical: isMobile ? 10 : 14,
-                                ),
-                              ),
-                              onPressed: () {
-                                final vidId = YoutubeUrlHelper.extractVideoId(live.streamUrl);
-                                if (vidId != null) {
-                                  _openVideoPlayerModal(
-                                    context,
-                                    AdminVideo(
-                                      id: 'live-stream',
-                                      youtubeVideoId: vidId,
-                                      title: live.title,
-                                      tag: 'Live Stream',
-                                      duration: 'LIVE',
-                                      youtubeUrl: live.streamUrl,
-                                      year: '2024',
-                                      sourceChannel: 'Ratnadeep Sound',
-                                    ),
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.play_circle_fill_rounded, size: 20),
-                              label: Text(
-                                isMobile ? 'Watch' : 'Watch Live Now',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
                     ),
                     const SizedBox(height: 36),
 
@@ -394,7 +520,7 @@ class _VideosScreenState extends State<VideosScreen> {
                             crossAxisCount: columns,
                             crossAxisSpacing: 20,
                             mainAxisSpacing: 24,
-                            childAspectRatio: 1.15,
+                            childAspectRatio: isMobile ? 1.05 : 1.15,
                           ),
                           itemBuilder: (context, index) {
                             final video = filteredVideos[index];
@@ -542,8 +668,11 @@ class _YoutubePlayerDialogState extends State<_YoutubePlayerDialog> {
               const SizedBox(height: 12),
 
               // Action Bar: "Watch on YouTube" Fallback & Controls
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 10,
                 children: [
                   Text(
                     'Channel: ${widget.video.sourceChannel}',

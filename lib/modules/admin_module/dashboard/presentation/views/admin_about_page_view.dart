@@ -125,6 +125,27 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
     _ctaBtnTextEnCtrl = TextEditingController(text: about.ctaBtnTextEn);
     _ctaBtnTextGuCtrl = TextEditingController(text: about.ctaBtnTextGu);
     _ctaRouteCtrl = TextEditingController(text: about.ctaRoute);
+
+    _attachLivePreviewListeners();
+  }
+
+  void _attachLivePreviewListeners() {
+    final controllers = [
+      _tagBadgeEnCtrl, _tagBadgeGuCtrl, _titleEnCtrl, _titleGuCtrl, _descEnCtrl, _descGuCtrl,
+      _historyTitleEnCtrl, _historyTitleGuCtrl, _historyBodyEnCtrl, _historyBodyGuCtrl,
+      _historyMottoEnCtrl, _historyMottoGuCtrl, _principlesTagEnCtrl, _principlesTagGuCtrl,
+      _principlesTitleEnCtrl, _principlesTitleGuCtrl, _committeeBadgeEnCtrl, _committeeBadgeGuCtrl,
+      _committeeTitleEnCtrl, _committeeTitleGuCtrl, _committeeDescEnCtrl, _committeeDescGuCtrl,
+      _ctaTitleEnCtrl, _ctaTitleGuCtrl, _ctaDescEnCtrl, _ctaDescGuCtrl,
+      _ctaBtnTextEnCtrl, _ctaBtnTextGuCtrl, _ctaRouteCtrl,
+    ];
+    for (final c in controllers) {
+      c.addListener(_onControllerChanged);
+    }
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -322,7 +343,11 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
     final titleGuCtrl = TextEditingController(text: principle?.titleGu ?? '');
     final descEnCtrl = TextEditingController(text: principle?.descEn ?? '');
     final descGuCtrl = TextEditingController(text: principle?.descGu ?? '');
-    final orderCtrl = TextEditingController(text: (principle?.order ?? (widget.store.aboutPrinciples.length + 1)).toString());
+    final maxOrder = widget.store.aboutPrinciples.isEmpty
+        ? 0
+        : widget.store.aboutPrinciples.map((p) => p.order).reduce((a, b) => a > b ? a : b);
+    final assignedOrder = principle?.order ?? (maxOrder + 1);
+    final orderCtrl = TextEditingController(text: '#$assignedOrder (Auto-assigned)');
     String iconKey = principle?.iconKey ?? 'verified';
 
     showMyAppDialog(
@@ -367,9 +392,11 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                       Expanded(
                         child: MyAppTextFormField(
                           controller: orderCtrl,
-                          keyboardType: TextInputType.number,
                           labelText: 'Display Order',
-                          showClearIcon: true,
+                          readOnly: true,
+                          enabled: false,
+                          prefixIcon: const Icon(Icons.drag_indicator_rounded, size: 18),
+                          showClearIcon: false,
                         ),
                       ),
                     ],
@@ -437,7 +464,7 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                   return;
                 }
 
-                final order = int.tryParse(orderCtrl.text.trim()) ?? (widget.store.aboutPrinciples.length + 1);
+                final order = assignedOrder;
                 final item = AdminAboutPrinciple(
                   id: principle?.id ?? 'principle-${DateTime.now().millisecondsSinceEpoch}',
                   number: numberCtrl.text.trim().isEmpty ? '૦૧' : numberCtrl.text.trim(),
@@ -513,7 +540,11 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
     final desigEnCtrl = TextEditingController(text: member?.designationEn ?? '');
     final desigGuCtrl = TextEditingController(text: member?.designationGu ?? '');
     final phoneCtrl = TextEditingController(text: member?.phone ?? '');
-    final orderCtrl = TextEditingController(text: (member?.order ?? (widget.store.committeeMembers.length + 1)).toString());
+    final maxMemberOrder = widget.store.committeeMembers.isEmpty
+        ? 0
+        : widget.store.committeeMembers.map((m) => m.order).reduce((a, b) => a > b ? a : b);
+    final assignedMemberOrder = member?.order ?? (maxMemberOrder + 1);
+    final orderCtrl = TextEditingController(text: '#$assignedMemberOrder');
     String photoUrl = member?.photoUrl ?? 'assets/images/pavan_putra_logo.jpg';
     bool isActive = member?.isActive ?? true;
 
@@ -595,9 +626,11 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                         width: 110,
                         child: MyAppTextFormField(
                           controller: orderCtrl,
-                          keyboardType: TextInputType.number,
                           labelText: 'Display Order',
-                          showClearIcon: true,
+                          readOnly: true,
+                          enabled: false,
+                          prefixIcon: const Icon(Icons.drag_indicator_rounded, size: 18),
+                          showClearIcon: false,
                         ),
                       ),
                     ],
@@ -624,7 +657,7 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                   return;
                 }
 
-                final order = int.tryParse(orderCtrl.text.trim()) ?? (widget.store.committeeMembers.length + 1);
+                final order = assignedMemberOrder;
                 final item = AdminCommitteeMember(
                   id: member?.id ?? 'cm-${DateTime.now().millisecondsSinceEpoch}',
                   nameEn: nameEn,
@@ -970,130 +1003,162 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                   ),
                 )
               else
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: widget.store.aboutPrinciples.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final principle = widget.store.aboutPrinciples[index];
-                    return Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colors.getSurfaceColor(context),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.25)),
-                      ),
-                      child: isMobile
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: colors.heritageGold.withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        principle.number,
-                                        style: styles.devotionalMotto(context, size: 16, color: colors.heritageGold),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Icon(principle.iconData, color: colors.heritageGold, size: 20),
-                                    const Spacer(),
-                                    MyAppIconButton(
-                                      tooltip: 'Edit Principle',
-                                      icon: const Icon(Icons.edit_outlined, size: 18),
-                                      color: colors.heritageGold,
-                                      onPressed: () => _openPrincipleDialog(principle),
-                                    ),
-                                    MyAppIconButton(
-                                      tooltip: 'Delete Principle',
-                                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                                      color: Colors.redAccent,
-                                      onPressed: () => _confirmDeletePrinciple(principle),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  principle.titleEn,
-                                  style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
-                                ),
-                                if (principle.titleGu.isNotEmpty) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    principle.titleGu,
-                                    style: styles.devotionalMotto(context, size: 13, color: colors.heritageGold),
-                                  ),
-                                ],
-                                if (principle.descEn.isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    principle.descEn,
-                                    style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
-                                  ),
-                                ],
-                              ],
-                            )
-                          : Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: colors.heritageGold.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    principle.number,
-                                    style: styles.devotionalMotto(context, size: 16, color: colors.heritageGold),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Icon(principle.iconData, color: colors.heritageGold, size: 20),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    canvasColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                  ),
+                  child: ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    buildDefaultDragHandles: false,
+                    itemCount: widget.store.aboutPrinciples.length,
+                    onReorderItem: (oldIndex, newIndex) {
+                      widget.store.reorderAboutPrinciples(oldIndex, newIndex);
+                      setState(() {});
+                    },
+                    itemBuilder: (context, index) {
+                      final principle = widget.store.aboutPrinciples[index];
+                      return Container(
+                        key: ValueKey(principle.id),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: colors.getSurfaceColor(context),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: colors.heritageGold.withValues(alpha: 0.25)),
+                        ),
+                        child: isMobile
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
-                                      Text(
-                                        principle.titleEn,
-                                        style: styles.editorialSerif(context, size: 14.5, fontWeight: FontWeight.w700),
+                                      ReorderableDragStartListener(
+                                        index: index,
+                                        child: Tooltip(
+                                          message: 'Drag to reorder',
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(right: 8),
+                                            child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 22),
+                                          ),
+                                        ),
                                       ),
-                                      if (principle.titleGu.isNotEmpty)
-                                        Text(
-                                          principle.titleGu,
-                                          style: styles.devotionalMotto(context, size: 12.5, color: colors.heritageGold),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: colors.heritageGold.withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(6),
                                         ),
-                                      if (principle.descEn.isNotEmpty)
-                                        Text(
-                                          principle.descEn,
-                                          style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                        child: Text(
+                                          principle.number,
+                                          style: styles.devotionalMotto(context, size: 16, color: colors.heritageGold),
                                         ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Icon(principle.iconData, color: colors.heritageGold, size: 20),
+                                      const Spacer(),
+                                      MyAppIconButton(
+                                        tooltip: 'Edit Principle',
+                                        icon: const Icon(Icons.edit_outlined, size: 18),
+                                        color: colors.heritageGold,
+                                        onPressed: () => _openPrincipleDialog(principle),
+                                      ),
+                                      MyAppIconButton(
+                                        tooltip: 'Delete Principle',
+                                        icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                                        color: Colors.redAccent,
+                                        onPressed: () => _confirmDeletePrinciple(principle),
+                                      ),
                                     ],
                                   ),
-                                ),
-                                MyAppIconButton(
-                                  tooltip: 'Edit Principle',
-                                  icon: const Icon(Icons.edit_outlined, size: 18),
-                                  color: colors.heritageGold,
-                                  onPressed: () => _openPrincipleDialog(principle),
-                                ),
-                                MyAppIconButton(
-                                  tooltip: 'Delete Principle',
-                                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                                  color: Colors.redAccent,
-                                  onPressed: () => _confirmDeletePrinciple(principle),
-                                ),
-                              ],
-                            ),
-                    );
-                  },
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    principle.titleEn,
+                                    style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
+                                  ),
+                                  if (principle.titleGu.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      principle.titleGu,
+                                      style: styles.devotionalMotto(context, size: 13, color: colors.heritageGold),
+                                    ),
+                                  ],
+                                  if (principle.descEn.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      principle.descEn,
+                                      style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                                    ),
+                                  ],
+                                ],
+                              )
+                            : Row(
+                                children: [
+                                  ReorderableDragStartListener(
+                                    index: index,
+                                    child: Tooltip(
+                                      message: 'Drag to reorder',
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 22),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: colors.heritageGold.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      principle.number,
+                                      style: styles.devotionalMotto(context, size: 16, color: colors.heritageGold),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Icon(principle.iconData, color: colors.heritageGold, size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          principle.titleEn,
+                                          style: styles.editorialSerif(context, size: 14.5, fontWeight: FontWeight.w700),
+                                        ),
+                                        if (principle.titleGu.isNotEmpty)
+                                          Text(
+                                            principle.titleGu,
+                                            style: styles.devotionalMotto(context, size: 12.5, color: colors.heritageGold),
+                                          ),
+                                        if (principle.descEn.isNotEmpty)
+                                          Text(
+                                            principle.descEn,
+                                            style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  MyAppIconButton(
+                                    tooltip: 'Edit Principle',
+                                    icon: const Icon(Icons.edit_outlined, size: 18),
+                                    color: colors.heritageGold,
+                                    onPressed: () => _openPrincipleDialog(principle),
+                                  ),
+                                  MyAppIconButton(
+                                    tooltip: 'Delete Principle',
+                                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                                    color: Colors.redAccent,
+                                    onPressed: () => _confirmDeletePrinciple(principle),
+                                  ),
+                                ],
+                              ),
+                      );
+                    },
+                  ),
                 ),
             ],
           ),
@@ -1273,7 +1338,8 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
     final isMobile = MediaQuery.sizeOf(context).width < 768;
 
     final allMembers = widget.store.committeeMembers;
-    final filtered = _memberSearchQuery.isEmpty
+    final isFiltering = _memberSearchQuery.isNotEmpty;
+    final filtered = !isFiltering
         ? allMembers
         : allMembers.where((m) {
             return m.nameEn.toLowerCase().contains(_memberSearchQuery) ||
@@ -1311,189 +1377,245 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
       );
     }
 
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: filtered.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        final member = filtered[index];
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: colors.getSurfaceColor(context),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: colors.heritageGold.withValues(alpha: 0.25)),
-          ),
-          child: isMobile
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: colors.heritageGold, width: 1.5),
-                          ),
-                          child: ClipOval(
-                            child: member.photoUrl.startsWith('http')
-                                ? CachedNetworkImage(
-                                    imageUrl: member.photoUrl,
-                                    fit: BoxFit.cover,
-                                    placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
-                                    errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                                  )
-                                : Image.asset(
-                                    member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.jpg',
-                                    fit: BoxFit.cover,
-                                  ),
+    Widget buildMemberItem(AdminCommitteeMember member, int index, {bool canDrag = false}) {
+      return Container(
+        key: ValueKey(member.id),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colors.getSurfaceColor(context),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: colors.heritageGold.withValues(alpha: 0.25)),
+        ),
+        child: isMobile
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (canDrag)
+                        ReorderableDragStartListener(
+                          index: index,
+                          child: Tooltip(
+                            message: 'Drag to reorder',
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 22),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                member.nameEn,
-                                style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
-                              ),
-                              if (member.nameGu.isNotEmpty)
-                                Text(
-                                  member.nameGu,
-                                  style: styles.devotionalMotto(context, size: 13, color: colors.heritageGold),
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colors.heritageGold, width: 1.5),
+                        ),
+                        child: ClipOval(
+                          child: member.photoUrl.startsWith('http')
+                              ? CachedNetworkImage(
+                                  imageUrl: member.photoUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
+                                  errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                )
+                              : Image.asset(
+                                  member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.jpg',
+                                  fit: BoxFit.cover,
                                 ),
-                            ],
-                          ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: colors.heritageGold.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            '#${member.order}',
-                            style: styles.cleanSans(context, size: 11, fontWeight: FontWeight.bold, color: colors.heritageGold),
-                          ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              member.nameEn,
+                              style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
+                            ),
+                            if (member.nameGu.isNotEmpty)
+                              Text(
+                                member.nameGu,
+                                style: styles.devotionalMotto(context, size: 13, color: colors.heritageGold),
+                              ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${member.designationEn}${member.designationGu.isNotEmpty ? " • ${member.designationGu}" : ""}',
-                      style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w600, color: colors.heritageGold),
-                    ),
-                    if (member.phone.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.phone_outlined, size: 14, color: colors.getSecondaryTextColor(context)),
-                          const SizedBox(width: 6),
-                          Text(
-                            member.phone,
-                            style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
-                          ),
-                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: colors.heritageGold.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '#${index + 1}',
+                          style: styles.cleanSans(context, size: 11, fontWeight: FontWeight.bold, color: colors.heritageGold),
+                        ),
                       ),
                     ],
-                    const Divider(height: 18),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${member.designationEn}${member.designationGu.isNotEmpty ? " • ${member.designationGu}" : ""}',
+                    style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w600, color: colors.heritageGold),
+                  ),
+                  if (member.phone.isNotEmpty) ...[
+                    const SizedBox(height: 4),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        MyAppTextButton.icon(
-                          color: colors.heritageGold,
-                          icon: const Icon(Icons.edit_outlined, size: 16),
-                          label: 'Edit',
-                          onPressed: () => _openMemberDialog(member),
-                        ),
-                        const SizedBox(width: 8),
-                        MyAppTextButton.icon(
-                          isDanger: true,
-                          icon: const Icon(Icons.delete_outline_rounded, size: 16),
-                          label: 'Delete',
-                          onPressed: () => _confirmDeleteMember(member),
+                        Icon(Icons.phone_outlined, size: 14, color: colors.getSecondaryTextColor(context)),
+                        const SizedBox(width: 6),
+                        Text(
+                          member.phone,
+                          style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
                         ),
                       ],
                     ),
                   ],
-                )
-              : Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.heritageGold, width: 1.5),
+                  const Divider(height: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      MyAppTextButton.icon(
+                        color: colors.heritageGold,
+                        icon: const Icon(Icons.edit_outlined, size: 16),
+                        label: 'Edit',
+                        onPressed: () => _openMemberDialog(member),
                       ),
-                      child: ClipOval(
-                        child: member.photoUrl.startsWith('http')
-                            ? CachedNetworkImage(
-                                imageUrl: member.photoUrl,
-                                fit: BoxFit.cover,
-                                placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
-                                errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                              )
-                            : Image.asset(
-                                member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.jpg',
-                                fit: BoxFit.cover,
-                              ),
+                      const SizedBox(width: 8),
+                      MyAppTextButton.icon(
+                        isDanger: true,
+                        icon: const Icon(Icons.delete_outline_rounded, size: 16),
+                        label: 'Delete',
+                        onPressed: () => _confirmDeleteMember(member),
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  if (canDrag)
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Tooltip(
+                        message: 'Drag to reorder',
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Icon(Icons.drag_indicator_rounded, color: colors.heritageGold, size: 22),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: colors.heritageGold, width: 1.5),
+                    ),
+                    child: ClipOval(
+                      child: member.photoUrl.startsWith('http')
+                          ? CachedNetworkImage(
+                              imageUrl: member.photoUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
+                              errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                            )
+                          : Image.asset(
+                              member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.jpg',
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              member.nameEn,
+                              style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
+                            ),
+                            if (member.nameGu.isNotEmpty) ...[
+                              const SizedBox(width: 6),
                               Text(
-                                member.nameEn,
-                                style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
+                                '(${member.nameGu})',
+                                style: styles.devotionalMotto(context, size: 12.5, color: colors.heritageGold),
                               ),
-                              if (member.nameGu.isNotEmpty) ...[
-                                const SizedBox(width: 6),
-                                Text(
-                                  '(${member.nameGu})',
-                                  style: styles.devotionalMotto(context, size: 12.5, color: colors.heritageGold),
-                                ),
-                              ],
                             ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${member.designationEn} • ${member.designationGu}${member.phone.isNotEmpty ? " • ${member.phone}" : ""}',
-                            style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${member.designationEn} • ${member.designationGu}${member.phone.isNotEmpty ? " • ${member.phone}" : ""}',
+                          style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '#${member.order}',
-                      style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.bold, color: colors.heritageGold),
-                    ),
-                    const SizedBox(width: 6),
-                    MyAppIconButton(
-                      tooltip: 'Edit Member',
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      color: colors.heritageGold,
-                      onPressed: () => _openMemberDialog(member),
-                    ),
-                    MyAppIconButton(
-                      tooltip: 'Delete Member',
-                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                      color: Colors.redAccent,
-                      onPressed: () => _confirmDeleteMember(member),
-                    ),
-                  ],
-                ),
-        );
-      },
+                  ),
+                  Text(
+                    '#${index + 1}',
+                    style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.bold, color: colors.heritageGold),
+                  ),
+                  const SizedBox(width: 6),
+                  MyAppIconButton(
+                    tooltip: 'Edit Member',
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    color: colors.heritageGold,
+                    onPressed: () => _openMemberDialog(member),
+                  ),
+                  MyAppIconButton(
+                    tooltip: 'Delete Member',
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    color: Colors.redAccent,
+                    onPressed: () => _confirmDeleteMember(member),
+                  ),
+                ],
+              ),
+      );
+    }
+
+    if (!isFiltering) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
+        child: ReorderableListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          buildDefaultDragHandles: false,
+          itemCount: allMembers.length,
+          onReorderItem: (oldIndex, newIndex) {
+            widget.store.reorderCommitteeMembers(oldIndex, newIndex);
+            setState(() {});
+          },
+          itemBuilder: (context, index) => buildMemberItem(allMembers[index], index, canDrag: true),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Text(
+            'Filtering by "$_memberSearchQuery". Clear search to drag and reorder members.',
+            style: styles.cleanSans(context, size: 12, color: colors.heritageGold),
+          ),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: filtered.length,
+          itemBuilder: (context, index) => buildMemberItem(filtered[index], index, canDrag: false),
+        ),
+      ],
     );
   }
 
@@ -1668,6 +1790,8 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
     final isMobile = screenWidth < 768;
     final isGu = _previewLang == 'gu';
 
+    final tag = isGu && _principlesTagGuCtrl.text.trim().isNotEmpty ? _principlesTagGuCtrl.text.trim() : _principlesTagEnCtrl.text.trim();
+    final title = isGu && _principlesTitleGuCtrl.text.trim().isNotEmpty ? _principlesTitleGuCtrl.text.trim() : _principlesTitleEnCtrl.text.trim();
     final principles = widget.store.aboutPrinciples.take(2).toList();
 
     return Container(
@@ -1691,6 +1815,12 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          if (tag.isNotEmpty) HeritageBadge(label: tag),
+          if (title.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(title, style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.bold)),
+          ],
           const SizedBox(height: 12),
           if (principles.isEmpty)
             const Text('No principles to preview.')
@@ -1746,6 +1876,9 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
     final isMobile = screenWidth < 768;
     final isGu = _previewLang == 'gu';
 
+    final badge = isGu && _committeeBadgeGuCtrl.text.trim().isNotEmpty ? _committeeBadgeGuCtrl.text.trim() : _committeeBadgeEnCtrl.text.trim();
+    final title = isGu && _committeeTitleGuCtrl.text.trim().isNotEmpty ? _committeeTitleGuCtrl.text.trim() : _committeeTitleEnCtrl.text.trim();
+    final desc = isGu && _committeeDescGuCtrl.text.trim().isNotEmpty ? _committeeDescGuCtrl.text.trim() : _committeeDescEnCtrl.text.trim();
     final members = widget.store.committeeMembers.take(2).toList();
 
     return Container(
@@ -1769,6 +1902,16 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          if (badge.isNotEmpty) HeritageBadge(label: badge),
+          if (title.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(title, style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.bold)),
+          ],
+          if (desc.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(desc, style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context))),
+          ],
           const SizedBox(height: 12),
           if (members.isEmpty)
             const Text('No committee members to preview.')

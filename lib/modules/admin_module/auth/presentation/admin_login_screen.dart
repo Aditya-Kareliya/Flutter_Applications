@@ -8,6 +8,7 @@ import '../../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../core/widgets/heritage_badge.dart';
 import '../../../../core/widgets/toast/my_app_toast_message.dart';
+import '../../../../core/widgets/brand_logo/brand_logo_widget.dart';
 import '../../../../core/widgets/my_app_ui_components.dart';
 import 'admin_auth_cubit.dart';
 
@@ -43,6 +44,89 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     }
 
     context.read<AdminAuthCubit>().signIn(email, password);
+  }
+
+  void _handleForgotPassword() {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+    final resetEmailCtrl = TextEditingController(text: _emailController.text.trim());
+
+    showMyAppDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.getCardBackgroundColor(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.lock_reset_rounded, color: colors.heritageGold),
+            const SizedBox(width: 10),
+            Text(
+              'Reset Admin Password',
+              style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter your registered administrator email to receive a secure password recovery link via Firebase Authentication.',
+              style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
+            ),
+            const SizedBox(height: 16),
+            MyAppTextFormField(
+              controller: resetEmailCtrl,
+              labelText: 'Administrator Email',
+              prefixIcon: const Icon(Icons.email_rounded),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          MyAppTextButton(
+            onPressed: () => Navigator.pop(ctx),
+            label: 'Cancel',
+          ),
+          MyAppFillButton(
+            onPressed: () async {
+              final email = resetEmailCtrl.text.trim();
+              if (email.isEmpty || !email.contains('@')) {
+                MyAppToastMessage.warning(
+                  context,
+                  title: 'Email Required',
+                  description: 'Please enter a valid administrator email address.',
+                );
+                return;
+              }
+              Navigator.pop(ctx);
+              try {
+                await context.read<AdminAuthCubit>().sendPasswordReset(email);
+                if (mounted) {
+                  MyAppToastMessage.success(
+                    context,
+                    title: 'Password Reset Sent',
+                    description: 'A password reset link has been dispatched to $email. Please check your inbox.',
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  MyAppToastMessage.error(
+                    context,
+                    title: 'Reset Failed',
+                    description: 'Could not send reset link: $e',
+                  );
+                }
+              }
+            },
+            label: 'Send Reset Link',
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -97,22 +181,12 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colors.heritageGold,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Image.asset(
-                          'assets/images/pavan_putra_logo.jpg',
-                          fit: BoxFit.cover,
-                        ),
+                    child: BrandLogoWidget(
+                      size: 60,
+                      isCircular: true,
+                      border: Border.all(
+                        color: colors.heritageGold,
+                        width: 1.5,
                       ),
                     ),
                   ),
@@ -165,6 +239,20 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     labelText: context.tr('admin_pass_label'),
                     prefixIcon: const Icon(Icons.lock_outline, size: 20),
                     showClearIcon: true,
+                  ),
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: _handleForgotPassword,
+                      icon: const Icon(Icons.lock_reset_rounded, size: 14),
+                      label: const Text('Forgot Password?'),
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        foregroundColor: colors.getAccentColor(context),
+                        textStyle: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ),
                   ),
                   if (error != null) ...[
                     const SizedBox(height: 14),

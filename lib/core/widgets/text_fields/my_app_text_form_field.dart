@@ -175,6 +175,7 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
     final isDark = colors.isDarkMode(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 768;
 
     final hasText = _effectiveController.text.isNotEmpty;
     final canTranslate = widget.showTranslateIcon && (widget.targetLanguageController != null || widget.onTranslate != null);
@@ -229,7 +230,7 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
       onFieldSubmitted: widget.onFieldSubmitted,
       style: styles.cleanSans(
         context,
-        size: 14,
+        size: isMobile ? 16 : 14,
         fontWeight: FontWeight.w500,
         color: colors.getPrimaryTextColor(context),
       ),

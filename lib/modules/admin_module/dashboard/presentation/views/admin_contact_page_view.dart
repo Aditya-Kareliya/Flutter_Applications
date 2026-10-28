@@ -7,6 +7,7 @@ import '../../../../../core/responsive/responsive.dart';
 import '../../../../../core/widgets/admin/admin_website_context_banner.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../../core/widgets/heritage_badge.dart';
+import '../../../../../core/widgets/image_picker/my_app_image_picker.dart';
 import '../../../../../core/widgets/toast/my_app_toast_message.dart';
 import '../../../../../core/widgets/my_app_ui_components.dart';
 import '../../data/admin_data_store.dart';
@@ -24,8 +25,16 @@ class AdminContactPageView extends StatefulWidget {
 class _AdminContactPageViewState extends State<AdminContactPageView> {
   late final TextEditingController _addressCtrl;
   late final TextEditingController _phoneCtrl;
+  late final TextEditingController _whatsappCtrl;
   late final TextEditingController _emailCtrl;
   late final TextEditingController _aartiTimeCtrl;
+
+  // QR Payment & Offerings Controllers
+  late final TextEditingController _upiIdCtrl;
+  late final TextEditingController _recipientNameCtrl;
+  late final TextEditingController _paymentNotesCtrl;
+  late bool _isPaymentEnabled;
+  late String _paymentQrImageUrl;
 
   String _statusFilter = 'All';
 
@@ -35,16 +44,27 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     final s = widget.store.settings;
     _addressCtrl = TextEditingController(text: s.address);
     _phoneCtrl = TextEditingController(text: s.contactPhone);
+    _whatsappCtrl = TextEditingController(text: s.whatsappNumber);
     _emailCtrl = TextEditingController(text: s.contactEmail);
     _aartiTimeCtrl = TextEditingController(text: s.dailyAartiTime);
+
+    _upiIdCtrl = TextEditingController(text: s.paymentUpiId);
+    _recipientNameCtrl = TextEditingController(text: s.paymentRecipientName);
+    _paymentNotesCtrl = TextEditingController(text: s.paymentNotes);
+    _isPaymentEnabled = s.isPaymentEnabled;
+    _paymentQrImageUrl = s.paymentQrImageUrl;
   }
 
   @override
   void dispose() {
     _addressCtrl.dispose();
     _phoneCtrl.dispose();
+    _whatsappCtrl.dispose();
     _emailCtrl.dispose();
     _aartiTimeCtrl.dispose();
+    _upiIdCtrl.dispose();
+    _recipientNameCtrl.dispose();
+    _paymentNotesCtrl.dispose();
     super.dispose();
   }
 
@@ -52,8 +72,14 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     final updated = widget.store.settings.copyWith(
       address: _addressCtrl.text.trim(),
       contactPhone: _phoneCtrl.text.trim(),
+      whatsappNumber: _whatsappCtrl.text.trim(),
       contactEmail: _emailCtrl.text.trim(),
       dailyAartiTime: _aartiTimeCtrl.text.trim(),
+      paymentQrImageUrl: _paymentQrImageUrl.trim(),
+      paymentUpiId: _upiIdCtrl.text.trim(),
+      paymentRecipientName: _recipientNameCtrl.text.trim(),
+      paymentNotes: _paymentNotesCtrl.text.trim(),
+      isPaymentEnabled: _isPaymentEnabled,
     );
     widget.store.updateSettings(updated);
 
@@ -250,6 +276,13 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               ),
               const SizedBox(height: 12),
               MyAppTextFormField(
+                controller: _whatsappCtrl,
+                labelText: 'Official WhatsApp Number',
+                hintText: 'e.g. +91 98765 43210',
+                prefixIcon: const Icon(Icons.chat_bubble_rounded),
+              ),
+              const SizedBox(height: 12),
+              MyAppTextFormField(
                 controller: _emailCtrl,
                 labelText: 'Official Email Address',
                 hintText: 'e.g. contact@pavanputragarbi.org',
@@ -267,7 +300,84 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         ),
         const SizedBox(height: 28),
 
-        // SECTION 2: ENQUIRIES INBOX
+        // SECTION 2: DEVOTIONAL OFFERINGS & QR PAYMENTS
+        CulturalFrameCard(
+          padding: EdgeInsets.all(isMobile ? 14 : 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.qr_code_scanner_rounded, color: colors.heritageGold),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '2. Devotional Offerings & QR Payments (Seva / Dan)',
+                      style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Configure the mandal verified UPI ID and payment QR code displayed to devotees on the Contact page.',
+                style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
+              ),
+              const SizedBox(height: 14),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Show QR Payment & Seva Section on Website', style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: const Text('When enabled, the verified QR code and UPI details appear on the public Contact page.'),
+                value: _isPaymentEnabled,
+                activeThumbColor: colors.heritageGold,
+                activeTrackColor: colors.heritageMaroon,
+                onChanged: (val) => setState(() => _isPaymentEnabled = val),
+              ),
+              if (_isPaymentEnabled) ...[
+                const SizedBox(height: 14),
+                MyAppTextFormField(
+                  controller: _upiIdCtrl,
+                  labelText: 'Verified Mandal UPI ID',
+                  hintText: 'e.g. pavanputra@upi',
+                  prefixIcon: const Icon(Icons.payment_rounded),
+                ),
+                const SizedBox(height: 12),
+                MyAppTextFormField(
+                  controller: _recipientNameCtrl,
+                  labelText: 'Verified Recipient / Account Name',
+                  hintText: 'e.g. Shree Pavan Putra Garbi Mandal Trust',
+                  prefixIcon: const Icon(Icons.account_balance_rounded),
+                ),
+                const SizedBox(height: 12),
+                MyAppTextFormField(
+                  controller: _paymentNotesCtrl,
+                  labelText: 'Payment Notes / Instructions',
+                  hintText: 'e.g. Direct mandal seva for Navratri Mahotsav',
+                  prefixIcon: const Icon(Icons.notes_rounded),
+                ),
+                const SizedBox(height: 16),
+                Text('Verified Bank QR Code Image:', style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                MyAppImagePicker(
+                  label: 'Verified UPI QR Code Image',
+                  initialImageUrl: _paymentQrImageUrl,
+                  height: 180,
+                  onImageChanged: (url) => setState(() => _paymentQrImageUrl = url),
+                  onImageRemoved: () => setState(() => _paymentQrImageUrl = ''),
+                ),
+                const SizedBox(height: 16),
+                MyAppFillButton.icon(
+                  onPressed: _saveContactInfo,
+                  icon: const Icon(Icons.save_rounded, size: 16),
+                  label: 'Save Payment & Contact Settings',
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 28),
+
+        // SECTION 3: ENQUIRIES INBOX
         Wrap(
           alignment: WrapAlignment.spaceBetween,
           crossAxisAlignment: WrapCrossAlignment.center,

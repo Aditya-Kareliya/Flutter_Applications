@@ -10,6 +10,7 @@ import '../my_app_text_style/my_app_text_styles.dart';
 import 'package:go_router/go_router.dart';
 import '../../utils/navigation_manager.dart';
 import '../../modules/admin_module/dashboard/data/admin_data_store.dart';
+import '../widgets/brand_logo/brand_logo_widget.dart';
 
 class MyAppDrawer extends StatelessWidget {
   const MyAppDrawer({super.key});
@@ -37,20 +38,10 @@ class MyAppDrawer extends StatelessWidget {
                     padding: const EdgeInsets.all(24),
                     child: Row(
                       children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: colors.getAccentColor(context), width: 1.5),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Image.asset(
-                              'assets/images/pavan_putra_logo.jpg',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                        BrandLogoWidget(
+                          size: 48,
+                          isCircular: true,
+                          border: Border.all(color: colors.getAccentColor(context), width: 1.5),
                         ),
                         const SizedBox(width: 14),
                         Expanded(

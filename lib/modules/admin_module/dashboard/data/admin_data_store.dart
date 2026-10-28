@@ -1695,6 +1695,11 @@ class AdminSettings {
   final String facebookUrl;
   final String whatsappNumber;
   final String logoImageUrl;
+  final String paymentQrImageUrl;
+  final String paymentUpiId;
+  final String paymentRecipientName;
+  final String paymentNotes;
+  final bool isPaymentEnabled;
   String get logoUrl => logoImageUrl;
 
   const AdminSettings({
@@ -1709,6 +1714,11 @@ class AdminSettings {
     this.facebookUrl = 'https://facebook.com/PavanPutraGarbiRajkot',
     this.whatsappNumber = '+919876543210',
     this.logoImageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.paymentQrImageUrl = '',
+    this.paymentUpiId = '',
+    this.paymentRecipientName = '',
+    this.paymentNotes = '',
+    this.isPaymentEnabled = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -1731,6 +1741,11 @@ class AdminSettings {
       'facebook_url': facebookUrl,
       'whatsapp_number': whatsappNumber,
       'logo_image_url': logoImageUrl,
+      'payment_qr_image_url': paymentQrImageUrl,
+      'payment_upi_id': paymentUpiId,
+      'payment_recipient_name': paymentRecipientName,
+      'payment_notes': paymentNotes,
+      'is_payment_enabled': isPaymentEnabled,
       'updated_at': DateTime.now().toIso8601String(),
     };
   }
@@ -1748,6 +1763,11 @@ class AdminSettings {
       facebookUrl: map['facebook_url'] as String? ?? map['facebookUrl'] as String? ?? 'https://facebook.com/PavanPutraGarbiRajkot',
       whatsappNumber: map['whatsapp_number'] as String? ?? map['whatsappNumber'] as String? ?? '+919876543210',
       logoImageUrl: map['logo_image_url'] as String? ?? map['logoImageUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      paymentQrImageUrl: map['payment_qr_image_url'] as String? ?? map['paymentQrImageUrl'] as String? ?? '',
+      paymentUpiId: map['payment_upi_id'] as String? ?? map['paymentUpiId'] as String? ?? '',
+      paymentRecipientName: map['payment_recipient_name'] as String? ?? map['paymentRecipientName'] as String? ?? '',
+      paymentNotes: map['payment_notes'] as String? ?? map['paymentNotes'] as String? ?? '',
+      isPaymentEnabled: map['is_payment_enabled'] as bool? ?? map['isPaymentEnabled'] as bool? ?? false,
     );
   }
 
@@ -1763,6 +1783,11 @@ class AdminSettings {
     String? facebookUrl,
     String? whatsappNumber,
     String? logoImageUrl,
+    String? paymentQrImageUrl,
+    String? paymentUpiId,
+    String? paymentRecipientName,
+    String? paymentNotes,
+    bool? isPaymentEnabled,
   }) {
     return AdminSettings(
       mandalNameEn: mandalNameEn ?? this.mandalNameEn,
@@ -1776,6 +1801,11 @@ class AdminSettings {
       facebookUrl: facebookUrl ?? this.facebookUrl,
       whatsappNumber: whatsappNumber ?? this.whatsappNumber,
       logoImageUrl: logoImageUrl ?? this.logoImageUrl,
+      paymentQrImageUrl: paymentQrImageUrl ?? this.paymentQrImageUrl,
+      paymentUpiId: paymentUpiId ?? this.paymentUpiId,
+      paymentRecipientName: paymentRecipientName ?? this.paymentRecipientName,
+      paymentNotes: paymentNotes ?? this.paymentNotes,
+      isPaymentEnabled: isPaymentEnabled ?? this.isPaymentEnabled,
     );
   }
 }
@@ -1944,12 +1974,21 @@ class AdminDataStore extends ChangeNotifier {
   AdminSettings _settings = const AdminSettings();
 
   bool _isFirestoreConnected = false;
-
   bool get isFirestoreConnected => _isFirestoreConnected;
 
   bool _isInitialized = false;
-
   bool get isInitialized => _isInitialized;
+
+  bool _isBusy = false;
+  String? _busyMessage;
+  bool get isBusy => _isBusy;
+  String? get busyMessage => _busyMessage;
+
+  void setBusy(bool value, [String? message]) {
+    _isBusy = value;
+    _busyMessage = message;
+    notifyListeners();
+  }
 
   FirebaseFirestore? get _firestore {
     try {
@@ -5134,6 +5173,125 @@ class AdminDataStore extends ChangeNotifier {
     }
     logActivity('DELETE', 'Footer', 'Cleared all website footer content fields');
     notifyListeners();
+  }
+
+  // --- REORDER METHODS FOR ALL ORDERED COLLECTIONS ---
+
+  Future<void> reorderCommitteeMembers(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _committeeMembers.length || newIndex < 0 || newIndex >= _committeeMembers.length) return;
+    final item = _committeeMembers.removeAt(oldIndex);
+    _committeeMembers.insert(newIndex, item);
+    for (int i = 0; i < _committeeMembers.length; i++) {
+      final updated = _committeeMembers[i].copyWith(order: i + 1);
+      _committeeMembers[i] = updated;
+      await _writeToFirestore('committee_members', updated.id, updated.toMap());
+    }
+    _committeeMembers.sort((a, b) => a.order.compareTo(b.order));
+    notifyListeners();
+  }
+
+  Future<void> reorderAboutPrinciples(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _aboutPrinciples.length || newIndex < 0 || newIndex >= _aboutPrinciples.length) return;
+    final item = _aboutPrinciples.removeAt(oldIndex);
+    _aboutPrinciples.insert(newIndex, item);
+    for (int i = 0; i < _aboutPrinciples.length; i++) {
+      final updated = _aboutPrinciples[i].copyWith(order: i + 1);
+      _aboutPrinciples[i] = updated;
+      await _writeToFirestore('about_principles', updated.id, updated.toMap());
+    }
+    _aboutPrinciples.sort((a, b) => a.order.compareTo(b.order));
+    notifyListeners();
+  }
+
+  Future<void> reorderHistoryMilestones(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _historyMilestones.length || newIndex < 0 || newIndex >= _historyMilestones.length) return;
+    final item = _historyMilestones.removeAt(oldIndex);
+    _historyMilestones.insert(newIndex, item);
+    for (int i = 0; i < _historyMilestones.length; i++) {
+      final updated = _historyMilestones[i].copyWith(order: i + 1);
+      _historyMilestones[i] = updated;
+      await _writeToFirestore('history_milestones', updated.id, updated.toMap());
+    }
+    _historyMilestones.sort((a, b) => a.order.compareTo(b.order));
+    notifyListeners();
+  }
+
+  Future<void> reorderHomeSingers(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _homeSingers.length || newIndex < 0 || newIndex >= _homeSingers.length) return;
+    final item = _homeSingers.removeAt(oldIndex);
+    _homeSingers.insert(newIndex, item);
+    for (int i = 0; i < _homeSingers.length; i++) {
+      final updated = _homeSingers[i].copyWith(order: i + 1);
+      _homeSingers[i] = updated;
+      await _writeToFirestore('home_singers', updated.id, updated.toMap());
+    }
+    _homeSingers.sort((a, b) => a.order.compareTo(b.order));
+    notifyListeners();
+  }
+
+  Future<void> reorderHomeBanners(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _homeBanners.length || newIndex < 0 || newIndex >= _homeBanners.length) return;
+    final item = _homeBanners.removeAt(oldIndex);
+    _homeBanners.insert(newIndex, item);
+    for (int i = 0; i < _homeBanners.length; i++) {
+      final updated = _homeBanners[i].copyWith(order: i + 1);
+      _homeBanners[i] = updated;
+      await _writeToFirestore('home_banners', updated.id, updated.toMap());
+    }
+    _homeBanners.sort((a, b) => a.order.compareTo(b.order));
+    notifyListeners();
+  }
+
+  Future<void> reorderHomePillars(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _pillars.length || newIndex < 0 || newIndex >= _pillars.length) return;
+    final item = _pillars.removeAt(oldIndex);
+    _pillars.insert(newIndex, item);
+    for (int i = 0; i < _pillars.length; i++) {
+      final updated = _pillars[i].copyWith(order: i + 1);
+      _pillars[i] = updated;
+      await _writeToFirestore('home_pillars', updated.id, updated.toMap());
+    }
+    _pillars.sort((a, b) => a.order.compareTo(b.order));
+    notifyListeners();
+  }
+
+  Future<void> reorderHomeBlessings(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _blessings.length || newIndex < 0 || newIndex >= _blessings.length) return;
+    final item = _blessings.removeAt(oldIndex);
+    _blessings.insert(newIndex, item);
+    for (int i = 0; i < _blessings.length; i++) {
+      final updated = _blessings[i].copyWith(order: i + 1);
+      _blessings[i] = updated;
+      await _writeToFirestore('home_blessings', updated.id, updated.toMap());
+    }
+    _blessings.sort((a, b) => a.order.compareTo(b.order));
+    notifyListeners();
+  }
+
+  Future<void> reorderFooterSocialLinks(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _footerSocialLinks.length || newIndex < 0 || newIndex >= _footerSocialLinks.length) return;
+    final item = _footerSocialLinks.removeAt(oldIndex);
+    _footerSocialLinks.insert(newIndex, item);
+    for (int i = 0; i < _footerSocialLinks.length; i++) {
+      final updated = _footerSocialLinks[i].copyWith(order: i + 1);
+      _footerSocialLinks[i] = updated;
+      await _writeToFirestore('footer_social_links', updated.id, updated.toMap());
+    }
+    _footerSocialLinks.sort((a, b) => a.order.compareTo(b.order));
+    notifyListeners();
+  }
+
+  Future<void> refreshAllData({bool forceRefresh = true}) async {
+    setBusy(true, 'Refreshing data from cloud...');
+    try {
+      await initializeEssentialFirstViewport(forceRefresh: forceRefresh);
+      await startGentleBackgroundLoading(forceRefresh: forceRefresh);
+      logActivity('CONFIG', 'System', 'Refreshed all portal data from Firestore');
+    } catch (e) {
+      debugPrint('Refresh error: $e');
+    } finally {
+      setBusy(false);
+    }
   }
 
 }

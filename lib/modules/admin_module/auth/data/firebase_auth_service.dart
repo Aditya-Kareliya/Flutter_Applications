@@ -25,4 +25,60 @@ class FirebaseAuthService {
     final token = await user.getIdTokenResult(true);
     return token.claims?['admin'] == true;
   }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
+  }
+
+  Future<void> reauthenticate(String currentPassword) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'no-current-user',
+        message: 'No administrator is currently signed in.',
+      );
+    }
+    final email = user.email;
+    if (email == null || email.isEmpty) {
+      throw FirebaseAuthException(
+        code: 'no-email',
+        message: 'Current administrator does not have an associated email.',
+      );
+    }
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: currentPassword,
+    );
+    await user.reauthenticateWithCredential(credential);
+  }
+
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'no-current-user',
+        message: 'No administrator is currently signed in.',
+      );
+    }
+    await reauthenticate(currentPassword);
+    await user.updatePassword(newPassword);
+  }
+
+  Future<void> updateEmail({
+    required String currentPassword,
+    required String newEmail,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'no-current-user',
+        message: 'No administrator is currently signed in.',
+      );
+    }
+    await reauthenticate(currentPassword);
+    await user.verifyBeforeUpdateEmail(newEmail.trim());
+  }
 }

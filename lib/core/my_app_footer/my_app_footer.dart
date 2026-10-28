@@ -7,6 +7,7 @@ import '../localization/my_app_translations.dart';
 import '../my_app_colors/my_app_colors.dart';
 import '../my_app_text_style/my_app_text_styles.dart';
 import '../widgets/heritage_divider.dart';
+import '../widgets/brand_logo/brand_logo_widget.dart';
 import '../../utils/navigation_manager.dart';
 import '../../modules/admin_module/dashboard/data/admin_data_store.dart';
 
@@ -53,40 +54,12 @@ class MyAppFooter extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: colors.heritageGold,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(22),
-                                child: AdminDataStore.instance.settings.logoImageUrl.isNotEmpty
-                                    ? (AdminDataStore.instance.settings.logoImageUrl.startsWith('http')
-                                        ? Image.network(
-                                            AdminDataStore.instance.settings.logoImageUrl,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => Image.asset(
-                                              'assets/images/pavan_putra_logo.jpg',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          )
-                                        : Image.asset(
-                                            AdminDataStore.instance.settings.logoImageUrl,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => Image.asset(
-                                              'assets/images/pavan_putra_logo.jpg',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ))
-                                    : Image.asset(
-                                        'assets/images/pavan_putra_logo.jpg',
-                                        fit: BoxFit.cover,
-                                      ),
+                            BrandLogoWidget(
+                              size: 44,
+                              isCircular: true,
+                              border: Border.all(
+                                color: colors.heritageGold,
+                                width: 1.5,
                               ),
                             ),
                             const SizedBox(width: 12),
