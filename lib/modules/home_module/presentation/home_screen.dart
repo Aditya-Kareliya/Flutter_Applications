@@ -1082,13 +1082,25 @@ class _SingerBannerCarousel extends StatelessWidget {
                                     child: ClipRRect(
                                       borderRadius: const BorderRadius.only(topLeft: Radius.circular(22), topRight: Radius.circular(22)),
                                       child: singer.imageUrl.startsWith('http')
-                                          ? Image.network(
-                                              singer.imageUrl,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                          ? Stack(
+                                              fit: StackFit.passthrough,
+                                              children: [
+                                                Image.asset(
+                                                  'assets/images/pavan_putra_logo.png',
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                                ),
+                                                CachedNetworkImage(
+                                                  imageUrl: singer.imageUrl,
+                                                  fit: BoxFit.cover,
+                                                  fadeInDuration: const Duration(milliseconds: 300),
+                                                  placeholder: (_, _) => const SizedBox.shrink(),
+                                                  errorWidget: (_, _, _) => const SizedBox.shrink(),
+                                                ),
+                                              ],
                                             )
                                           : Image.asset(
-                                              singer.imageUrl.isNotEmpty ? singer.imageUrl : 'assets/images/pavan_putra_logo.jpg',
+                                              singer.imageUrl.isNotEmpty ? singer.imageUrl : 'assets/images/pavan_putra_logo.png',
                                               fit: BoxFit.cover,
                                               errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
                                             ),
@@ -1185,20 +1197,41 @@ class _SingerBannerCarousel extends StatelessWidget {
   }
 
   Widget _buildArtistImage(String imageUrl, {required double size, required MyAppColors colors}) {
+    final baseAsset = Image.asset(
+      'assets/images/pavan_putra_logo.png',
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Image.asset(
+        'assets/images/pavan_putra_logo.jpg',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      ),
+    );
+
     final imageWidget = imageUrl.startsWith('http')
-        ? Image.network(
-            imageUrl,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', width: size, height: size, fit: BoxFit.cover),
+        ? Stack(
+            fit: StackFit.passthrough,
+            children: [
+              baseAsset,
+              CachedNetworkImage(
+                imageUrl: imageUrl,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                fadeInDuration: const Duration(milliseconds: 300),
+                placeholder: (_, _) => const SizedBox.shrink(),
+                errorWidget: (_, _, _) => const SizedBox.shrink(),
+              ),
+            ],
           )
         : Image.asset(
-            imageUrl.isNotEmpty ? imageUrl : 'assets/images/pavan_putra_logo.jpg',
+            imageUrl.isNotEmpty ? imageUrl : 'assets/images/pavan_putra_logo.png',
             width: size,
             height: size,
             fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', width: size, height: size, fit: BoxFit.cover),
+            errorBuilder: (_, _, _) => baseAsset,
           );
 
     return Container(
