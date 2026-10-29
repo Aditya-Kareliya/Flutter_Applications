@@ -599,10 +599,14 @@ class _YoutubePlayerDialogState extends State<_YoutubePlayerDialog> {
         : widget.video.title;
 
     final watchUrl = YoutubeUrlHelper.buildWatchUrl(widget.video.youtubeVideoId);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return Dialog(
       backgroundColor: colors.deepMaroon,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 12 : 16,
+        vertical: isMobile ? 16 : 24,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
@@ -613,30 +617,39 @@ class _YoutubePlayerDialogState extends State<_YoutubePlayerDialog> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 820),
         child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Header with Tag, Channel & Close Button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  HeritageBadge(
-                    label: '${widget.video.tag} • ${widget.video.year} • ${widget.video.sourceChannel}',
-                    backgroundColor: Colors.white.withValues(alpha: 0.12),
-                    textColor: colors.lightGold,
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
-                      Icons.close_rounded,
-                      color: Colors.white,
-                      size: 26,
+          padding: EdgeInsets.all(isMobile ? 14 : 20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header with Tag, Channel & Close Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: HeritageBadge(
+                          label: '${widget.video.tag} • ${widget.video.year} • ${widget.video.sourceChannel}',
+                          backgroundColor: Colors.white.withValues(alpha: 0.12),
+                          textColor: colors.lightGold,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 14),
 
               // Embedded YouTube Player
@@ -706,7 +719,8 @@ class _YoutubePlayerDialogState extends State<_YoutubePlayerDialog> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
@@ -850,15 +864,20 @@ class _VideoItemCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      video.sourceChannel,
-                      style: styles.cleanSans(
-                        context,
-                        size: 11,
-                        fontWeight: FontWeight.w600,
-                        color: colors.getAccentColor(context),
+                    Expanded(
+                      child: Text(
+                        video.sourceChannel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: styles.cleanSans(
+                          context,
+                          size: 11,
+                          fontWeight: FontWeight.w600,
+                          color: colors.getAccentColor(context),
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       'YOUTUBE ARCHIVE',
                       style: styles.cleanSans(

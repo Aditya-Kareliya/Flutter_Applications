@@ -1,43 +1,78 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+# ==============================================================================
+# Flutter & Dart Build Artifacts
+# ==============================================================================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+doc/api/
 
-# IntelliJ related
+# ==============================================================================
+# Firebase & Deployment Caches / Logs
+# ==============================================================================
+.firebase/
+*-debug.log
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# ==============================================================================
+# IDEs and Text Editors
+# ==============================================================================
+# IntelliJ / Android Studio
+.idea/
 *.iml
 *.ipr
 *.iws
-.idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# Visual Studio Code
+.vscode/
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-/coverage/
+# Other Editors
+*.sublime-project
+*.sublime-workspace
+.atom/
+.history/
 
-# Symbolication related
+# ==============================================================================
+# Operating System Junk Files
+# ==============================================================================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# Linux
+*~
+
+# ==============================================================================
+# Node / NPM / Environment Secrets
+# ==============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.*
+*.local
+*.pem
+*.key
+
+# ==============================================================================
+# Flutter Symbols & Obfuscation
+# ==============================================================================
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
-
-# Widget Preview related
 .widget_preview/
+migrate_working_dir/
