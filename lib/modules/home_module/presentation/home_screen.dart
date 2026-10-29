@@ -342,38 +342,72 @@ class _HeritageHeroSection extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: _renderEmblemImage(imageUrl),
+        child: _renderEmblemImage(imageUrl, size: size),
       ),
     );
   }
 
-  Widget _renderEmblemImage(String imageUrl) {
+  Widget _renderEmblemImage(String imageUrl, {required double size}) {
+    final baseAsset = Image.asset(
+      'assets/images/pavan_putra_logo.png',
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Image.asset(
+        'assets/images/pavan_putra_logo.jpg',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      ),
+    );
+
     if (imageUrl.startsWith('data:image')) {
       try {
         final commaIdx = imageUrl.indexOf(',');
         final base64Data = commaIdx != -1 ? imageUrl.substring(commaIdx + 1) : imageUrl;
         return Image.memory(
           base64Decode(base64Data),
+          width: size,
+          height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => const Icon(Icons.image_outlined, color: Colors.white70, size: 48),
+          errorBuilder: (_, _, _) => baseAsset,
         );
-      } catch (_) {}
+      } catch (_) {
+        return baseAsset;
+      }
     }
 
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      return CachedNetworkImage(
-        imageUrl: imageUrl,
-        fit: BoxFit.cover,
-        placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-        errorWidget: (_, _, _) => const Icon(Icons.broken_image_rounded, color: Colors.white70, size: 48),
+      return Stack(
+        fit: StackFit.passthrough,
+        alignment: Alignment.center,
+        children: [
+          baseAsset,
+          CachedNetworkImage(
+            imageUrl: imageUrl,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            fadeInDuration: const Duration(milliseconds: 300),
+            fadeOutDuration: const Duration(milliseconds: 200),
+            placeholder: (_, _) => const SizedBox.shrink(),
+            errorWidget: (_, _, _) => const SizedBox.shrink(),
+          ),
+        ],
       );
     }
 
-    return Image.asset(
-      imageUrl.isNotEmpty ? imageUrl : 'assets/images/pavan_putra_logo.jpg',
-      fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => const Icon(Icons.image_outlined, color: Colors.white70, size: 48),
-    );
+    if (imageUrl.isNotEmpty && imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => baseAsset,
+      );
+    }
+
+    return baseAsset;
   }
 
   Widget _buildHeroTextContent(

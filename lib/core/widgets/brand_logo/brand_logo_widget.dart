@@ -41,27 +41,37 @@ class BrandLogoWidget extends StatelessWidget {
         final effectiveWidth = size ?? width;
         final effectiveHeight = size ?? height;
 
-        Widget imageWidget;
-        if (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) {
-          imageWidget = CachedNetworkImage(
-            imageUrl: logoUrl,
+        final baseAsset = Image.asset(
+          defaultAsset,
+          width: effectiveWidth,
+          height: effectiveHeight,
+          fit: fit,
+          errorBuilder: (context, error, stackTrace) => Image.asset(
+            'assets/images/pavan_putra_logo.jpg',
             width: effectiveWidth,
             height: effectiveHeight,
             fit: fit,
-            fadeInDuration: const Duration(milliseconds: 300),
-            fadeOutDuration: const Duration(milliseconds: 200),
-            placeholder: (context, url) => fallbackWidget ?? Image.asset(
-              defaultAsset,
-              width: effectiveWidth,
-              height: effectiveHeight,
-              fit: fit,
-            ),
-            errorWidget: (context, url, error) => fallbackWidget ?? Image.asset(
-              defaultAsset,
-              width: effectiveWidth,
-              height: effectiveHeight,
-              fit: fit,
-            ),
+          ),
+        );
+
+        Widget imageWidget;
+        if (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) {
+          imageWidget = Stack(
+            fit: StackFit.passthrough,
+            alignment: Alignment.center,
+            children: [
+              fallbackWidget ?? baseAsset,
+              CachedNetworkImage(
+                imageUrl: logoUrl,
+                width: effectiveWidth,
+                height: effectiveHeight,
+                fit: fit,
+                fadeInDuration: const Duration(milliseconds: 300),
+                fadeOutDuration: const Duration(milliseconds: 200),
+                placeholder: (context, url) => const SizedBox.shrink(),
+                errorWidget: (context, url, error) => const SizedBox.shrink(),
+              ),
+            ],
           );
         } else if (logoUrl.isNotEmpty && logoUrl.startsWith('assets/')) {
           imageWidget = Image.asset(
@@ -69,20 +79,10 @@ class BrandLogoWidget extends StatelessWidget {
             width: effectiveWidth,
             height: effectiveHeight,
             fit: fit,
-            errorBuilder: (context, error, stackTrace) => fallbackWidget ?? Image.asset(
-              defaultAsset,
-              width: effectiveWidth,
-              height: effectiveHeight,
-              fit: fit,
-            ),
+            errorBuilder: (context, error, stackTrace) => fallbackWidget ?? baseAsset,
           );
         } else {
-          imageWidget = fallbackWidget ?? Image.asset(
-            defaultAsset,
-            width: effectiveWidth,
-            height: effectiveHeight,
-            fit: fit,
-          );
+          imageWidget = fallbackWidget ?? baseAsset;
         }
 
         Widget clippedWidget;

@@ -20,6 +20,7 @@
   <meta name="twitter:image" content="/android-chrome-512x512.png">
 
   <!-- Favicon & Touch Icons -->
+  <link rel="preload" href="/apple-touch-icon.png" as="image">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -94,14 +95,36 @@
       align-items: center;
       text-align: center;
     }
-    .loader-spinner-ring {
-      width: 68px;
-      height: 68px;
+    .loader-avatar-container {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loader-avatar-img {
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      border: 2.6px solid rgba(87, 8, 20, 0.18);
-      border-top: 2.6px solid #C89B3C;
+      object-fit: cover;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      border: 1.5px solid rgba(200, 155, 60, 0.5);
+      background-color: #ffffff;
+      display: block;
+    }
+    .loader-spinner-ring {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      border: 2.8px solid rgba(87, 8, 20, 0.15);
+      border-top: 2.8px solid #C89B3C;
       animation: spin 0.9s linear infinite;
       box-sizing: border-box;
+      pointer-events: none;
     }
     .loader-welcome-title {
       margin-top: 20px;
@@ -144,7 +167,10 @@
 
   <div id="app-loader">
     <div class="loader-card">
-      <div class="loader-spinner-ring"></div>
+      <div class="loader-avatar-container">
+        <img class="loader-avatar-img" src="/apple-touch-icon.png" alt="Pavan Putra Garbi Mandal" />
+        <div class="loader-spinner-ring"></div>
+      </div>
       <div class="loader-welcome-title">
         <div>Welcome...</div>
         <div>Please wait a moment...</div>
