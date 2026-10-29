@@ -397,7 +397,10 @@ class _HeritageHeroSection extends StatelessWidget {
       );
     }
 
-    if (imageUrl.isNotEmpty && imageUrl.startsWith('assets/')) {
+    if (imageUrl.isNotEmpty &&
+        imageUrl.startsWith('assets/') &&
+        imageUrl != 'assets/images/pavan_putra_logo.png' &&
+        imageUrl != 'assets/images/pavan_putra_logo.jpg') {
       return Image.asset(
         imageUrl,
         width: size,

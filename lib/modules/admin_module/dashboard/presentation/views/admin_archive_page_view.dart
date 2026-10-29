@@ -380,9 +380,9 @@ class _AdminArchivePageViewState extends State<AdminArchivePageView> {
                                               ? CachedNetworkImage(
                                                   imageUrl: album.coverImageUrl,
                                                   fit: BoxFit.cover,
-                                                  errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                                  errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                                                 )
-                                              : Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                              : Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                                         ),
                                       ),
                                       const SizedBox(width: 12),

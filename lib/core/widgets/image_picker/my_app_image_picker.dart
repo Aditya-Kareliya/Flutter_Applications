@@ -34,7 +34,7 @@ class MyAppImagePicker extends StatefulWidget {
     this.height = 180,
     this.width = double.infinity,
     this.isCircle = false,
-    this.defaultFallbackAsset = 'assets/images/pavan_putra_logo.jpg',
+    this.defaultFallbackAsset = 'assets/images/pavan_putra_logo.png',
   });
 
   @override

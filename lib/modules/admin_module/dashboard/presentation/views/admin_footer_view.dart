@@ -2076,7 +2076,7 @@ class _AdminFooterViewState extends State<AdminFooterView> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
-                            child: Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                            child: Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                           ),
                         ),
                         const SizedBox(width: 10),

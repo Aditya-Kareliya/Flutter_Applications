@@ -73,7 +73,7 @@ class BrandLogoWidget extends StatelessWidget {
               ),
             ],
           );
-        } else if (logoUrl.isNotEmpty && logoUrl.startsWith('assets/')) {
+        } else if (logoUrl.isNotEmpty && logoUrl.startsWith('assets/') && logoUrl != defaultAsset) {
           imageWidget = Image.asset(
             logoUrl,
             width: effectiveWidth,

@@ -95,7 +95,7 @@ class AdminCommitteeMember {
     required this.designationEn,
     required this.designationGu,
     this.phone = '',
-    this.photoUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.photoUrl = 'assets/images/pavan_putra_logo.png',
     this.order = 0,
     this.isActive = true,
   });
@@ -123,7 +123,7 @@ class AdminCommitteeMember {
       designationEn: map['designation_en'] as String? ?? map['designationEn'] as String? ?? '',
       designationGu: map['designation_gu'] as String? ?? map['designationGu'] as String? ?? '',
       phone: map['phone'] as String? ?? '',
-      photoUrl: map['photo_url'] as String? ?? map['photoUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      photoUrl: map['photo_url'] as String? ?? map['photoUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
       isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
     );
@@ -178,7 +178,7 @@ class AdminHistoryMilestone {
     required this.descEn,
     required this.descGu,
     this.iconName = 'local_fire_department_rounded',
-    this.imageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.order = 0,
   });
 
@@ -210,7 +210,7 @@ class AdminHistoryMilestone {
       descEn: map['desc_en'] as String? ?? map['descEn'] as String? ?? '',
       descGu: map['desc_gu'] as String? ?? map['descGu'] as String? ?? '',
       iconName: map['icon_name'] as String? ?? map['iconName'] as String? ?? 'local_fire_department_rounded',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
     );
   }
@@ -264,7 +264,7 @@ class AdminHomeSinger {
     required this.roleGu,
     required this.descEn,
     required this.descGu,
-    this.imageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.order = 0,
   });
 
@@ -292,7 +292,7 @@ class AdminHomeSinger {
       roleGu: map['role_gu'] as String? ?? map['roleGu'] as String? ?? '',
       descEn: map['desc_en'] as String? ?? map['descEn'] as String? ?? '',
       descGu: map['desc_gu'] as String? ?? map['descGu'] as String? ?? '',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
     );
   }
@@ -791,7 +791,7 @@ class AdminAboutPageData {
     this.foundationDescGu = '',
     this.foundationMottoEn = '',
     this.foundationMottoGu = '',
-    this.foundationImageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.foundationImageUrl = 'assets/images/pavan_putra_logo.png',
     this.valuesTagEn = '',
     this.valuesTagGu = '',
     this.valuesTitleEn = '',
@@ -887,7 +887,7 @@ class AdminHomeBanner {
     required this.titleGu,
     required this.subtitleEn,
     required this.subtitleGu,
-    this.imageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.ctaTextEn = 'EXPLORE ARCHIVE',
     this.ctaTextGu = 'આર્કાઇવ જુઓ',
     this.ctaRoute = '/archive',
@@ -923,7 +923,7 @@ class AdminHomeBanner {
       titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
       subtitleEn: map['subtitle_en'] as String? ?? map['subtitleEn'] as String? ?? '',
       subtitleGu: map['subtitle_gu'] as String? ?? map['subtitleGu'] as String? ?? '',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       ctaTextEn: map['cta_text_en'] as String? ?? map['ctaTextEn'] as String? ?? 'EXPLORE',
       ctaTextGu: map['cta_text_gu'] as String? ?? map['ctaTextGu'] as String? ?? 'જુઓ',
       ctaRoute: map['cta_route'] as String? ?? map['ctaRoute'] as String? ?? '/archive',
@@ -1086,7 +1086,7 @@ class AdminHomeBlessing {
     this.authorGu = '',
     this.designationEn = '',
     this.designationGu = '',
-    this.photoUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.photoUrl = 'assets/images/pavan_putra_logo.png',
     this.order = 0,
     this.isActive = true,
   });
@@ -1129,7 +1129,7 @@ class AdminHomeBlessing {
       authorGu: map['author_gu'] as String? ?? map['authorGu'] as String? ?? '',
       designationEn: map['designation_en'] as String? ?? map['designationEn'] as String? ?? '',
       designationGu: map['designation_gu'] as String? ?? map['designationGu'] as String? ?? '',
-      photoUrl: map['photo_url'] as String? ?? map['photoUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      photoUrl: map['photo_url'] as String? ?? map['photoUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
       isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
     );
@@ -1268,7 +1268,7 @@ class AdminAlbum {
     required this.name,
     required this.dayTag,
     required this.description,
-    this.coverImageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.coverImageUrl = 'assets/images/pavan_putra_logo.png',
     this.photoCount = 0,
   });
 
@@ -1294,7 +1294,7 @@ class AdminAlbum {
       name: map['name'] as String? ?? '',
       dayTag: map['day_tag'] as String? ?? map['dayTag'] as String? ?? 'Day 1',
       description: map['description'] as String? ?? '',
-      coverImageUrl: map['cover_image_url'] as String? ?? map['coverImageUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      coverImageUrl: map['cover_image_url'] as String? ?? map['coverImageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       photoCount: (map['photo_count'] as num?)?.toInt() ?? (map['photoCount'] as num?)?.toInt() ?? 0,
     );
   }
@@ -1330,7 +1330,7 @@ class AdminPhoto {
     required this.day,
     required this.titleEn,
     required this.titleGu,
-    this.imageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.caption = '',
     this.isFeatured = true,
   });
@@ -1362,7 +1362,7 @@ class AdminPhoto {
       day: map['day'] as String? ?? 'Day 1',
       titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
       titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       caption: map['caption'] as String? ?? '',
       isFeatured: map['is_featured'] as bool? ?? map['isFeatured'] as bool? ?? true,
     );
@@ -1567,7 +1567,7 @@ class AdminBlog {
     required this.snippet,
     this.snippetGu = '',
     required this.content,
-    this.imageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.isPublished = true,
   });
 
@@ -1607,7 +1607,7 @@ class AdminBlog {
       snippet: map['snippet'] as String? ?? map['snippet_en'] as String? ?? '',
       snippetGu: map['snippet_gu'] as String? ?? '',
       content: map['content'] as String? ?? '',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       isPublished: map['is_published'] as bool? ?? map['isPublished'] as bool? ?? true,
     );
   }
@@ -1713,7 +1713,7 @@ class AdminSettings {
     this.instagramHandle = '',
     this.facebookUrl = 'https://facebook.com/PavanPutraGarbiRajkot',
     this.whatsappNumber = '+919876543210',
-    this.logoImageUrl = 'assets/images/pavan_putra_logo.jpg',
+    this.logoImageUrl = 'assets/images/pavan_putra_logo.png',
     this.paymentQrImageUrl = '',
     this.paymentUpiId = '',
     this.paymentRecipientName = '',
@@ -1762,7 +1762,7 @@ class AdminSettings {
       instagramHandle: map['instagram_handle'] as String? ?? map['instagramHandle'] as String? ?? '',
       facebookUrl: map['facebook_url'] as String? ?? map['facebookUrl'] as String? ?? 'https://facebook.com/PavanPutraGarbiRajkot',
       whatsappNumber: map['whatsapp_number'] as String? ?? map['whatsappNumber'] as String? ?? '+919876543210',
-      logoImageUrl: map['logo_image_url'] as String? ?? map['logoImageUrl'] as String? ?? 'assets/images/pavan_putra_logo.jpg',
+      logoImageUrl: map['logo_image_url'] as String? ?? map['logoImageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       paymentQrImageUrl: map['payment_qr_image_url'] as String? ?? map['paymentQrImageUrl'] as String? ?? '',
       paymentUpiId: map['payment_upi_id'] as String? ?? map['paymentUpiId'] as String? ?? '',
       paymentRecipientName: map['payment_recipient_name'] as String? ?? map['paymentRecipientName'] as String? ?? '',
@@ -2062,7 +2062,7 @@ class AdminDataStore extends ChangeNotifier {
       img = _homeBanners.first.imageUrl.trim();
     }
     if (img.isEmpty) {
-      img = 'assets/images/pavan_putra_logo.jpg';
+      img = 'assets/images/pavan_putra_logo.png';
     }
 
     return AdminHeroData(
@@ -2142,7 +2142,7 @@ class AdminDataStore extends ChangeNotifier {
     String getVal(String key, String lang) => getContentVal(key, lang);
 
     String img = getVal('about_foundation_image', 'en');
-    if (img.isEmpty) img = 'assets/images/pavan_putra_logo.jpg';
+    if (img.isEmpty) img = 'assets/images/pavan_putra_logo.png';
 
     String tagEn = getVal('about_tag', 'en');
     String tagGu = getVal('about_tag', 'gu');
@@ -2350,8 +2350,8 @@ class AdminDataStore extends ChangeNotifier {
         key: 'hero_image_url',
         label: 'Hero Emblem Graphic URL',
         section: 'Home Hero Section',
-        valueEn: 'assets/images/pavan_putra_logo.jpg',
-        valueGu: 'assets/images/pavan_putra_logo.jpg',
+        valueEn: 'assets/images/pavan_putra_logo.png',
+        valueGu: 'assets/images/pavan_putra_logo.png',
       ),
       AdminContentField(key: 'stat_years_title', label: 'Stat 1: Heritage Years Title', section: 'Heritage Highlights', valueEn: '45+ Years', valueGu: '૪૫+ વર્ષ'),
       AdminContentField(key: 'stat_years_desc', label: 'Stat 1: Heritage Years Description', section: 'Heritage Highlights', valueEn: 'Continuous heritage in Rajkot', valueGu: 'રાજકોટમાં અખંડ પરંપરા'),
@@ -2534,8 +2534,8 @@ class AdminDataStore extends ChangeNotifier {
         key: 'about_foundation_image',
         label: 'Foundation Historical Emblem / Photo',
         section: 'About Page',
-        valueEn: 'assets/images/pavan_putra_logo.jpg',
-        valueGu: 'assets/images/pavan_putra_logo.jpg',
+        valueEn: 'assets/images/pavan_putra_logo.png',
+        valueGu: 'assets/images/pavan_putra_logo.png',
       ),
       AdminContentField(key: 'about_values_tag', label: 'Principles Eyebrow Badge', section: 'About Page', valueEn: 'CORE PILLARS', valueGu: 'પાયાના આધારસ્તંભ'),
       AdminContentField(
@@ -2747,7 +2747,7 @@ class AdminDataStore extends ChangeNotifier {
           instagramHandle: '@pavanputra_garbi_rajkot',
           facebookUrl: 'https://facebook.com/PavanPutraGarbiRajkot',
           whatsappNumber: '+919876543210',
-          logoImageUrl: 'assets/images/pavan_putra_logo.jpg',
+          logoImageUrl: 'assets/images/pavan_putra_logo.png',
         );
         _settings = officialSettings;
       }
@@ -2811,8 +2811,8 @@ class AdminDataStore extends ChangeNotifier {
           key: 'hero_image_url',
           label: 'Hero Emblem Graphic URL',
           section: 'Home Hero Section',
-          valueEn: 'assets/images/pavan_putra_logo.jpg',
-          valueGu: 'assets/images/pavan_putra_logo.jpg',
+          valueEn: 'assets/images/pavan_putra_logo.png',
+          valueGu: 'assets/images/pavan_putra_logo.png',
         ),
         AdminContentField(key: 'stat_years_title', label: 'Stat 1: Heritage Years Title', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
         AdminContentField(key: 'stat_years_desc', label: 'Stat 1: Heritage Years Description', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
@@ -2996,8 +2996,8 @@ class AdminDataStore extends ChangeNotifier {
           key: 'about_foundation_image',
           label: 'Foundation Historical Emblem / Photo',
           section: 'About Page',
-          valueEn: 'assets/images/pavan_putra_logo.jpg',
-          valueGu: 'assets/images/pavan_putra_logo.jpg',
+          valueEn: 'assets/images/pavan_putra_logo.png',
+          valueGu: 'assets/images/pavan_putra_logo.png',
         ),
         AdminContentField(key: 'about_values_tag', label: 'Principles Eyebrow Badge', section: 'About Page', valueEn: 'CORE PILLARS', valueGu: 'પાયાના આધારસ્તંભ'),
         AdminContentField(

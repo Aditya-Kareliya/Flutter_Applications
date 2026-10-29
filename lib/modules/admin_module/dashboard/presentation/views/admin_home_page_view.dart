@@ -46,7 +46,7 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
   late final TextEditingController _heroBottomBadgeEnCtrl;
   late final TextEditingController _heroBottomBadgeGuCtrl;
 
-  String _heroImageUrl = 'assets/images/pavan_putra_logo.jpg';
+  String _heroImageUrl = 'assets/images/pavan_putra_logo.png';
   String _previewLang = 'en';
   String _statsPreviewLang = 'en';
 
@@ -153,7 +153,7 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
     _heroBottomBadgeEnCtrl = TextEditingController(text: hero.bottomBadgeEn);
     _heroBottomBadgeGuCtrl = TextEditingController(text: hero.bottomBadgeGu);
 
-    _heroImageUrl = hero.imageUrl.isNotEmpty ? hero.imageUrl : 'assets/images/pavan_putra_logo.jpg';
+    _heroImageUrl = hero.imageUrl.isNotEmpty ? hero.imageUrl : 'assets/images/pavan_putra_logo.png';
 
     final stats = store.statsData;
     _stat1TitleEnCtrl = TextEditingController(text: stats.stat1.titleEn);
@@ -913,7 +913,7 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
     final roleGuCtrl = TextEditingController(text: singer?.roleGu ?? '');
     final descEnCtrl = TextEditingController(text: singer?.descEn ?? '');
     final descGuCtrl = TextEditingController(text: singer?.descGu ?? '');
-    String imgUrl = singer?.imageUrl ?? 'assets/images/pavan_putra_logo.jpg';
+    String imgUrl = singer?.imageUrl ?? 'assets/images/pavan_putra_logo.png';
 
     showMyAppDialog(
       context: context,
@@ -1422,7 +1422,7 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
     final desigGuCtrl = TextEditingController(text: blessing?.designationGu ?? '');
     final quoteEnCtrl = TextEditingController(text: blessing?.quoteEn ?? '');
     final quoteGuCtrl = TextEditingController(text: blessing?.quoteGu ?? '');
-    String photoUrl = blessing?.photoUrl ?? 'assets/images/pavan_putra_logo.jpg';
+    String photoUrl = blessing?.photoUrl ?? 'assets/images/pavan_putra_logo.png';
     int order = blessing?.order ?? widget.store.blessings.length + 1;
 
     showMyAppDialog(
@@ -1726,7 +1726,7 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
     final readTimeCtrl = TextEditingController(text: article?.readTime ?? '5 min read');
     final dateCtrl = TextEditingController(text: article?.date ?? 'October 2025');
     final contentCtrl = TextEditingController(text: article?.content ?? '');
-    String imageUrl = article?.imageUrl ?? 'assets/images/pavan_putra_logo.jpg';
+    String imageUrl = article?.imageUrl ?? 'assets/images/pavan_putra_logo.png';
     bool isPublished = article?.isPublished ?? true;
 
     showMyAppDialog(
@@ -3326,8 +3326,8 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                                   ),
                                   child: ClipOval(
                                     child: singer.imageUrl.startsWith('http')
-                                        ? Image.network(singer.imageUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg'))
-                                        : Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                        ? Image.network(singer.imageUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png'))
+                                        : Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                                   ),
                                 ),
                                 const SizedBox(width: 14),
@@ -3601,8 +3601,8 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                               ),
                               child: ClipOval(
                                 child: blessing.photoUrl.startsWith('http')
-                                    ? Image.network(blessing.photoUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg'))
-                                    : Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                    ? Image.network(blessing.photoUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png'))
+                                    : Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -5982,8 +5982,8 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                                 ),
                                 child: ClipOval(
                                   child: b.photoUrl.startsWith('http')
-                                      ? Image.network(b.photoUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg'))
-                                      : Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                      ? Image.network(b.photoUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png'))
+                                      : Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                                 ),
                               ),
                               const SizedBox(width: 10),

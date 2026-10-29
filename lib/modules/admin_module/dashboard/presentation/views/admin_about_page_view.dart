@@ -40,7 +40,7 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
   late final TextEditingController _historyBodyGuCtrl;
   late final TextEditingController _historyMottoEnCtrl;
   late final TextEditingController _historyMottoGuCtrl;
-  String _foundationImageUrl = 'assets/images/pavan_putra_logo.jpg';
+  String _foundationImageUrl = 'assets/images/pavan_putra_logo.png';
 
   // Section 3: Principles Header
   late final TextEditingController _principlesTagEnCtrl;
@@ -545,7 +545,7 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
         : widget.store.committeeMembers.map((m) => m.order).reduce((a, b) => a > b ? a : b);
     final assignedMemberOrder = member?.order ?? (maxMemberOrder + 1);
     final orderCtrl = TextEditingController(text: '#$assignedMemberOrder');
-    String photoUrl = member?.photoUrl ?? 'assets/images/pavan_putra_logo.jpg';
+    String photoUrl = member?.photoUrl ?? 'assets/images/pavan_putra_logo.png';
     bool isActive = member?.isActive ?? true;
 
     showMyAppDialog(
@@ -1418,10 +1418,10 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                                   imageUrl: member.photoUrl,
                                   fit: BoxFit.cover,
                                   placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
-                                  errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                  errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                                 )
                               : Image.asset(
-                                  member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.jpg',
+                                  member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.png',
                                   fit: BoxFit.cover,
                                 ),
                         ),
@@ -1521,10 +1521,10 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                               imageUrl: member.photoUrl,
                               fit: BoxFit.cover,
                               placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
-                              errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                              errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                             )
                           : Image.asset(
-                              member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.jpg',
+                              member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.png',
                               fit: BoxFit.cover,
                             ),
                     ),
@@ -1700,10 +1700,10 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                             imageUrl: _foundationImageUrl,
                             fit: BoxFit.cover,
                             placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
-                            errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                            errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                           )
                         : Image.asset(
-                            _foundationImageUrl.isNotEmpty ? _foundationImageUrl : 'assets/images/pavan_putra_logo.jpg',
+                            _foundationImageUrl.isNotEmpty ? _foundationImageUrl : 'assets/images/pavan_putra_logo.png',
                             fit: BoxFit.cover,
                           ),
                   ),
@@ -1746,10 +1746,10 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                             imageUrl: _foundationImageUrl,
                             fit: BoxFit.cover,
                             placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
-                            errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                            errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                           )
                         : Image.asset(
-                            _foundationImageUrl.isNotEmpty ? _foundationImageUrl : 'assets/images/pavan_putra_logo.jpg',
+                            _foundationImageUrl.isNotEmpty ? _foundationImageUrl : 'assets/images/pavan_putra_logo.png',
                             fit: BoxFit.cover,
                           ),
                   ),
@@ -1942,7 +1942,7 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                               ? CachedNetworkImage(
                                   imageUrl: m.photoUrl,
                                   fit: BoxFit.cover,
-                                  errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
+                                  errorWidget: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
                                 )
                               : Image.asset(m.photoUrl, fit: BoxFit.cover),
                         ),
