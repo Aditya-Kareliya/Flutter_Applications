@@ -599,7 +599,9 @@ class _YoutubePlayerDialogState extends State<_YoutubePlayerDialog> {
         : widget.video.title;
 
     final watchUrl = YoutubeUrlHelper.buildWatchUrl(widget.video.youtubeVideoId);
-    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isMobile = screenWidth < 600;
+    final isSmallMobile = screenWidth < 400;
 
     return Dialog(
       backgroundColor: colors.deepMaroon,
@@ -623,104 +625,189 @@ class _YoutubePlayerDialogState extends State<_YoutubePlayerDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header with Tag, Channel & Close Button
+                // Header with Tag, Channel & Touch-friendly Close Button
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: HeritageBadge(
-                          label: '${widget.video.tag} • ${widget.video.year} • ${widget.video.sourceChannel}',
+                          label: isSmallMobile
+                              ? '${widget.video.tag} • ${widget.video.year}'
+                              : '${widget.video.tag} • ${widget.video.year} • ${widget.video.sourceChannel}',
                           backgroundColor: Colors.white.withValues(alpha: 0.12),
                           textColor: colors.lightGold,
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      icon: const Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
-                        size: 24,
+                    Material(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => Navigator.pop(context),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              const SizedBox(height: 14),
+                const SizedBox(height: 14),
 
-              // Embedded YouTube Player
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Container(
-                    color: Colors.black,
-                    child: YoutubePlayer(
-                      controller: _controller,
-                      aspectRatio: 16 / 9,
+                // Embedded YouTube Player
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: Container(
+                      color: Colors.black,
+                      child: YoutubePlayer(
+                        controller: _controller,
+                        aspectRatio: 16 / 9,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Title
-              Text(
-                displayTitle,
-                style: styles.editorialSerif(
-                  context,
-                  size: 18,
-                  fontWeight: FontWeight.w700,
-                  color: colors.white,
+                // Title
+                Text(
+                  displayTitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: styles.editorialSerif(
+                    context,
+                    size: isMobile ? 16 : 18,
+                    fontWeight: FontWeight.w700,
+                    color: colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
-              // Action Bar: "Watch on YouTube" Fallback & Controls
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 10,
-                children: [
-                  Text(
-                    'Channel: ${widget.video.sourceChannel}',
-                    style: styles.cleanSans(
-                      context,
-                      size: 12,
-                      color: const Color(0xFFE2DDD1),
+                // Action Bar: YouTube Channel & Responsive Watch Button
+                if (isMobile) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.ondemand_video_rounded,
+                        size: 16,
+                        color: colors.lightGold,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Channel: ${widget.video.sourceChannel}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: styles.cleanSans(
+                            context,
+                            size: 12,
+                            color: const Color(0xFFE2DDD1),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFCC0000),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        launchUrl(
+                          Uri.parse(watchUrl),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                      icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                      label: const Text(
+                        'Watch on YouTube',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.5,
+                        ),
+                      ),
                     ),
                   ),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFFCC0000),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    ),
-                    onPressed: () {
-                      launchUrl(
-                        Uri.parse(watchUrl),
-                        mode: LaunchMode.externalApplication,
-                      );
-                    },
-                    icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                    label: const Text(
-                      'Watch on YouTube',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                    ),
+                ] else ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.ondemand_video_rounded,
+                              size: 16,
+                              color: colors.lightGold,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Channel: ${widget.video.sourceChannel}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: styles.cleanSans(
+                                  context,
+                                  size: 13,
+                                  color: const Color(0xFFE2DDD1),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFCC0000),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 11,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          launchUrl(
+                            Uri.parse(watchUrl),
+                            mode: LaunchMode.externalApplication,
+                          );
+                        },
+                        icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                        label: const Text(
+                          'Watch on YouTube',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 
