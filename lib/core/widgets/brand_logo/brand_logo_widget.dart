@@ -48,17 +48,13 @@ class BrandLogoWidget extends StatelessWidget {
             width: effectiveWidth,
             height: effectiveHeight,
             fit: fit,
-            placeholder: (context, url) => Container(
+            fadeInDuration: const Duration(milliseconds: 300),
+            fadeOutDuration: const Duration(milliseconds: 200),
+            placeholder: (context, url) => fallbackWidget ?? Image.asset(
+              defaultAsset,
               width: effectiveWidth,
               height: effectiveHeight,
-              color: Colors.black12,
-              child: const Center(
-                child: SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
+              fit: fit,
             ),
             errorWidget: (context, url, error) => fallbackWidget ?? Image.asset(
               defaultAsset,

@@ -12,13 +12,13 @@ on:
       - master
       - develop
       - pavan_putra_garbi_mandal
-
+      - pavanputragarbimandal
   pull_request:
     branches:
       - main
       - master
       - pavan_putra_garbi_mandal
-
+      - pavanputragarbimandal
   workflow_dispatch:
     inputs:
       run_build:
@@ -238,4 +238,4 @@ jobs:
           files: |
             artifacts/web/*.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}

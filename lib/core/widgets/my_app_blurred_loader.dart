@@ -5,6 +5,7 @@ import 'package:sizer/sizer.dart';
 import '../dependency_injection/dependency_injection.dart';
 import '../my_app_colors/my_app_colors.dart';
 import '../my_app_text_style/my_app_text_styles.dart';
+import 'brand_logo/brand_logo_widget.dart';
 
 class MyAppBlurredLoader extends StatelessWidget {
   final String? message;
@@ -52,14 +53,25 @@ class MyAppBlurredLoader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  width: 68,
-                  height: 68,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.6,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      colors.heritageGold,
-                    ),
-                    backgroundColor: colors.heritageMaroon.withValues(alpha: 0.18),
+                  width: 76,
+                  height: 76,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const BrandLogoWidget(
+                        size: 56,
+                        isCircular: true,
+                      ),
+                      Positioned.fill(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.8,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colors.heritageGold,
+                          ),
+                          backgroundColor: colors.heritageMaroon.withValues(alpha: 0.15),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(height: 2.2.h),
