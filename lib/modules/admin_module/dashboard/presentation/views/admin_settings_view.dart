@@ -124,6 +124,7 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colors.getCardBackgroundColor(context),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
@@ -132,9 +133,13 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
           children: [
             Icon(Icons.password_rounded, color: colors.heritageGold),
             const SizedBox(width: 10),
-            Text(
-              'Change Admin Password',
-              style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700),
+            Expanded(
+              child: Text(
+                'Change Admin Password',
+                style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -236,6 +241,7 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colors.getCardBackgroundColor(context),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
@@ -244,9 +250,13 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
           children: [
             Icon(Icons.mark_email_read_rounded, color: colors.heritageGold),
             const SizedBox(width: 10),
-            Text(
-              'Change Admin Email',
-              style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700),
+            Expanded(
+              child: Text(
+                'Change Admin Email',
+                style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -258,7 +268,7 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Enter current administrator password and your new email address. A verification link will be issued via Firebase Authentication.',
+                  'Enter current administrator password and your new email address. Your administrator email will be updated immediately without requiring OTP verification.',
                   style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
                 ),
                 const SizedBox(height: 16),
@@ -307,10 +317,11 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
                 }
               } catch (e) {
                 if (mounted) {
+                  final msg = e.toString().replaceFirst('Exception: ', '');
                   MyAppToastMessage.error(
                     context,
                     title: 'Email Update Failed',
-                    description: '$e',
+                    description: msg,
                   );
                 }
               }
@@ -468,14 +479,43 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
                 style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
               ),
               const SizedBox(height: 14),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Enable QR Payment & Seva Section on Website', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('When enabled, the verified QR code and UPI details appear on the Contact page.'),
-                value: _isPaymentEnabled,
-                activeThumbColor: colors.heritageGold,
-                activeTrackColor: colors.heritageMaroon,
-                onChanged: (val) => setState(() => _isPaymentEnabled = val),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: colors.getSurfaceColor(context),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colors.getBorderColor(context)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Enable QR Payment & Seva Section on Website',
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'When enabled, the verified QR code and UPI details appear on the Contact page.',
+                            style: TextStyle(fontSize: 11.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 0.85,
+                      child: Switch(
+                        value: _isPaymentEnabled,
+                        activeThumbColor: colors.heritageGold,
+                        activeTrackColor: colors.deepMaroon,
+                        onChanged: (val) => setState(() => _isPaymentEnabled = val),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 14),
               if (_isPaymentEnabled) ...[

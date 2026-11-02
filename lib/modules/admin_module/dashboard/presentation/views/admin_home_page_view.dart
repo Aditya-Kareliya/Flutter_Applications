@@ -1837,12 +1837,46 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                     minLines: 3,
                   ),
                   const SizedBox(height: 14),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Publish on Website'),
-                    subtitle: const Text('When active, this article card will be visible on the public homepage.'),
-                    value: isPublished,
-                    onChanged: (val) => setDlgState(() => isPublished = val),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: colors.getSurfaceColor(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colors.getBorderColor(context)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Publish on Website',
+                                style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600),
+                              ),
+                              Text(
+                                isPublished ? 'Visible on public homepage' : 'Draft only (hidden)',
+                                style: styles.cleanSans(
+                                  context,
+                                  size: 11.5,
+                                  color: isPublished ? Colors.green : colors.getMutedTextColor(context),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Transform.scale(
+                          scale: 0.85,
+                          child: Switch(
+                            value: isPublished,
+                            activeThumbColor: colors.heritageGold,
+                            activeTrackColor: colors.deepMaroon,
+                            onChanged: (val) => setDlgState(() => isPublished = val),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -35,7 +35,7 @@ class MyAppTextFormField extends StatefulWidget {
   final ValueChanged<String>? onFieldSubmitted;
   final FormFieldValidator<String>? validator;
   final bool showToastOnError;
-  final int maxLines;
+  final int? maxLines;
   final int minLines;
   final TextInputType keyboardType;
   final EdgeInsets scrollPadding;
@@ -86,16 +86,21 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
 
   bool _isTranslating = false;
   String? _lastErrorAnnounced;
+  late bool _obscureText;
 
   @override
   void initState() {
     super.initState();
+    _obscureText = widget.obscureText;
     _effectiveController.addListener(_handleTextChange);
   }
 
   @override
   void didUpdateWidget(MyAppTextFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.obscureText != oldWidget.obscureText) {
+      _obscureText = widget.obscureText;
+    }
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleTextChange);
       widget.controller?.addListener(_handleTextChange);
@@ -175,14 +180,35 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
     final isDark = colors.isDarkMode(context);
-    final isMobile = MediaQuery.sizeOf(context).width < 768;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isMobile = screenWidth < 768;
+    final isTablet = screenWidth >= 768 && screenWidth < 1024;
+    final isMobileOrTablet = isMobile || isTablet;
+
+    // Auto-height resolution for mobile and tablet views
+    final int? effectiveMaxLines;
+    if (widget.obscureText) {
+      effectiveMaxLines = 1;
+    } else if (isMobileOrTablet &&
+        widget.maxLines == 1 &&
+        widget.onFieldSubmitted == null &&
+        widget.keyboardType != TextInputType.emailAddress &&
+        widget.keyboardType != TextInputType.phone &&
+        widget.keyboardType != TextInputType.number &&
+        widget.keyboardType != TextInputType.datetime &&
+        widget.keyboardType != TextInputType.url) {
+      effectiveMaxLines = null;
+    } else {
+      effectiveMaxLines = widget.maxLines;
+    }
 
     final hasText = _effectiveController.text.isNotEmpty;
     final canTranslate = widget.showTranslateIcon && (widget.targetLanguageController != null || widget.onTranslate != null);
-    final canClear = widget.showClearIcon && hasText && !widget.readOnly && widget.enabled;
+    final canToggleVisibility = widget.obscureText;
+    final canClear = widget.showClearIcon && hasText && !widget.readOnly && widget.enabled && !widget.obscureText;
 
     Widget? builtSuffix;
-    if (canTranslate || canClear || widget.suffixIcon != null) {
+    if (canTranslate || canClear || canToggleVisibility || widget.suffixIcon != null) {
       builtSuffix = Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
@@ -209,6 +235,21 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
               onPressed: _handleClear,
               tooltip: 'Clear text',
             ),
+          if (canToggleVisibility)
+            IconButton(
+              icon: Icon(
+                _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                size: 20,
+                color: colors.getSecondaryTextColor(context),
+              ),
+              splashRadius: 18,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              tooltip: _obscureText ? 'Show password' : 'Hide password',
+              onPressed: () {
+                setState(() => _obscureText = !_obscureText);
+              },
+            ),
           const SizedBox(width: 4),
         ],
       );
@@ -218,11 +259,11 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
       controller: _effectiveController,
       focusNode: widget.focusNode,
       keyboardType: widget.keyboardType,
-      maxLines: widget.maxLines,
+      maxLines: effectiveMaxLines,
       minLines: widget.minLines,
       scrollPadding: widget.scrollPadding,
       readOnly: widget.readOnly,
-      obscureText: widget.obscureText,
+      obscureText: _obscureText,
       enabled: widget.enabled,
       autofocus: widget.autofocus,
       inputFormatters: widget.inputFormatters,
@@ -230,7 +271,7 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
       onFieldSubmitted: widget.onFieldSubmitted,
       style: styles.cleanSans(
         context,
-        size: isMobile ? 16 : 14,
+        size: isMobile ? 15 : 14,
         fontWeight: FontWeight.w500,
         color: colors.getPrimaryTextColor(context),
       ),
@@ -259,7 +300,7 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,
-        isDense: true,
+        isDense: !isMobileOrTablet,
         filled: true,
         fillColor: isDark ? const Color(0xFF1E1B1B) : Colors.white,
         floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -280,10 +321,17 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
                 child: widget.prefixIcon,
               )
             : null,
-        prefixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+        prefixIconConstraints: isMobileOrTablet
+            ? const BoxConstraints(minWidth: 42, minHeight: 42)
+            : const BoxConstraints(minWidth: 38, minHeight: 38),
         suffixIcon: builtSuffix,
-        suffixIconConstraints: const BoxConstraints(minHeight: 38),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        suffixIconConstraints: isMobileOrTablet
+            ? const BoxConstraints(minWidth: 42, minHeight: 42)
+            : const BoxConstraints(minHeight: 38),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: isMobileOrTablet ? 14 : 12,
+        ),
         // Error text style is 0 height to prevent vertical layout shift
         errorStyle: const TextStyle(fontSize: 0, height: 0),
         border: OutlineInputBorder(

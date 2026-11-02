@@ -47,5 +47,6 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
+    - assets/images/
     - assets/images/pavan_putra_logo.jpg
     - assets/images/pavan_putra_logo.png

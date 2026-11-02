@@ -117,6 +117,9 @@ class _ContactScreenState extends State<ContactScreen> {
         final settings = AdminDataStore.instance.settings;
 
         return MyAppScaffold(
+          onRefresh: () async {
+            await AdminDataStore.instance.reloadContactPage();
+          },
           body: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: isMobile ? 16 : 32,

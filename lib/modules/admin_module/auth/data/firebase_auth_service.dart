@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 
 class FirebaseAuthService {
   FirebaseAuthService({FirebaseAuth? auth})
@@ -27,7 +29,35 @@ class FirebaseAuthService {
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
-    await _auth.sendPasswordResetEmail(email: email.trim());
+    final cleanEmail = email.trim();
+    try {
+      await _auth.sendPasswordResetEmail(email: cleanEmail);
+    } catch (e) {
+      // Direct Firebase Identity Toolkit REST fallback to guarantee password reset dispatch
+      final apiKey = _auth.app.options.apiKey;
+      final uri = Uri.parse(
+        'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=$apiKey',
+      );
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'requestType': 'PASSWORD_RESET',
+          'email': cleanEmail,
+        }),
+      );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return;
+      }
+      try {
+        final errorData = jsonDecode(response.body);
+        final errorMsg = errorData['error']?['message'];
+        if (errorMsg != null) {
+          throw Exception(errorMsg);
+        }
+      } catch (_) {}
+      rethrow;
+    }
   }
 
   Future<void> reauthenticate(String currentPassword) async {
@@ -79,6 +109,41 @@ class FirebaseAuthService {
       );
     }
     await reauthenticate(currentPassword);
-    await user.verifyBeforeUpdateEmail(newEmail.trim());
+    final cleanEmail = newEmail.trim();
+
+    // Direct email update in Firebase without requiring OTP or email link verification:
+    try {
+      final idToken = await user.getIdToken(true);
+      final apiKey = _auth.app.options.apiKey;
+      final uri = Uri.parse(
+        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=$apiKey',
+      );
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'idToken': idToken,
+          'email': cleanEmail,
+          'returnSecureToken': true,
+        }),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        await user.reload();
+        return;
+      }
+
+      final errorData = jsonDecode(response.body);
+      final errorMsg = errorData['error']?['message'] ?? 'Failed to update email in Firebase';
+      if (errorMsg == 'EMAIL_EXISTS') {
+        throw FirebaseAuthException(
+          code: 'email-already-in-use',
+          message: 'The email address $cleanEmail is already in use by another account.',
+        );
+      }
+      throw Exception(errorMsg);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

@@ -31,8 +31,7 @@ class CulturalFrameCard extends StatelessWidget {
     final bg = backgroundColor ?? colors.getCardBackgroundColor(context);
     final border = borderColor ?? colors.getBorderColor(context);
 
-    final cardWidget = Container(
-      padding: padding ?? const EdgeInsets.all(22),
+    return Container(
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(borderRadius),
@@ -45,20 +44,24 @@ class CulturalFrameCard extends StatelessWidget {
           ),
         ],
       ),
-      child: child,
-    );
-
-    if (onTap != null) {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(borderRadius),
-          child: cardWidget,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Material(
+          color: Colors.transparent,
+          child: onTap != null
+              ? InkWell(
+                  onTap: onTap,
+                  child: Padding(
+                    padding: padding ?? const EdgeInsets.all(22),
+                    child: child,
+                  ),
+                )
+              : Padding(
+                  padding: padding ?? const EdgeInsets.all(22),
+                  child: child,
+                ),
         ),
-      );
-    }
-
-    return cardWidget;
+      ),
+    );
   }
 }

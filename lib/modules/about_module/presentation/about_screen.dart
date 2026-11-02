@@ -32,18 +32,11 @@ class _AboutScreenState extends State<AboutScreen> {
     final baseAsset = Image.asset(
       'assets/images/pavan_putra_logo.png',
       fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => Image.asset(
-        'assets/images/pavan_putra_logo.jpg',
-        fit: BoxFit.cover,
-      ),
+      errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
     );
 
     if (url.isEmpty || url.startsWith('assets/')) {
-      return Image.asset(
-        url.isEmpty ? 'assets/images/pavan_putra_logo.png' : url,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => baseAsset,
-      );
+      return Image.asset(url.isEmpty ? 'assets/images/pavan_putra_logo.png' : url, fit: BoxFit.cover, errorBuilder: (_, _, _) => baseAsset);
     }
     return Stack(
       fit: StackFit.passthrough,
@@ -93,11 +86,11 @@ class _AboutScreenState extends State<AboutScreen> {
           final committeeDesc = about.getCommitteeDesc(lang);
 
           return MyAppScaffold(
+            onRefresh: () async {
+              await AdminDataStore.instance.reloadAboutPage();
+            },
             body: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 16 : 32,
-                vertical: isMobile ? 32 : 48,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32, vertical: isMobile ? 32 : 48),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1240),
@@ -110,46 +103,19 @@ class _AboutScreenState extends State<AboutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (tag.isNotEmpty) ...[
-                              HeritageBadge(label: tag),
-                              const SizedBox(height: 16),
-                            ],
+                            if (tag.isNotEmpty) ...[HeritageBadge(label: tag), const SizedBox(height: 16)],
                             if (title.isNotEmpty || desc.isNotEmpty) ...[
                               if (isMobile) ...[
-                                if (title.isNotEmpty)
-                                  Text(title, style: styles.h1(context)),
-                                if (title.isNotEmpty && desc.isNotEmpty)
-                                  const SizedBox(height: 16),
-                                if (desc.isNotEmpty)
-                                  Text(
-                                    desc,
-                                    style: styles.bodyText(context).copyWith(
-                                          fontSize: 15,
-                                          height: 1.65,
-                                        ),
-                                  ),
+                                if (title.isNotEmpty) Text(title, style: styles.h1(context)),
+                                if (title.isNotEmpty && desc.isNotEmpty) const SizedBox(height: 16),
+                                if (desc.isNotEmpty) Text(desc, style: styles.bodyText(context).copyWith(fontSize: 15, height: 1.65)),
                               ] else
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (title.isNotEmpty)
-                                      Expanded(
-                                        flex: 5,
-                                        child: Text(title, style: styles.h1(context)),
-                                      ),
-                                    if (title.isNotEmpty && desc.isNotEmpty)
-                                      const SizedBox(width: 36),
-                                    if (desc.isNotEmpty)
-                                      Expanded(
-                                        flex: 6,
-                                        child: Text(
-                                          desc,
-                                          style: styles.bodyText(context).copyWith(
-                                                fontSize: 15.5,
-                                                height: 1.7,
-                                              ),
-                                        ),
-                                      ),
+                                    if (title.isNotEmpty) Expanded(flex: 5, child: Text(title, style: styles.h1(context))),
+                                    if (title.isNotEmpty && desc.isNotEmpty) const SizedBox(width: 36),
+                                    if (desc.isNotEmpty) Expanded(flex: 6, child: Text(desc, style: styles.bodyText(context).copyWith(fontSize: 15.5, height: 1.7))),
                                   ],
                                 ),
                               const SizedBox(height: 36),
@@ -175,15 +141,9 @@ class _AboutScreenState extends State<AboutScreen> {
                                         height: 80,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: colors.heritageGold,
-                                            width: 1.5,
-                                          ),
+                                          border: Border.all(color: colors.heritageGold, width: 1.5),
                                         ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(40),
-                                          child: _buildEmblemImage(about.foundationImageUrl, colors),
-                                        ),
+                                        child: ClipRRect(borderRadius: BorderRadius.circular(40), child: _buildEmblemImage(about.foundationImageUrl, colors)),
                                       ),
                                       const SizedBox(height: 20),
                                       Column(
@@ -192,32 +152,17 @@ class _AboutScreenState extends State<AboutScreen> {
                                           Text(
                                             about.getFoundationTitle(lang),
                                             textAlign: TextAlign.center,
-                                            style: styles.editorialSerif(
-                                              context,
-                                              size: 20,
-                                              fontWeight: FontWeight.w700,
-                                              color: colors.white,
-                                            ),
+                                            style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700, color: colors.white),
                                           ),
                                           const SizedBox(height: 12),
                                           Text(
                                             about.getFoundationDesc(lang),
                                             textAlign: TextAlign.center,
-                                            style: styles.bodyText(context).copyWith(
-                                                  color: const Color(0xFFE2DDD1),
-                                                  height: 1.65,
-                                                ),
+                                            style: styles.bodyText(context).copyWith(color: const Color(0xFFE2DDD1), height: 1.65),
                                           ),
                                           if (about.getFoundationMotto(lang).isNotEmpty) ...[
                                             const SizedBox(height: 20),
-                                            Text(
-                                              about.getFoundationMotto(lang),
-                                              style: styles.devotionalMotto(
-                                                context,
-                                                size: 20,
-                                                color: colors.lightGold,
-                                              ),
-                                            ),
+                                            Text(about.getFoundationMotto(lang), style: styles.devotionalMotto(context, size: 20, color: colors.lightGold)),
                                           ],
                                         ],
                                       ),
@@ -231,15 +176,9 @@ class _AboutScreenState extends State<AboutScreen> {
                                         height: 80,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: colors.heritageGold,
-                                            width: 1.5,
-                                          ),
+                                          border: Border.all(color: colors.heritageGold, width: 1.5),
                                         ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(40),
-                                          child: _buildEmblemImage(about.foundationImageUrl, colors),
-                                        ),
+                                        child: ClipRRect(borderRadius: BorderRadius.circular(40), child: _buildEmblemImage(about.foundationImageUrl, colors)),
                                       ),
                                       const SizedBox(width: 28),
                                       Expanded(
@@ -248,31 +187,13 @@ class _AboutScreenState extends State<AboutScreen> {
                                           children: [
                                             Text(
                                               about.getFoundationTitle(lang),
-                                              style: styles.editorialSerif(
-                                                context,
-                                                size: 26,
-                                                fontWeight: FontWeight.w700,
-                                                color: colors.white,
-                                              ),
+                                              style: styles.editorialSerif(context, size: 26, fontWeight: FontWeight.w700, color: colors.white),
                                             ),
                                             const SizedBox(height: 12),
-                                            Text(
-                                              about.getFoundationDesc(lang),
-                                              style: styles.bodyText(context).copyWith(
-                                                    color: const Color(0xFFE2DDD1),
-                                                    height: 1.65,
-                                                  ),
-                                            ),
+                                            Text(about.getFoundationDesc(lang), style: styles.bodyText(context).copyWith(color: const Color(0xFFE2DDD1), height: 1.65)),
                                             if (about.getFoundationMotto(lang).isNotEmpty) ...[
                                               const SizedBox(height: 20),
-                                              Text(
-                                                about.getFoundationMotto(lang),
-                                                style: styles.devotionalMotto(
-                                                  context,
-                                                  size: 20,
-                                                  color: colors.lightGold,
-                                                ),
-                                              ),
+                                              Text(about.getFoundationMotto(lang), style: styles.devotionalMotto(context, size: 20, color: colors.lightGold)),
                                             ],
                                           ],
                                         ),
@@ -291,14 +212,8 @@ class _AboutScreenState extends State<AboutScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const HeritageDivider(verticalPadding: 36),
-                              if (valuesTag.isNotEmpty) ...[
-                                HeritageBadge(label: valuesTag),
-                                const SizedBox(height: 14),
-                              ],
-                              Text(
-                                valuesTitle.isNotEmpty ? valuesTitle : (isGujarati ? 'મંડળના પાયાના સિદ્ધાંતો' : 'Core Principles of the Mandal'),
-                                style: styles.h2(context),
-                              ),
+                              if (valuesTag.isNotEmpty) ...[HeritageBadge(label: valuesTag), const SizedBox(height: 14)],
+                              Text(valuesTitle.isNotEmpty ? valuesTitle : (isGujarati ? 'મંડળના પાયાના સિદ્ધાંતો' : 'Core Principles of the Mandal'), style: styles.h2(context)),
                               const SizedBox(height: 24),
                               LayoutBuilder(
                                 builder: (context, constraints) {
@@ -331,12 +246,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                       for (final p in activePrinciples)
                                         SizedBox(
                                           width: itemWidth,
-                                          child: _PrincipleCard(
-                                            number: p.number,
-                                            title: p.getTitle(lang),
-                                            desc: p.getDesc(lang),
-                                            icon: p.iconData,
-                                          ),
+                                          child: _PrincipleCard(number: p.number, title: p.getTitle(lang), desc: p.getDesc(lang), icon: p.iconData),
                                         ),
                                     ],
                                   );
@@ -369,10 +279,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                     Expanded(
                                       child: Text(
                                         aarti,
-                                        style: styles.bodyText(context).copyWith(
-                                              color: colors.getPrimaryTextColor(context),
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        style: styles.bodyText(context).copyWith(color: colors.getPrimaryTextColor(context), fontWeight: FontWeight.w600),
                                       ),
                                     ),
                                   ],
@@ -391,20 +298,14 @@ class _AboutScreenState extends State<AboutScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const HeritageDivider(verticalPadding: 36),
-                              if (committeeBadge.isNotEmpty) ...[
-                                HeritageBadge(label: committeeBadge),
-                                const SizedBox(height: 14),
-                              ],
+                              if (committeeBadge.isNotEmpty) ...[HeritageBadge(label: committeeBadge), const SizedBox(height: 14)],
                               Text(
                                 committeeTitle.isNotEmpty ? committeeTitle : (isGujarati ? 'ટ્રસ્ટી મંડળ અને સમિતિ' : 'Trustees & Organizing Committee'),
                                 style: styles.h2(context),
                               ),
                               if (committeeDesc.isNotEmpty) ...[
                                 const SizedBox(height: 8),
-                                Text(
-                                  committeeDesc,
-                                  style: styles.cleanSans(context, size: 14, color: colors.getSecondaryTextColor(context)),
-                                ),
+                                Text(committeeDesc, style: styles.cleanSans(context, size: 14, color: colors.getSecondaryTextColor(context))),
                               ],
                               const SizedBox(height: 24),
                               LayoutBuilder(
@@ -418,11 +319,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                       children: [
                                         for (int i = 0; i < activeCommittee.length; i++) ...[
                                           if (i > 0) const SizedBox(height: 16),
-                                          _CommitteeMemberCard(
-                                            member: activeCommittee[i],
-                                            lang: lang,
-                                            isGujarati: isGujarati,
-                                          ),
+                                          _CommitteeMemberCard(member: activeCommittee[i], lang: lang, isGujarati: isGujarati),
                                         ],
                                       ],
                                     );
@@ -437,11 +334,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                       for (final m in activeCommittee)
                                         SizedBox(
                                           width: itemWidth,
-                                          child: _CommitteeMemberCard(
-                                            member: m,
-                                            lang: lang,
-                                            isGujarati: isGujarati,
-                                          ),
+                                          child: _CommitteeMemberCard(member: m, lang: lang, isGujarati: isGujarati),
                                         ),
                                     ],
                                   );
@@ -472,36 +365,17 @@ class _AboutScreenState extends State<AboutScreen> {
                                               Container(
                                                 width: 44,
                                                 height: 44,
-                                                decoration: BoxDecoration(
-                                                  color: colors.getAccentColor(context).withValues(alpha: 0.1),
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                child: Icon(
-                                                  Icons.history_edu_rounded,
-                                                  color: colors.getAccentColor(context),
-                                                  size: 24,
-                                                ),
+                                                decoration: BoxDecoration(color: colors.getAccentColor(context).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                                                child: Icon(Icons.history_edu_rounded, color: colors.getAccentColor(context), size: 24),
                                               ),
                                               const SizedBox(width: 16),
                                               Expanded(
                                                 child: Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(
-                                                      about.getCtaTitle(lang),
-                                                      style: styles.editorialSerif(
-                                                        context,
-                                                        size: 16,
-                                                        fontWeight: FontWeight.w700,
-                                                      ),
-                                                    ),
+                                                    Text(about.getCtaTitle(lang), style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.w700)),
                                                     const SizedBox(height: 4),
-                                                    Text(
-                                                      about.getCtaDesc(lang),
-                                                      style: styles.bodySmall(context).copyWith(
-                                                            color: colors.getMutedTextColor(context),
-                                                          ),
-                                                    ),
+                                                    Text(about.getCtaDesc(lang), style: styles.bodySmall(context).copyWith(color: colors.getMutedTextColor(context))),
                                                   ],
                                                 ),
                                               ),
@@ -527,12 +401,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                               },
                                               child: Text(
                                                 about.getCtaBtnText(lang),
-                                                style: styles.cleanSans(
-                                                  context,
-                                                  color: colors.white,
-                                                  size: 13,
-                                                  fontWeight: FontWeight.w700,
-                                                ),
+                                                style: styles.cleanSans(context, color: colors.white, size: 13, fontWeight: FontWeight.w700),
                                               ),
                                             ),
                                           ),
@@ -543,36 +412,17 @@ class _AboutScreenState extends State<AboutScreen> {
                                           Container(
                                             width: 48,
                                             height: 48,
-                                            decoration: BoxDecoration(
-                                              color: colors.getAccentColor(context).withValues(alpha: 0.1),
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: Icon(
-                                              Icons.history_edu_rounded,
-                                              color: colors.getAccentColor(context),
-                                              size: 26,
-                                            ),
+                                            decoration: BoxDecoration(color: colors.getAccentColor(context).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                                            child: Icon(Icons.history_edu_rounded, color: colors.getAccentColor(context), size: 26),
                                           ),
                                           const SizedBox(width: 18),
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  about.getCtaTitle(lang),
-                                                  style: styles.editorialSerif(
-                                                    context,
-                                                    size: 17,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
+                                                Text(about.getCtaTitle(lang), style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700)),
                                                 const SizedBox(height: 4),
-                                                Text(
-                                                  about.getCtaDesc(lang),
-                                                  style: styles.bodySmall(context).copyWith(
-                                                        color: colors.getMutedTextColor(context),
-                                                      ),
-                                                ),
+                                                Text(about.getCtaDesc(lang), style: styles.bodySmall(context).copyWith(color: colors.getMutedTextColor(context))),
                                               ],
                                             ),
                                           ),
@@ -594,12 +444,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                             },
                                             child: Text(
                                               about.getCtaBtnText(lang),
-                                              style: styles.cleanSans(
-                                                context,
-                                                color: colors.white,
-                                                size: 13,
-                                                fontWeight: FontWeight.w700,
-                                              ),
+                                              style: styles.cleanSans(context, color: colors.white, size: 13, fontWeight: FontWeight.w700),
                                             ),
                                           ),
                                         ],
@@ -628,12 +473,7 @@ class _PrincipleCard extends StatelessWidget {
   final String desc;
   final IconData icon;
 
-  const _PrincipleCard({
-    required this.number,
-    required this.title,
-    this.desc = '',
-    required this.icon,
-  });
+  const _PrincipleCard({required this.number, required this.title, this.desc = '', required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -651,25 +491,13 @@ class _PrincipleCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: colors.getAccentColor(context).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: colors.heritageGold.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: colors.heritageGold.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(icon, size: 18, color: colors.getAccentColor(context)),
-                  if (number.isNotEmpty) ...[
-                    const SizedBox(width: 6),
-                    Text(
-                      number,
-                      style: styles.devotionalMotto(
-                        context,
-                        size: 16,
-                        color: colors.getAccentColor(context),
-                      ),
-                    ),
-                  ],
+                  if (number.isNotEmpty) ...[const SizedBox(width: 6), Text(number, style: styles.devotionalMotto(context, size: 16, color: colors.getAccentColor(context)))],
                 ],
               ),
             ),
@@ -679,24 +507,10 @@ class _PrincipleCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    title,
-                    style: styles.editorialSerif(
-                      context,
-                      size: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  Text(title, style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700)),
                   if (desc.isNotEmpty) ...[
                     const SizedBox(height: 6),
-                    Text(
-                      desc,
-                      style: styles.bodyText(context).copyWith(
-                            fontSize: 13.5,
-                            height: 1.55,
-                            color: colors.getSecondaryTextColor(context),
-                          ),
-                    ),
+                    Text(desc, style: styles.bodyText(context).copyWith(fontSize: 13.5, height: 1.55, color: colors.getSecondaryTextColor(context))),
                   ],
                 ],
               ),
@@ -714,11 +528,7 @@ class _CommitteeMemberCard extends StatelessWidget {
   final String lang;
   final bool isGujarati;
 
-  const _CommitteeMemberCard({
-    required this.member,
-    required this.lang,
-    required this.isGujarati,
-  });
+  const _CommitteeMemberCard({required this.member, required this.lang, required this.isGujarati});
 
   @override
   Widget build(BuildContext context) {
@@ -744,10 +554,7 @@ class _CommitteeMemberCard extends StatelessWidget {
                           Image.asset(
                             'assets/images/pavan_putra_logo.png',
                             fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Image.asset(
-                              'assets/images/pavan_putra_logo.jpg',
-                              fit: BoxFit.cover,
-                            ),
+                            errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
                           ),
                           CachedNetworkImage(
                             imageUrl: member.photoUrl,
@@ -762,10 +569,7 @@ class _CommitteeMemberCard extends StatelessWidget {
                     : Image.asset(
                         member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.png',
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Image.asset(
-                          'assets/images/pavan_putra_logo.jpg',
-                          fit: BoxFit.cover,
-                        ),
+                        errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
                       ),
               ),
             ),
@@ -783,12 +587,7 @@ class _CommitteeMemberCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     desig,
-                    style: styles.cleanSans(
-                      context,
-                      size: 13,
-                      fontWeight: FontWeight.w600,
-                      color: colors.heritageGold,
-                    ),
+                    style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: colors.heritageGold),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -843,15 +642,7 @@ class _InteractiveHoverCardState extends State<_InteractiveHoverCard> {
         transform: Matrix4.translationValues(0, _isHovered ? -4 : 0, 0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          boxShadow: _isHovered
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFFC5A059).withValues(alpha: 0.16),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  )
-                ]
-              : [],
+          boxShadow: _isHovered ? [BoxShadow(color: const Color(0xFFC5A059).withValues(alpha: 0.16), blurRadius: 18, offset: const Offset(0, 8))] : [],
         ),
         child: widget.child,
       ),
@@ -880,8 +671,7 @@ class _SmoothRevealState extends State<_SmoothReveal> with SingleTickerProviderS
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
-    _slide = Tween<Offset>(begin: const Offset(0, 0.18), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _slide = Tween<Offset>(begin: const Offset(0, 0.18), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     if (widget.delay == Duration.zero) {
       _controller.forward();

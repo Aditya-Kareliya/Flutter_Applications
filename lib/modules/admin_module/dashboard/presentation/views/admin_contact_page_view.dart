@@ -324,14 +324,43 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
               ),
               const SizedBox(height: 14),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Show QR Payment & Seva Section on Website', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('When enabled, the verified QR code and UPI details appear on the public Contact page.'),
-                value: _isPaymentEnabled,
-                activeThumbColor: colors.heritageGold,
-                activeTrackColor: colors.heritageMaroon,
-                onChanged: (val) => setState(() => _isPaymentEnabled = val),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: colors.getSurfaceColor(context),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colors.getBorderColor(context)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Show QR Payment & Seva Section on Website',
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'When enabled, the verified QR code and UPI details appear on the public Contact page.',
+                            style: TextStyle(fontSize: 11.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 0.85,
+                      child: Switch(
+                        value: _isPaymentEnabled,
+                        activeThumbColor: colors.heritageGold,
+                        activeTrackColor: colors.deepMaroon,
+                        onChanged: (val) => setState(() => _isPaymentEnabled = val),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (_isPaymentEnabled) ...[
                 const SizedBox(height: 14),

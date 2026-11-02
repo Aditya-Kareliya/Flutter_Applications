@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../modules/admin_module/dashboard/data/admin_data_store.dart';
 
-/// Standardized Brand Logo Widget
-/// Consumes the configured logo from AdminDataStore.instance.settings.logoImageUrl
-/// with automatic caching, minimal placeholder, and local asset fallback.
+/// Clean, robust Brand Logo Widget
+/// Loads from local assets immediately on frame 0.
+/// When a cloud API logo URL is available, seamlessly displays it.
 class BrandLogoWidget extends StatelessWidget {
   final double? width;
   final double? height;
@@ -30,68 +30,71 @@ class BrandLogoWidget extends StatelessWidget {
     this.fallbackWidget,
   });
 
-  static const String defaultAsset = 'assets/images/pavan_putra_logo.png';
+  static const String defaultAssetPng = 'assets/images/pavan_putra_logo.png';
+  static const String defaultAssetJpg = 'assets/images/pavan_putra_logo.jpg';
 
   @override
   Widget build(BuildContext context) {
+    final effectiveWidth = size ?? width;
+    final effectiveHeight = size ?? height;
+
+    final defaultAssetWidget = Image.asset(
+      defaultAssetPng,
+      width: effectiveWidth,
+      height: effectiveHeight,
+      fit: fit,
+      errorBuilder: (_, _, _) => Image.asset(
+        defaultAssetJpg,
+        width: effectiveWidth,
+        height: effectiveHeight,
+        fit: fit,
+      ),
+    );
+
     return ListenableBuilder(
       listenable: AdminDataStore.instance,
       builder: (context, _) {
         final logoUrl = AdminDataStore.instance.settings.logoImageUrl.trim();
-        final effectiveWidth = size ?? width;
-        final effectiveHeight = size ?? height;
 
-        final baseAsset = Image.asset(
-          defaultAsset,
-          width: effectiveWidth,
-          height: effectiveHeight,
-          fit: fit,
-          errorBuilder: (context, error, stackTrace) => Image.asset(
-            'assets/images/pavan_putra_logo.jpg',
-            width: effectiveWidth,
-            height: effectiveHeight,
-            fit: fit,
-          ),
-        );
-
-        Widget imageWidget;
+        Widget content;
         if (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) {
-          imageWidget = Stack(
+          content = Stack(
             fit: StackFit.passthrough,
             alignment: Alignment.center,
             children: [
-              fallbackWidget ?? baseAsset,
+              fallbackWidget ?? defaultAssetWidget,
               CachedNetworkImage(
                 imageUrl: logoUrl,
                 width: effectiveWidth,
                 height: effectiveHeight,
                 fit: fit,
-                fadeInDuration: const Duration(milliseconds: 300),
-                fadeOutDuration: const Duration(milliseconds: 200),
-                placeholder: (context, url) => const SizedBox.shrink(),
-                errorWidget: (context, url, error) => const SizedBox.shrink(),
+                placeholder: (_, _) => const SizedBox.shrink(),
+                errorWidget: (_, _, _) => const SizedBox.shrink(),
               ),
             ],
           );
-        } else if (logoUrl.isNotEmpty && logoUrl.startsWith('assets/') && logoUrl != defaultAsset) {
-          imageWidget = Image.asset(
+        } else if (logoUrl.isNotEmpty &&
+            logoUrl.startsWith('assets/') &&
+            logoUrl != defaultAssetPng &&
+            logoUrl != defaultAssetJpg) {
+          content = Image.asset(
             logoUrl,
             width: effectiveWidth,
             height: effectiveHeight,
             fit: fit,
-            errorBuilder: (context, error, stackTrace) => fallbackWidget ?? baseAsset,
+            errorBuilder: (_, _, _) => fallbackWidget ?? defaultAssetWidget,
           );
         } else {
-          imageWidget = fallbackWidget ?? baseAsset;
+          content = fallbackWidget ?? defaultAssetWidget;
         }
 
-        Widget clippedWidget;
+        Widget clipped;
         if (isCircular) {
-          clippedWidget = ClipOval(child: imageWidget);
+          clipped = ClipOval(child: content);
         } else if (borderRadius != null) {
-          clippedWidget = ClipRRect(borderRadius: borderRadius!, child: imageWidget);
+          clipped = ClipRRect(borderRadius: borderRadius!, child: content);
         } else {
-          clippedWidget = imageWidget;
+          clipped = content;
         }
 
         if (border != null || boxShadow != null) {
@@ -104,17 +107,16 @@ class BrandLogoWidget extends StatelessWidget {
               border: border,
               boxShadow: boxShadow,
             ),
-            child: clippedWidget,
+            child: clipped,
           );
         }
 
         return SizedBox(
           width: effectiveWidth,
           height: effectiveHeight,
-          child: clippedWidget,
+          child: clipped,
         );
       },
     );
   }
 }
-

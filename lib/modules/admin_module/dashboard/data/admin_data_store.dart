@@ -167,6 +167,7 @@ class AdminHistoryMilestone {
   final String iconName;
   final String imageUrl;
   final int order;
+  final bool isActive;
 
   AdminHistoryMilestone({
     required this.id,
@@ -180,6 +181,7 @@ class AdminHistoryMilestone {
     this.iconName = 'local_fire_department_rounded',
     this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.order = 0,
+    this.isActive = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -195,6 +197,7 @@ class AdminHistoryMilestone {
       'icon_name': iconName,
       'image_url': imageUrl,
       'order': order,
+      'is_active': isActive,
       'updated_at': DateTime.now().toIso8601String(),
     };
   }
@@ -212,6 +215,7 @@ class AdminHistoryMilestone {
       iconName: map['icon_name'] as String? ?? map['iconName'] as String? ?? 'local_fire_department_rounded',
       imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
+      isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
     );
   }
 
@@ -227,6 +231,7 @@ class AdminHistoryMilestone {
     String? iconName,
     String? imageUrl,
     int? order,
+    bool? isActive,
   }) {
     return AdminHistoryMilestone(
       id: id ?? this.id,
@@ -240,6 +245,7 @@ class AdminHistoryMilestone {
       iconName: iconName ?? this.iconName,
       imageUrl: imageUrl ?? this.imageUrl,
       order: order ?? this.order,
+      isActive: isActive ?? this.isActive,
     );
   }
 }
@@ -1762,7 +1768,10 @@ class AdminSettings {
       instagramHandle: map['instagram_handle'] as String? ?? map['instagramHandle'] as String? ?? '',
       facebookUrl: map['facebook_url'] as String? ?? map['facebookUrl'] as String? ?? 'https://facebook.com/PavanPutraGarbiRajkot',
       whatsappNumber: map['whatsapp_number'] as String? ?? map['whatsappNumber'] as String? ?? '+919876543210',
-      logoImageUrl: map['logo_image_url'] as String? ?? map['logoImageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      logoImageUrl: () {
+        final raw = (map['logo_image_url'] as String? ?? map['logoImageUrl'] as String? ?? '').trim();
+        return raw.isNotEmpty ? raw : 'assets/images/pavan_putra_logo.png';
+      }(),
       paymentQrImageUrl: map['payment_qr_image_url'] as String? ?? map['paymentQrImageUrl'] as String? ?? '',
       paymentUpiId: map['payment_upi_id'] as String? ?? map['paymentUpiId'] as String? ?? '',
       paymentRecipientName: map['payment_recipient_name'] as String? ?? map['paymentRecipientName'] as String? ?? '',
@@ -2300,6 +2309,7 @@ class AdminDataStore extends ChangeNotifier {
       instagramHandle: '@pavanputra_garbi_rajkot',
       facebookUrl: 'https://facebook.com/PavanPutraGarbiRajkot',
       whatsappNumber: '+919876543210',
+      logoImageUrl: 'assets/images/pavan_putra_logo.png',
     );
 
     final officialSiteContent = [
@@ -2729,9 +2739,10 @@ class AdminDataStore extends ChangeNotifier {
 
   // --- Cloud Firestore Integration ---
 
-  Future<void> _fetchSettings(FirebaseFirestore db) async {
+  Future<void> _fetchSettings(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final settingsDoc = await db.collection('settings').doc('mandal_settings').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final settingsDoc = await db.collection('settings').doc('mandal_settings').get(getOpt);
       if (settingsDoc.exists && settingsDoc.data() != null && settingsDoc.data()!.isNotEmpty) {
         _settings = AdminSettings.fromMap(settingsDoc.data()!);
       }
@@ -2756,9 +2767,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchSiteContent(FirebaseFirestore db) async {
+  Future<void> _fetchSiteContent(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final contentSnap = await db.collection('site_content').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final contentSnap = await db.collection('site_content').get(getOpt);
       for (final doc in contentSnap.docs) {
         final f = AdminContentField.fromMap(doc.data());
         _siteContentMap[f.key] = f;
@@ -3056,9 +3068,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchHomeBanners(FirebaseFirestore db) async {
+  Future<void> _fetchHomeBanners(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final hbSnap = await db.collection('home_banners').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final hbSnap = await db.collection('home_banners').get(getOpt);
       if (hbSnap.docs.isNotEmpty) {
         _homeBanners.clear();
         for (final doc in hbSnap.docs) {
@@ -3071,9 +3084,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchHomeAboutCards(FirebaseFirestore db) async {
+  Future<void> _fetchHomeAboutCards(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final acSnap = await db.collection('home_about_cards').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final acSnap = await db.collection('home_about_cards').get(getOpt);
       if (acSnap.docs.isNotEmpty) {
         _aboutCards.clear();
         for (final doc in acSnap.docs) {
@@ -3086,9 +3100,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchPillars(FirebaseFirestore db) async {
+  Future<void> _fetchPillars(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final pillarsSnap = await db.collection('home_pillars').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final pillarsSnap = await db.collection('home_pillars').get(getOpt);
       if (pillarsSnap.docs.isNotEmpty) {
         _pillars.clear();
         for (final doc in pillarsSnap.docs) {
@@ -3101,9 +3116,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchHomeSingers(FirebaseFirestore db) async {
+  Future<void> _fetchHomeSingers(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final hsSnap = await db.collection('home_singers').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final hsSnap = await db.collection('home_singers').get(getOpt);
       if (hsSnap.docs.isNotEmpty) {
         _homeSingers.clear();
         for (final doc in hsSnap.docs) {
@@ -3116,9 +3132,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchBlessings(FirebaseFirestore db) async {
+  Future<void> _fetchBlessings(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final blessingsSnap = await db.collection('home_blessings').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final blessingsSnap = await db.collection('home_blessings').get(getOpt);
       if (blessingsSnap.docs.isNotEmpty) {
         _blessings.clear();
         for (final doc in blessingsSnap.docs) {
@@ -3131,11 +3148,12 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchFooter(FirebaseFirestore db) async {
+  Future<void> _fetchFooter(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
       final results = await Future.wait([
-        db.collection('footer_links').get(),
-        db.collection('footer_social_links').get(),
+        db.collection('footer_links').get(getOpt),
+        db.collection('footer_social_links').get(getOpt),
       ]);
       final fLinksSnap = results[0];
       if (fLinksSnap.docs.isNotEmpty) {
@@ -3158,9 +3176,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchLiveStream(FirebaseFirestore db) async {
+  Future<void> _fetchLiveStream(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final liveDoc = await db.collection('live_stream').doc('current').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final liveDoc = await db.collection('live_stream').doc('current').get(getOpt);
       if (liveDoc.exists && liveDoc.data() != null && liveDoc.data()!.isNotEmpty) {
         _liveStreamSettings = AdminLiveStreamSettings.fromMap(liveDoc.data()!);
       }
@@ -3169,9 +3188,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchGarbiYears(FirebaseFirestore db) async {
+  Future<void> _fetchGarbiYears(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final yearsSnap = await db.collection('garbi_years').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final yearsSnap = await db.collection('garbi_years').get(getOpt);
       if (yearsSnap.docs.isNotEmpty) {
         _years.clear();
         for (final doc in yearsSnap.docs) {
@@ -3184,9 +3204,10 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchAlbums(FirebaseFirestore db) async {
+  Future<void> _fetchAlbums(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final albumsSnap = await db.collection('albums').get();
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
+      final albumsSnap = await db.collection('albums').get(getOpt);
       if (albumsSnap.docs.isNotEmpty) {
         _albums.clear();
         for (final doc in albumsSnap.docs) {
@@ -3198,10 +3219,11 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchHomeVideosPreview(FirebaseFirestore db) async {
+  Future<void> _fetchHomeVideosPreview(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
       // Query published videos with limit 6 for Home Screen preview
-      final videosSnap = await db.collection('videos').where('isPublished', isEqualTo: true).limit(6).get();
+      final videosSnap = await db.collection('videos').where('isPublished', isEqualTo: true).limit(6).get(getOpt);
       if (videosSnap.docs.isNotEmpty) {
         _videos.clear();
         for (final doc in videosSnap.docs) {
@@ -3213,10 +3235,11 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchHomeBlogsPreview(FirebaseFirestore db) async {
+  Future<void> _fetchHomeBlogsPreview(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
+      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
       // Limit 3 for Home Screen preview
-      final blogsSnap = await db.collection('blogs').limit(3).get();
+      final blogsSnap = await db.collection('blogs').limit(3).get(getOpt);
       if (blogsSnap.docs.isNotEmpty) {
         _blogs.clear();
         for (final doc in blogsSnap.docs) {
@@ -3648,11 +3671,13 @@ class AdminDataStore extends ChangeNotifier {
   // --- On-Demand Screen-Level Loaders ---
 
   bool _isGalleryLoaded = false;
-  Future<void> ensureGalleryLoaded([String? year, String? album]) async {
+  Future<void> ensureGalleryLoaded([String? year, String? album, bool forceRefresh = false]) async {
     final db = _firestore;
-    if (db == null || _isGalleryLoaded) return;
+    if (db == null || (_isGalleryLoaded && !forceRefresh)) return;
     try {
-      final snap = await db.collection('photos').get();
+      final snap = await db.collection('photos').get(
+        forceRefresh ? const GetOptions(source: Source.server) : const GetOptions(),
+      );
       if (snap.docs.isNotEmpty) {
         _photos.clear();
         for (final doc in snap.docs) {
@@ -3667,27 +3692,32 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isAboutDetailsLoaded = false;
-  Future<void> ensureAboutPageLoaded() async {
+  Future<void> ensureAboutPageLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
-    if (db == null || _isAboutDetailsLoaded) return;
+    if (db == null || (_isAboutDetailsLoaded && !forceRefresh)) return;
     try {
+      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
       final results = await Future.wait([
-        db.collection('committee_members').get(),
-        db.collection('about_principles').get(),
+        db.collection('committee_members').get(getOpt),
+        db.collection('about_principles').get(getOpt),
       ]);
       final cmSnap = results[0];
-      _committeeMembers.clear();
-      for (final doc in cmSnap.docs) {
-        _committeeMembers.add(AdminCommitteeMember.fromMap(doc.data()));
+      if (cmSnap.docs.isNotEmpty) {
+        _committeeMembers.clear();
+        for (final doc in cmSnap.docs) {
+          _committeeMembers.add(AdminCommitteeMember.fromMap(doc.data()));
+        }
+        _committeeMembers.sort((a, b) => a.order.compareTo(b.order));
       }
-      _committeeMembers.sort((a, b) => a.order.compareTo(b.order));
 
       final prSnap = results[1];
-      _aboutPrinciples.clear();
-      for (final doc in prSnap.docs) {
-        _aboutPrinciples.add(AdminAboutPrinciple.fromMap(doc.data()));
+      if (prSnap.docs.isNotEmpty) {
+        _aboutPrinciples.clear();
+        for (final doc in prSnap.docs) {
+          _aboutPrinciples.add(AdminAboutPrinciple.fromMap(doc.data()));
+        }
+        _aboutPrinciples.sort((a, b) => a.order.compareTo(b.order));
       }
-      _aboutPrinciples.sort((a, b) => a.order.compareTo(b.order));
       _isAboutDetailsLoaded = true;
       notifyListeners();
     } catch (e) {
@@ -3696,11 +3726,12 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isHistoryLoaded = false;
-  Future<void> ensureHistoryLoaded() async {
+  Future<void> ensureHistoryLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
-    if (db == null || _isHistoryLoaded) return;
+    if (db == null || (_isHistoryLoaded && !forceRefresh)) return;
     try {
-      final hmSnap = await db.collection('history_milestones').get();
+      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
+      final hmSnap = await db.collection('history_milestones').get(getOpt);
       if (hmSnap.docs.isNotEmpty) {
         _historyMilestones.clear();
         for (final doc in hmSnap.docs) {
@@ -3716,11 +3747,12 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isFullVideosLoaded = false;
-  Future<void> ensureVideosLoaded() async {
+  Future<void> ensureVideosLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
-    if (db == null || _isFullVideosLoaded) return;
+    if (db == null || (_isFullVideosLoaded && !forceRefresh)) return;
     try {
-      final snap = await db.collection('videos').get();
+      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
+      final snap = await db.collection('videos').get(getOpt);
       if (snap.docs.isNotEmpty) {
         _videos.clear();
         for (final doc in snap.docs) {
@@ -3735,11 +3767,12 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isFullBlogsLoaded = false;
-  Future<void> ensureBlogsLoaded() async {
+  Future<void> ensureBlogsLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
-    if (db == null || _isFullBlogsLoaded) return;
+    if (db == null || (_isFullBlogsLoaded && !forceRefresh)) return;
     try {
-      final snap = await db.collection('blogs').get();
+      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
+      final snap = await db.collection('blogs').get(getOpt);
       if (snap.docs.isNotEmpty) {
         _blogs.clear();
         for (final doc in snap.docs) {
@@ -3754,18 +3787,19 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isAdminDataLoaded = false;
-  Future<void> ensureAdminDataLoaded() async {
+  Future<void> ensureAdminDataLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
-    if (db == null || _isAdminDataLoaded) return;
+    if (db == null || (_isAdminDataLoaded && !forceRefresh)) return;
     try {
+      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
       final results = await Future.wait([
-        db.collection('enquiries').get(),
-        db.collection('activity_logs').get(),
-        ensureGalleryLoaded(),
-        ensureVideosLoaded(),
-        ensureBlogsLoaded(),
-        ensureAboutPageLoaded(),
-        ensureHistoryLoaded(),
+        db.collection('enquiries').get(getOpt),
+        db.collection('activity_logs').get(getOpt),
+        ensureGalleryLoaded(null, null, forceRefresh),
+        ensureVideosLoaded(forceRefresh: forceRefresh),
+        ensureBlogsLoaded(forceRefresh: forceRefresh),
+        ensureAboutPageLoaded(forceRefresh: forceRefresh),
+        ensureHistoryLoaded(forceRefresh: forceRefresh),
       ]);
       final enqSnap = results[0] as QuerySnapshot<Map<String, dynamic>>;
       _enquiries.clear();
@@ -3782,7 +3816,7 @@ class AdminDataStore extends ChangeNotifier {
       _listenToAdminRealtimeUpdates(db);
       notifyListeners();
     } catch (e) {
-      debugPrint('Admin data load notice: $e');
+      debugPrint('Admin data on-demand load notice: $e');
     }
   }
 
@@ -4825,7 +4859,12 @@ class AdminDataStore extends ChangeNotifier {
       orElse: () => AdminAlbum(id: '', year: '', name: '', dayTag: '', description: ''),
     );
     _albums.removeWhere((a) => a.id == id);
-    logActivity('DELETE', 'Albums', 'Deleted album "${item.name}"');
+    final linkedPhotos = _photos.where((p) => p.albumId == id).toList();
+    for (final p in linkedPhotos) {
+      _deleteFromFirestore('photos', p.id);
+    }
+    _photos.removeWhere((p) => p.albumId == id);
+    logActivity('DELETE', 'Albums', 'Deleted album "${item.name}" and ${linkedPhotos.length} associated photos');
     _deleteFromFirestore('albums', id);
     notifyListeners();
   }
@@ -5279,6 +5318,145 @@ class AdminDataStore extends ChangeNotifier {
     }
     _footerSocialLinks.sort((a, b) => a.order.compareTo(b.order));
     notifyListeners();
+  }
+
+  Future<void> reorderYears(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _years.length) return;
+    if (newIndex < 0 || newIndex > _years.length) return;
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = _years.removeAt(oldIndex);
+    _years.insert(newIndex, item);
+    logActivity('REORDER', 'Years', 'Reordered festival years');
+    notifyListeners();
+  }
+
+  // --- Granular Page-Specific Reloaders ---
+
+  Future<void> reloadHomePage() async {
+    final db = _firestore;
+    if (db == null) return;
+    try {
+      await Future.wait([
+        _fetchSettings(db, forceServer: true),
+        _fetchSiteContent(db, forceServer: true),
+        _fetchHomeBanners(db, forceServer: true),
+        _fetchHomeAboutCards(db, forceServer: true),
+        _fetchPillars(db, forceServer: true),
+        _fetchHomeSingers(db, forceServer: true),
+        _fetchBlessings(db, forceServer: true),
+        _fetchLiveStream(db, forceServer: true),
+        _fetchHomeVideosPreview(db, forceServer: true),
+        _fetchHomeBlogsPreview(db, forceServer: true),
+        _fetchGarbiYears(db, forceServer: true),
+        _fetchAlbums(db, forceServer: true),
+      ]);
+      unawaited(_saveEssentialToLocalStorage());
+      unawaited(_saveBackgroundToLocalStorage());
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Home page reload error: $e');
+    }
+  }
+
+  Future<void> reloadAboutPage() async {
+    final db = _firestore;
+    if (db == null) return;
+    try {
+      await Future.wait([
+        _fetchSiteContent(db, forceServer: true),
+        _fetchHomeAboutCards(db, forceServer: true),
+        ensureAboutPageLoaded(forceRefresh: true),
+      ]);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('About page reload error: $e');
+    }
+  }
+
+  Future<void> reloadHistoryPage() async {
+    final db = _firestore;
+    if (db == null) return;
+    try {
+      await Future.wait([
+        _fetchSiteContent(db, forceServer: true),
+        ensureHistoryLoaded(forceRefresh: true),
+      ]);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('History page reload error: $e');
+    }
+  }
+
+  Future<void> reloadGalleryPage([String? year, String? album]) async {
+    final db = _firestore;
+    if (db == null) return;
+    try {
+      await Future.wait([
+        ensureGalleryLoaded(year, album, true),
+        _fetchGarbiYears(db, forceServer: true),
+        _fetchAlbums(db, forceServer: true),
+      ]);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Gallery page reload error: $e');
+    }
+  }
+
+  Future<void> reloadVideosPage() async {
+    final db = _firestore;
+    if (db == null) return;
+    try {
+      await Future.wait([
+        ensureVideosLoaded(forceRefresh: true),
+        _fetchLiveStream(db, forceServer: true),
+      ]);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Videos page reload error: $e');
+    }
+  }
+
+  Future<void> reloadBlogsPage() async {
+    final db = _firestore;
+    if (db == null) return;
+    try {
+      await Future.wait([
+        ensureBlogsLoaded(forceRefresh: true),
+      ]);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Blogs page reload error: $e');
+    }
+  }
+
+  Future<void> reloadArchivePage() async {
+    final db = _firestore;
+    if (db == null) return;
+    try {
+      await Future.wait([
+        _fetchGarbiYears(db, forceServer: true),
+        _fetchAlbums(db, forceServer: true),
+      ]);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Archive page reload error: $e');
+    }
+  }
+
+  Future<void> reloadContactPage() async {
+    final db = _firestore;
+    if (db == null) return;
+    try {
+      await Future.wait([
+        _fetchSiteContent(db, forceServer: true),
+        _fetchSettings(db, forceServer: true),
+      ]);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Contact page reload error: $e');
+    }
   }
 
   Future<void> refreshAllData({bool forceRefresh = true}) async {

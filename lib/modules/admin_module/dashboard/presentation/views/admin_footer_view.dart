@@ -361,17 +361,41 @@ class _AdminFooterViewState extends State<AdminFooterView> {
                   const SizedBox(height: 14),
 
                   // External Link Switch
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('External Website Link', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Enable if this link goes to an external site or custom URL', style: TextStyle(fontSize: 11)),
-                    value: isExternal,
-                    onChanged: (val) => setDlgState(() {
-                      isExternal = val;
-                      if (!isExternal && !urlCtrl.text.startsWith('/')) {
-                        urlCtrl.text = '/about';
-                      }
-                    }),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: colors.getSurfaceColor(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colors.getBorderColor(context)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('External Website Link', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                              Text('Enable if this link goes to an external site or custom URL', style: TextStyle(fontSize: 11)),
+                            ],
+                          ),
+                        ),
+                        Transform.scale(
+                          scale: 0.85,
+                          child: Switch(
+                            value: isExternal,
+                            activeThumbColor: colors.heritageGold,
+                            activeTrackColor: colors.deepMaroon,
+                            onChanged: (val) => setDlgState(() {
+                              isExternal = val;
+                              if (!isExternal && !urlCtrl.text.startsWith('/')) {
+                                urlCtrl.text = '/about';
+                              }
+                            }),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 10),
 

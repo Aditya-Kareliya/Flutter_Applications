@@ -9,7 +9,6 @@ import '../../../../core/responsive/responsive.dart';
 import '../../../../core/widgets/heritage_badge.dart';
 import '../../../../core/widgets/brand_logo/brand_logo_widget.dart';
 import '../../../../core/widgets/my_app_blurred_loader.dart';
-import '../../../../core/widgets/toast/my_app_toast_message.dart';
 import '../../../../core/widgets/my_app_ui_components.dart';
 import '../../../../utils/navigation_manager.dart';
 import '../../auth/presentation/admin_auth_cubit.dart';
@@ -91,60 +90,59 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ? const MyAppBlurredLoader(
               message: 'Loading Admin Portal...',
             )
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (!isMobile)
-                  _AdminSidebar(
-                    selectedTab: _selectedTab,
-                    onSelectTab: _selectTab,
-                  ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      _AdminTopNavBar(
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxHeight < 80 || constraints.maxWidth < 80) {
+                  return const SizedBox.shrink();
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!isMobile)
+                      _AdminSidebar(
                         selectedTab: _selectedTab,
-                        onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+                        onSelectTab: _selectTab,
                       ),
-                      ListenableBuilder(
-                        listenable: _store,
-                        builder: (context, _) {
-                          if (!_store.isBusy) return const SizedBox(height: 2);
-                          return SizedBox(
-                            height: 3,
-                            child: LinearProgressIndicator(
-                              backgroundColor: Colors.transparent,
-                              valueColor: AlwaysStoppedAnimation<Color>(colors.heritageGold),
-                            ),
-                          );
-                        },
-                      ),
-                      Expanded(
-                        child: RefreshIndicator(
-                          color: colors.heritageGold,
-                          backgroundColor: colors.getCardBackgroundColor(context),
-                          displacement: 20,
-                          onRefresh: () async {
-                            await _store.refreshAllData();
-                          },
-                          child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(
-                              parent: ClampingScrollPhysics(),
-                            ),
-                            padding: EdgeInsets.fromLTRB(
-                              isMobile ? 14 : 28,
-                              20,
-                              isMobile ? 14 : 28,
-                              isMobile ? 16 : 24,
-                            ),
-                            child: _buildCurrentTabContent(context),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          _AdminTopNavBar(
+                            selectedTab: _selectedTab,
+                            onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
                           ),
-                        ),
+                          ListenableBuilder(
+                            listenable: _store,
+                            builder: (context, _) {
+                              if (!_store.isBusy) return const SizedBox(height: 2);
+                              return SizedBox(
+                                height: 3,
+                                child: LinearProgressIndicator(
+                                  backgroundColor: Colors.transparent,
+                                  valueColor: AlwaysStoppedAnimation<Color>(colors.heritageGold),
+                                ),
+                              );
+                            },
+                          ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(
+                                parent: ClampingScrollPhysics(),
+                              ),
+                              padding: EdgeInsets.fromLTRB(
+                                isMobile ? 14 : 28,
+                                20,
+                                isMobile ? 14 : 28,
+                                isMobile ? 16 : 24,
+                              ),
+                              child: _buildCurrentTabContent(context),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ],
+                    ),
+                  ],
+                );
+              },
             ),
     );
   }
@@ -203,7 +201,6 @@ class _AdminTopNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = serviceLocator<MyAppColors>();
-    final styles = serviceLocator<MyAppTextStyles>();
     final isMobile = context.isMobile;
 
     return Container(
@@ -242,46 +239,6 @@ class _AdminTopNavBar extends StatelessWidget {
                 textColor: colors.getAccentColor(context),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          ListenableBuilder(
-            listenable: AdminDataStore.instance,
-            builder: (context, _) {
-              if (AdminDataStore.instance.isBusy) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(colors.heritageGold),
-                        ),
-                      ),
-                      if (!isMobile) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          AdminDataStore.instance.busyMessage ?? 'Syncing...',
-                          style: styles.cleanSans(context, size: 11, color: colors.heritageGold),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              }
-              return MyAppIconButton(
-                tooltip: 'Refresh cloud data',
-                icon: const Icon(Icons.refresh_rounded, size: 19),
-                color: colors.heritageGold,
-                onPressed: () {
-                  AdminDataStore.instance.refreshAllData(forceRefresh: true);
-                  MyAppToastMessage.info(context, title: 'Refreshing', description: 'Synchronizing with cloud...');
-                },
-              );
-            },
           ),
           const SizedBox(width: 8),
           if (isMobile)

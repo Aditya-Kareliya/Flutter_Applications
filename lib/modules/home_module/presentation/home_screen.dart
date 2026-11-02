@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +10,7 @@ import '../../../core/widgets/cultural_frame_card.dart';
 import '../../../core/widgets/heritage_badge.dart';
 import '../../../core/widgets/heritage_divider.dart';
 import '../../../core/widgets/article_detail_modal.dart';
+import '../../../core/widgets/brand_logo/brand_logo_widget.dart';
 import '../../../utils/navigation_manager.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../admin_module/dashboard/data/admin_data_store.dart';
@@ -22,7 +22,12 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: AdminDataStore.instance,
-      builder: (context, _) => const MyAppScaffold(body: _HomeBody()),
+      builder: (context, _) => MyAppScaffold(
+        onRefresh: () async {
+          await AdminDataStore.instance.reloadHomePage();
+        },
+        body: const _HomeBody(),
+      ),
     );
   }
 }
@@ -342,75 +347,13 @@ class _HeritageHeroSection extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: _renderEmblemImage(imageUrl, size: size),
-      ),
-    );
-  }
-
-  Widget _renderEmblemImage(String imageUrl, {required double size}) {
-    final baseAsset = Image.asset(
-      'assets/images/pavan_putra_logo.png',
-      width: size,
-      height: size,
-      fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => Image.asset(
-        'assets/images/pavan_putra_logo.jpg',
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-      ),
-    );
-
-    if (imageUrl.startsWith('data:image')) {
-      try {
-        final commaIdx = imageUrl.indexOf(',');
-        final base64Data = commaIdx != -1 ? imageUrl.substring(commaIdx + 1) : imageUrl;
-        return Image.memory(
-          base64Decode(base64Data),
-          width: size,
-          height: size,
+        child: BrandLogoWidget(
+          size: size,
+          isCircular: true,
           fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => baseAsset,
-        );
-      } catch (_) {
-        return baseAsset;
-      }
-    }
-
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      return Stack(
-        fit: StackFit.passthrough,
-        alignment: Alignment.center,
-        children: [
-          baseAsset,
-          CachedNetworkImage(
-            imageUrl: imageUrl,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            fadeInDuration: const Duration(milliseconds: 300),
-            fadeOutDuration: const Duration(milliseconds: 200),
-            placeholder: (_, _) => const SizedBox.shrink(),
-            errorWidget: (_, _, _) => const SizedBox.shrink(),
-          ),
-        ],
-      );
-    }
-
-    if (imageUrl.isNotEmpty &&
-        imageUrl.startsWith('assets/') &&
-        imageUrl != 'assets/images/pavan_putra_logo.png' &&
-        imageUrl != 'assets/images/pavan_putra_logo.jpg') {
-      return Image.asset(
-        imageUrl,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => baseAsset,
-      );
-    }
-
-    return baseAsset;
+        ),
+      ),
+    );
   }
 
   Widget _buildHeroTextContent(

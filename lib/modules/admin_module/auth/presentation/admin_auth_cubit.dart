@@ -19,7 +19,7 @@ final class AdminAuthenticating extends AdminAuthState {
 
 final class AdminLoggedIn extends AdminAuthState {
   final String adminEmail;
-  const AdminLoggedIn({this.adminEmail = 'admin@pavanputragarbi.org'});
+  const AdminLoggedIn({this.adminEmail = 'admin@gmail.com'});
 }
 
 final class AdminAuthFailure extends AdminAuthState {
@@ -48,20 +48,20 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
     if (s is AdminLoggedIn) {
       return s.adminEmail;
     }
-    return 'admin@pavanputragarbi.org';
+    return 'admin@gmail.com';
   }
 
   Future<void> restoreSession() async {
     try {
       final fbUser = _authService.currentUser;
       if (fbUser != null) {
-        emit(AdminLoggedIn(adminEmail: fbUser.email ?? 'admin@pavanputragarbi.org'));
+        emit(AdminLoggedIn(adminEmail: fbUser.email ?? 'admin@gmail.com'));
         return;
       }
 
       final prefs = await SharedPreferences.getInstance();
       final isLoggedIn = prefs.getBool(_authKey) ?? false;
-      final savedEmail = prefs.getString(_authEmailKey) ?? 'admin@pavanputragarbi.org';
+      final savedEmail = prefs.getString(_authEmailKey) ?? 'admin@gmail.com';
       if (isLoggedIn) {
         emit(AdminLoggedIn(adminEmail: savedEmail));
       } else {
@@ -90,6 +90,10 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
         debugPrint('Firebase Auth signIn code: ${e.code}');
         String userFriendly = 'Authentication failed. Please verify your credentials.';
         switch (e.code) {
+          case 'configuration-not-found':
+            userFriendly =
+                'Firebase Authentication is not enabled for project pavanputragarbi. Please enable Email/Password in Firebase Console (Authentication > Sign-in method).';
+            break;
           case 'user-not-found':
             userFriendly = 'No admin account found with this email address.';
             break;
@@ -111,12 +115,17 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
             break;
         }
 
-        // Check fallback for local admin if network fails or test credential is used
-        if (trimmed == 'admin@pavanputragarbi.org' && password == 'Pavan@1212') {
+        // Check fallback for local admin if Firebase fails or test credential is used
+        final lowerTrimmed = trimmed.toLowerCase();
+        if ((lowerTrimmed == 'admin@gmail.com' ||
+                lowerTrimmed == 'admin@pavanputragarbi.org' ||
+                lowerTrimmed == 'admin') &&
+            password == 'Pavan@1212') {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool(_authKey, true);
-          await prefs.setString(_authEmailKey, trimmed);
-          emit(AdminLoggedIn(adminEmail: trimmed));
+          final loggedEmail = lowerTrimmed.contains('@') ? trimmed : 'admin@gmail.com';
+          await prefs.setString(_authEmailKey, loggedEmail);
+          emit(AdminLoggedIn(adminEmail: loggedEmail));
           return;
         }
 
@@ -132,9 +141,9 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(_authKey, true);
-        await prefs.setString(_authEmailKey, 'admin@pavanputragarbi.org');
+        await prefs.setString(_authEmailKey, 'admin@gmail.com');
       } catch (_) {}
-      emit(const AdminLoggedIn(adminEmail: 'admin@pavanputragarbi.org'));
+      emit(const AdminLoggedIn(adminEmail: 'admin@gmail.com'));
     } else {
       emit(const AdminAuthFailure('Incorrect username or password. Please verify and try again.'));
     }
@@ -145,7 +154,22 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
     if (trimmed.isEmpty || !trimmed.contains('@')) {
       throw Exception('Please provide a valid administrator email address.');
     }
-    await _authService.sendPasswordResetEmail(trimmed);
+    try {
+      await _authService.sendPasswordResetEmail(trimmed);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        throw Exception('No administrator account found with email $trimmed.');
+      } else if (e.code == 'invalid-email') {
+        throw Exception('The email address $trimmed is not valid.');
+      }
+      throw Exception(e.message ?? 'Authentication error [${e.code}]');
+    } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      if (msg.contains('EMAIL_NOT_FOUND') || msg.contains('user-not-found')) {
+        throw Exception('No administrator account found with email $trimmed.');
+      }
+      throw Exception(msg);
+    }
   }
 
   Future<void> changePassword({

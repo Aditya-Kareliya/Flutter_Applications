@@ -83,6 +83,9 @@ class _VideosScreenState extends State<VideosScreen> {
         }).toList();
 
         return MyAppScaffold(
+          onRefresh: () async {
+            await AdminDataStore.instance.reloadVideosPage();
+          },
           body: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: isMobile ? 16 : 32,

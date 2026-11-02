@@ -67,8 +67,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           final isGujarati = state.locale.languageCode == 'gu';
           final store = AdminDataStore.instance;
 
-          final List<_MilestoneItem> milestones = store.historyMilestones.isNotEmpty
-              ? store.historyMilestones.map((m) {
+          final activeMilestones = store.historyMilestones.where((m) => m.isActive).toList();
+          final List<_MilestoneItem> milestones = activeMilestones.isNotEmpty
+              ? activeMilestones.map((m) {
                   final badge = isGujarati && m.badgeGu.isNotEmpty ? m.badgeGu : m.badgeEn;
                   final title = isGujarati && m.titleGu.isNotEmpty ? m.titleGu : m.titleEn;
                   final desc = isGujarati && m.descGu.isNotEmpty ? m.descGu : m.descEn;
@@ -119,6 +120,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ];
 
           return MyAppScaffold(
+            onRefresh: () async {
+              await AdminDataStore.instance.reloadHistoryPage();
+            },
             body: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: isMobile ? 16 : 32,

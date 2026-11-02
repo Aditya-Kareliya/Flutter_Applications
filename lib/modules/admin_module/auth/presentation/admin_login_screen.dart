@@ -55,6 +55,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colors.getCardBackgroundColor(context),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
@@ -63,9 +64,17 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           children: [
             Icon(Icons.lock_reset_rounded, color: colors.heritageGold),
             const SizedBox(width: 10),
-            Text(
-              'Reset Admin Password',
-              style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700),
+            Expanded(
+              child: Text(
+                'Reset Admin Password',
+                style: styles.editorialSerif(
+                  context,
+                  size: 19,
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -86,6 +95,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             ),
           ],
         ),
+        actionsOverflowButtonSpacing: 8,
         actions: [
           MyAppTextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -114,10 +124,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 }
               } catch (e) {
                 if (mounted) {
+                  final msg = e.toString().replaceFirst('Exception: ', '');
                   MyAppToastMessage.error(
                     context,
                     title: 'Reset Failed',
-                    description: 'Could not send reset link: $e',
+                    description: msg,
                   );
                 }
               }

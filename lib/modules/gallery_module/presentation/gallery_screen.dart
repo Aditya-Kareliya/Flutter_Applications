@@ -81,6 +81,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
               }).toList();
 
         return MyAppScaffold(
+          onRefresh: () async {
+            await AdminDataStore.instance.reloadGalleryPage(widget.year, widget.album);
+          },
           body: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: isMobile ? 16 : 32,

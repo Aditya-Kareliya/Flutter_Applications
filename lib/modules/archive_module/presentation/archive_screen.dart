@@ -30,6 +30,12 @@ class ArchiveScreen extends StatelessWidget {
             listenable: AdminDataStore.instance,
             builder: (context, _) {
               return MyAppScaffold(
+                onRefresh: () async {
+                  await AdminDataStore.instance.reloadArchivePage();
+                  if (context.mounted) {
+                    await context.read<ArchiveCubit>().load();
+                  }
+                },
                 body: BlocConsumer<ArchiveCubit, ArchiveState>(
                   listener: (context, state) {},
                   builder: (context, state) {

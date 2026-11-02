@@ -66,9 +66,14 @@ class MyAppFillButton extends StatelessWidget {
           icon!,
           const SizedBox(width: 8),
         ],
-        Text(
-          label,
-          style: textStyle ?? styles.cleanSans(context, size: 13, fontWeight: FontWeight.w700, color: Colors.white),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: textStyle ?? styles.cleanSans(context, size: 13, fontWeight: FontWeight.w700, color: Colors.white),
+          ),
         ),
       ],
     );
@@ -164,9 +169,14 @@ class MyAppOutlineButton extends StatelessWidget {
           ),
           const SizedBox(width: 8),
         ],
-        Text(
-          label,
-          style: textStyle ?? styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: effectiveColor),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: textStyle ?? styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: effectiveColor),
+          ),
         ),
       ],
     );
@@ -245,9 +255,13 @@ class MyAppTextButton extends StatelessWidget {
           ),
           const SizedBox(width: 6),
         ],
-        Text(
-          label,
-          style: textStyle ?? styles.cleanSans(context, size: isCompact ? 11 : 13, fontWeight: FontWeight.w600, color: effectiveColor),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textStyle ?? styles.cleanSans(context, size: isCompact ? 11 : 13, fontWeight: FontWeight.w600, color: effectiveColor),
+          ),
         ),
       ],
     );

@@ -13,6 +13,7 @@ class MyAppTranslations {
     'en': {
       // Navigation & Branding
       'app_title': 'PAVAN PUTRA GARBI MANDAL',
+      'pavan_putra_garbi_mandal': 'PAVAN PUTRA GARBI MANDAL',
       'app_short_title': 'PAVAN PUTRA',
       'app_subtitle': 'RAJKOT • GUJARAT • EST. 1977',
       'sacred_invocation': '|| ૐ નમો ભગવતે || || જાગતી જોગમાયા||',
@@ -285,6 +286,7 @@ class MyAppTranslations {
       // Loader & Common
       'loading_switching_lang': 'Switching language...',
       'loading_wait': 'Please wait a moment...',
+      'refresh_loading': 'Updating data...',
       'empty_state_title': 'No items currently available',
       'empty_state_desc':
           'Content will appear here as soon as published by the Mandal archive team.',
@@ -295,6 +297,7 @@ class MyAppTranslations {
     'gu': {
       // Navigation & Branding
       'app_title': 'શ્રી પવનપુત્ર ગરબી મંડળ',
+      'pavan_putra_garbi_mandal': 'શ્રી પવનપુત્ર ગરબી મંડળ',
       'app_short_title': 'પવનપુત્ર ગરબી મંડળ',
       'app_subtitle': 'રાજકોટ • ગુજરાત • સ્થાપના ૧૯૭૭',
       'sacred_invocation': '|| ૐ નમો ભગવતે || || જાગતી જોગમાયા||',
@@ -563,6 +566,7 @@ class MyAppTranslations {
       // Loader & Common
       'loading_switching_lang': 'ગુજરાતી ભાષા લોડ થઈ રહી છે...',
       'loading_wait': 'કૃપા કરી થોડી રાહ જુઓ...',
+      'refresh_loading': 'માહિતી અપડેટ થઈ રહી છે...',
       'empty_state_title': 'હાલ કોઈ માહિતી ઉપલબ્ધ નથી',
       'empty_state_desc': 'મંડળ દ્વારા વિગતો અપલોડ થતાં જ અહીં દર્શાવાશે.',
       'retry_btn': 'ફરી પ્રયાસ કરો',
