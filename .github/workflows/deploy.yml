@@ -125,6 +125,12 @@ jobs:
     needs: [ version, code-quality ]
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    if: |
+      contains(github.event.head_commit.message, '#build') ||
+      inputs.run_build == true ||
+      inputs.run_build == 'true' ||
+      github.event.inputs.run_build == true ||
+      github.event.inputs.run_build == 'true'
 
     steps:
       - name: 📥 Checkout Code
@@ -178,14 +184,6 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: 🚀 Deploy Web App & Firestore Rules to Firebase
-        if: |
-          github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'push' && (
-            github.ref == 'refs/heads/main' ||
-            github.ref == 'refs/heads/master' ||
-            github.ref == 'refs/heads/pavan_putra_garbi_mandal' ||
-            github.ref == 'refs/heads/pavanputragarbimandal'
-          ))
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PAVAN_PUTRA_GARBI_MANDAL || secrets.FIREBASE_TOKEN }}
         run: |
@@ -211,14 +209,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: |
-      github.event_name == 'workflow_dispatch' ||
       contains(github.event.head_commit.message, '#build') ||
-      (github.event_name == 'push' && (
-        github.ref == 'refs/heads/main' ||
-        github.ref == 'refs/heads/master' ||
-        github.ref == 'refs/heads/pavan_putra_garbi_mandal' ||
-        github.ref == 'refs/heads/pavanputragarbimandal'
-      ))
+      inputs.run_build == true ||
+      inputs.run_build == 'true' ||
+      github.event.inputs.run_build == true ||
+      github.event.inputs.run_build == 'true'
 
     steps:
       - name: 📥 Download Web Artifact
