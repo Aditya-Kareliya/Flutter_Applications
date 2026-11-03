@@ -34,7 +34,7 @@ class EmailNotificationService {
 
   String _getContactPhone() {
     final val = AdminDataStore.instance.settings.contactPhone.trim();
-    return val.isNotEmpty ? val : '+91 94282 89998 / +91 98765 43210';
+    return val.isNotEmpty ? val : '';
   }
 
   String _getVenueAddress() {
@@ -74,15 +74,15 @@ class EmailNotificationService {
       try {
         final success = await _dispatchEmailViaGateway(
           toEmail: email,
-          subject: 'New Devotee Inquiry Received — ${_getMandalNameGu()}',
+          subject: '[pavanputragarbi mandal] New Devotee Inquiry: ${enquiry.name}',
           fields: {
-            'Recipient': recipientName,
+            'Mandal': 'pavanputragarbi mandal',
             'Devotee Name': enquiry.name,
             'Contact Phone': enquiry.phone.isNotEmpty ? enquiry.phone : 'Not provided',
             'Email Address': enquiry.email.isNotEmpty ? enquiry.email : 'Not provided',
             'Submission Date': enquiry.date,
             'Inquiry Message': enquiry.message,
-            'Mandal': '${_getMandalNameGu()} (${_getMandalNameEn()})',
+            'Target Officer': recipientName,
           },
           replyTo: enquiry.email.isNotEmpty ? enquiry.email : null,
         );
@@ -98,7 +98,7 @@ class EmailNotificationService {
           await FirebaseFirestore.instance.collection('mail').add({
             'to': [email],
             'message': {
-              'subject': 'New Devotee Inquiry Received — ${_getMandalNameGu()}',
+              'subject': '[pavanputragarbi mandal] New Devotee Inquiry: ${enquiry.name}',
               'text': _buildPlainTextNotification(enquiry: enquiry, recipientEmail: email),
               'html': _buildHtmlNotification(
                 enquiry: enquiry,
@@ -128,15 +128,14 @@ class EmailNotificationService {
     try {
       final success = await _dispatchEmailViaGateway(
         toEmail: email,
-        subject: 'Admin Notification System Active — ${_getMandalNameGu()}',
+        subject: '[pavanputragarbi mandal] Admin Notification System Active',
         fields: {
-          'System Status': 'Active & Operational',
+          'Mandal': 'pavanputragarbi mandal',
           'Officer Name': recipient.recipientName,
           'Department': recipient.department,
           'Verified Email': email,
           'Verified Time': timestampStr,
-          'Mandal': '${_getMandalNameGu()} (${_getMandalNameEn()})',
-          'Notice': 'Devotee inquiries submitted on the public Contact page will arrive at this address.',
+          'Status': 'Active & Operational',
         },
       );
 
@@ -145,7 +144,7 @@ class EmailNotificationService {
         await FirebaseFirestore.instance.collection('mail').add({
           'to': [email],
           'message': {
-            'subject': 'Admin Notification System Active — ${_getMandalNameGu()}',
+            'subject': '[pavanputragarbi mandal] Admin Notification System Active',
             'html': _buildTestHtml(recipient: recipient, timestamp: timestampStr),
           },
           'created_at': FieldValue.serverTimestamp(),
@@ -174,12 +173,12 @@ class EmailNotificationService {
     try {
       final success = await _dispatchEmailViaGateway(
         toEmail: cleanEmail,
-        subject: 'Forgot Password — ${_getMandalNameGu()}',
+        subject: '[pavanputragarbi mandal] Forgot Password Recovery',
         fields: {
+          'Mandal': 'pavanputragarbi mandal',
           'Action': 'Password Reset Request',
           'Registered Email': cleanEmail,
           'Reset Link': link,
-          'Mandal': '${_getMandalNameGu()} (${_getMandalNameEn()})',
           'Security Notice': 'If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.',
         },
       );
@@ -189,7 +188,7 @@ class EmailNotificationService {
         await FirebaseFirestore.instance.collection('mail').add({
           'to': [cleanEmail],
           'message': {
-            'subject': 'Forgot Password — ${_getMandalNameGu()}',
+            'subject': '[pavanputragarbi mandal] Forgot Password Recovery',
             'html': _buildForgotPasswordHtml(email: cleanEmail, resetLink: link),
           },
           'created_at': FieldValue.serverTimestamp(),
@@ -333,7 +332,7 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
     final mandalEn = _getMandalNameEn();
     final address = _getVenueAddress();
     final phone = _getContactPhone();
-    final nameGreeting = (recipientName != null && recipientName.isNotEmpty) ? recipientName : 'Administrator';
+    final aarti = _getAartiSchedule();
 
     return '''
 <!DOCTYPE html>
@@ -343,78 +342,228 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>New Devotee Inquiry Received — $mandalEn</title>
 </head>
-<body style="margin:0;padding:32px 14px;background-color:#F0F4F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#1E293B;">
-  <div style="max-width:580px;margin:0 auto;background:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #E2E8F0;">
-    
-    <!-- Top Solid Brand Header with Centered Logo (Matches MedSaral Style) -->
-    <div style="background-color:#205482;padding:32px 20px 26px 20px;text-align:center;">
-      <div style="text-align:center;margin-bottom:14px;">
-        <img src="$logoUrl" alt="Mandal Logo" width="76" height="76" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,0.85);display:inline-block;background-color:#FFFFFF;" />
-      </div>
-      <h1 style="margin:0;color:#FFFFFF;font-size:22px;font-weight:700;letter-spacing:0.3px;line-height:1.3;">New Devotee Inquiry Received</h1>
-      <p style="margin:4px 0 0 0;color:#CBD5E1;font-size:12px;letter-spacing:0.5px;">$mandalGu</p>
-    </div>
+<body style="margin:0;padding:0;background-color:#f4f7f6;">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#f4f7f6; padding:40px 15px; font-family: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <tbody>
+        <tr>
+            <td align="center">
+                <!-- Main Content Container -->
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:600px;
+                              background-color:#ffffff;
+                              border-radius:12px;
+                              overflow:hidden;
+                              box-shadow:0 4px 15px rgba(0,0,0,0.05);
+                              border:1px solid #e2e8f0;">
+                    <tbody>
+                        <!-- Header Section -->
+                        <tr>
+                            <td align="center" style="padding:40px 30px 20px 30px;">
+                                <!-- Logo -->
+                                <img src="$logoUrl" alt="Mandal Logo" width="120" height="120" style="display:block;
+                                            border:0;
+                                            margin:0 auto 25px auto;
+                                            border-radius:50%;
+                                            object-fit:cover;
+                                            border:2px solid #C5A059;
+                                            background-color:#ffffff;">
 
-    <!-- White Content Body -->
-    <div style="padding:32px 28px;">
-      <h2 style="font-size:17px;font-weight:700;color:#0F172A;margin:0 0 10px 0;">Dear $nameGreeting,</h2>
-      <p style="font-size:14px;color:#475569;line-height:1.55;margin:0 0 24px 0;">
-        A new devotee inquiry has been submitted for you. Please review the details below.
-      </p>
+                                <h1 style="margin:0;
+                                           color:#0a1332;
+                                           font-size:24px;
+                                           font-weight:700;
+                                           margin-bottom:8px;">
+                                    New Devotee Inquiry Received
+                                </h1>
 
-      <!-- Rounded Details Card Container -->
-      <div style="background-color:#F8FAFC;border-radius:10px;padding:20px 22px;margin-bottom:24px;border:1px solid #E2E8F0;">
-        <div style="margin-bottom:12px;font-size:14px;">
-          <strong style="color:#334155;">Devotee Name:</strong>
-          <span style="color:#0F172A;font-weight:600;margin-left:8px;">${enquiry.name}</span>
-        </div>
-        <div style="margin-bottom:12px;font-size:14px;">
-          <strong style="color:#334155;">Contact Phone:</strong>
-          <span style="margin-left:8px;">${enquiry.phone.isNotEmpty ? '<a href="tel:${enquiry.phone}" style="color:#0284C7;text-decoration:none;font-weight:600;">${enquiry.phone}</a>' : '<span style="color:#94A3B8;">Not provided</span>'}</span>
-        </div>
-        <div style="margin-bottom:12px;font-size:14px;">
-          <strong style="color:#334155;">Email Address:</strong>
-          <span style="margin-left:8px;">${enquiry.email.isNotEmpty ? '<a href="mailto:${enquiry.email}" style="color:#0284C7;text-decoration:none;font-weight:600;">${enquiry.email}</a>' : '<span style="color:#94A3B8;">Not provided</span>'}</span>
-        </div>
-        <div style="margin-bottom:14px;font-size:14px;">
-          <strong style="color:#334155;">Submission Date:</strong>
-          <span style="color:#0F172A;margin-left:8px;">${enquiry.date}</span>
-        </div>
-        <div style="font-size:14px;">
-          <strong style="color:#334155;display:block;margin-bottom:6px;">Inquiry / Prayer Request:</strong>
-          <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:6px;padding:12px 14px;color:#0F172A;font-size:13.5px;line-height:1.6;">
-            ${enquiry.message}
-          </div>
-        </div>
-      </div>
+                                <div style="color:#C5A059;
+                                            font-size:14px;
+                                            font-weight:bold;
+                                            margin-bottom:16px;">
+                                    $mandalGu
+                                </div>
 
-      <p style="text-align:center;font-size:13px;color:#64748B;margin:0 0 24px 0;">
-        Please contact the devotee for further consultation.
-      </p>
+                                <p style="margin:0 auto;
+                                          color:#5a667b;
+                                          font-size:15px;
+                                          line-height:1.6;
+                                          max-width:480px;
+                                          text-align:center;">
+                                    A new devotee inquiry has been submitted through the public website. Please review the details below.
+                                </p>
 
-      <!-- Quick Action Buttons -->
-      <div style="text-align:center;margin-bottom:12px;">
-        ${enquiry.email.isNotEmpty ? '''
-        <a href="mailto:${enquiry.email}?subject=Pranam ${enquiry.name} ji — $mandalGu" style="display:inline-block;background-color:#205482;color:#FFFFFF;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;margin:4px 6px;">
-          ✉️ Reply via Email
-        </a>
-        ''' : ''}
-        ${enquiry.phone.isNotEmpty ? '''
-        <a href="tel:${enquiry.phone}" style="display:inline-block;background-color:#059669;color:#FFFFFF;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;margin:4px 6px;">
-          📞 Call Devotee
-        </a>
-        ''' : ''}
-      </div>
-    </div>
+                                <!-- Primary Button -->
+                                ${enquiry.email.isNotEmpty ? '''
+                                <table border="0" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+                                    <tbody>
+                                        <tr>
+                                            <td align="center" bgcolor="#4A000B" style="border-radius:8px;">
+                                                <a href="mailto:${enquiry.email}?subject=Pranam ${enquiry.name} ji — $mandalGu" target="_blank" rel="noopener noreferrer" style="display:inline-block;
+                                                          padding:14px 32px;
+                                                          color:#ffffff;
+                                                          text-decoration:none;
+                                                          font-size:15px;
+                                                          font-weight:bold;
+                                                          border-radius:8px;
+                                                          background-color:#4A000B;">
+                                                    ✉️ Reply to Devotee
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                ''' : ''}
 
-    <!-- Clean Footer -->
-    <div style="border-top:1px solid #E2E8F0;padding:22px 24px;text-align:center;background:#FFFFFF;color:#64748B;font-size:12px;line-height:1.6;">
-      <p style="margin:0 0 4px 0;font-weight:700;color:#334155;font-size:13px;">$mandalGu ($mandalEn)</p>
-      <p style="margin:0 0 8px 0;font-size:11.5px;color:#64748B;">$address • Helpline: $phone</p>
-      <p style="margin:0;color:#94A3B8;font-size:11px;">This is a securely generated message. Please do not reply directly to this email.</p>
-    </div>
+                            </td>
+                        </tr>
 
-  </div>
+                        <!-- Devotee Details Summary Card -->
+                        <tr>
+                            <td style="padding:10px 30px 20px 30px;">
+                                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;
+                                              border:1px solid #e2e8f0;
+                                              border-radius:8px;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding:20px 24px; font-size:14px; line-height:1.7;">
+                                                <div style="margin-bottom:10px;">
+                                                    <strong style="color:#334155;">Devotee Name:</strong>
+                                                    <span style="color:#0f172a; font-weight:bold; margin-left:8px;">${enquiry.name}</span>
+                                                </div>
+                                                <div style="margin-bottom:10px;">
+                                                    <strong style="color:#334155;">Contact Phone:</strong>
+                                                    <span style="margin-left:8px;">${enquiry.phone.isNotEmpty ? '<a href="tel:${enquiry.phone}" style="color:#1a49ba; text-decoration:none; font-weight:bold;">${enquiry.phone}</a>' : '<span style="color:#94a3b8;">Not provided</span>'}</span>
+                                                </div>
+                                                <div style="margin-bottom:10px;">
+                                                    <strong style="color:#334155;">Email Address:</strong>
+                                                    <span style="margin-left:8px;">${enquiry.email.isNotEmpty ? '<a href="mailto:${enquiry.email}" style="color:#1a49ba; text-decoration:none; font-weight:bold;">${enquiry.email}</a>' : '<span style="color:#94a3b8;">Not provided</span>'}</span>
+                                                </div>
+                                                <div style="margin-bottom:10px;">
+                                                    <strong style="color:#334155;">Submission Date:</strong>
+                                                    <span style="color:#0f172a; margin-left:8px;">${enquiry.date}</span>
+                                                </div>
+                                                <div>
+                                                    <strong style="color:#334155;">Target Officer:</strong>
+                                                    <span style="color:#64748b; margin-left:8px;">$recipientEmail</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- Message Box -->
+                        <tr>
+                            <td style="padding:0 30px 24px 30px;">
+                                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;
+                                              border-left:4px solid #C5A059;
+                                              border-radius:8px;
+                                              border-top:1px solid #e2e8f0;
+                                              border-right:1px solid #e2e8f0;
+                                              border-bottom:1px solid #e2e8f0;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding:18px 20px;
+                                                       font-size:13.5px;
+                                                       line-height:1.6;
+                                                       color:#475569;">
+                                                <strong style="color:#0f172a; font-size:14px;">
+                                                    📝 Devotee Message / Prayer Request
+                                                </strong>
+                                                <br><br>
+                                                ${enquiry.message}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- Action Button (Second) -->
+                        <tr>
+                            <td align="center" style="padding:0 30px 34px 30px;">
+                                ${enquiry.phone.isNotEmpty ? '''
+                                <a href="tel:${enquiry.phone}" target="_blank" rel="noopener noreferrer" style="display:inline-block;
+                                          padding:12px 28px;
+                                          background-color:#059669;
+                                          color:#ffffff;
+                                          text-decoration:none;
+                                          font-size:14.5px;
+                                          font-weight:bold;
+                                          border-radius:8px;
+                                          margin:4px 6px;">
+                                    📞 Call Devotee
+                                </a>
+                                ''' : ''}
+                                <a href="https://pavanputragarbi.web.app/#/admin" target="_blank" rel="noopener noreferrer" style="display:inline-block;
+                                          padding:12px 28px;
+                                          background-color:#1a49ba;
+                                          color:#ffffff;
+                                          text-decoration:none;
+                                          font-size:14.5px;
+                                          font-weight:bold;
+                                          border-radius:8px;
+                                          margin:4px 6px;">
+                                    🌐 Open Admin Portal
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- Inner Footer (Company Info) -->
+                        <tr>
+                            <td align="center" style="background-color:#f8fafc;
+                                       padding:30px 20px;
+                                       border-top:1px solid #e2e8f0;">
+
+                                <div style="font-size:22px; margin-bottom:10px;">🏛️</div>
+
+                                <div style="font-size:15px;
+                                            color:#0f172a;
+                                            font-weight:bold;
+                                            margin-bottom:6px;">
+                                    $mandalGu
+                                </div>
+                                <div style="font-size:12px;
+                                            color:#64748b;
+                                            font-weight:600;
+                                            margin-bottom:8px;">
+                                    $mandalEn
+                                </div>
+
+                                <div style="font-size:12px;
+                                            color:#64748b;
+                                            line-height:1.6;">
+                                    $address<br>
+                                    Helpline: $phone • Aarti: $aarti
+                                </div>
+
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <!-- Main Footer -->
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:600px;
+                              margin-top:20px;">
+                    <tbody>
+                        <tr>
+                            <td align="center">
+                                <p style="margin:0;
+                                          font-size:12px;
+                                          color:#94a3b8;
+                                          line-height:1.5;">
+                                    This is an automated email from pavanputragarbi mandal. Please do not reply directly.
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
 </body>
 </html>
 ''';
@@ -434,50 +583,128 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Notification System Active — $mandalEn</title>
 </head>
-<body style="margin:0;padding:32px 14px;background-color:#F0F4F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1E293B;">
-  <div style="max-width:580px;margin:0 auto;background:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #E2E8F0;">
-    
-    <div style="background-color:#205482;padding:32px 20px 26px 20px;text-align:center;">
-      <img src="$logoUrl" alt="Logo" width="76" height="76" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,0.85);display:inline-block;background:#FFFFFF;margin-bottom:12px;" />
-      <h1 style="margin:0;color:#FFFFFF;font-size:22px;font-weight:700;">Admin Mail System Verified</h1>
-      <p style="margin:4px 0 0 0;color:#CBD5E1;font-size:12px;">$mandalGu</p>
-    </div>
+<body style="margin:0;padding:0;background-color:#f4f7f6;">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#f4f7f6; padding:40px 15px; font-family: Arial, sans-serif;">
+    <tbody>
+        <tr>
+            <td align="center">
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:600px;
+                              background-color:#ffffff;
+                              border-radius:12px;
+                              overflow:hidden;
+                              box-shadow:0 4px 15px rgba(0,0,0,0.05);
+                              border:1px solid #e2e8f0;">
+                    <tbody>
+                        <tr>
+                            <td align="center" style="padding:40px 30px 20px 30px;">
+                                <img src="$logoUrl" alt="Mandal Logo" width="120" height="120" style="display:block;
+                                            border:0;
+                                            margin:0 auto 25px auto;
+                                            border-radius:50%;
+                                            object-fit:cover;
+                                            border:2px solid #C5A059;
+                                            background-color:#ffffff;">
 
-    <div style="padding:32px 28px;">
-      <h2 style="font-size:17px;font-weight:700;color:#0F172A;margin:0 0 10px 0;">Dear ${recipient.recipientName},</h2>
-      <p style="font-size:14px;color:#475569;line-height:1.55;margin:0 0 20px 0;">
-        Your administrative notification address (<strong>${recipient.email}</strong>) has been successfully verified for the <strong>${recipient.department}</strong> department.
-      </p>
+                                <h1 style="margin:0;
+                                           color:#0a1332;
+                                           font-size:24px;
+                                           font-weight:700;
+                                           margin-bottom:8px;">
+                                    Notification System Verified
+                                </h1>
 
-      <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:14px 18px;margin-bottom:22px;font-size:13px;color:#065F46;line-height:1.5;">
-        <strong>✓ Operational:</strong> Whenever devotees submit inquiries on the public website, you will receive real-time notification alerts at this verified inbox.
-      </div>
+                                <div style="color:#C5A059; font-size:14px; font-weight:bold; margin-bottom:14px;">
+                                    $mandalGu
+                                </div>
 
-      <div style="background-color:#F8FAFC;border-radius:10px;padding:18px 20px;margin-bottom:24px;border:1px solid #E2E8F0;font-size:13.5px;">
-        <div style="margin-bottom:10px;"><strong>Department:</strong> <span style="margin-left:8px;color:#334155;">${recipient.department}</span></div>
-        <div style="margin-bottom:10px;"><strong>Primary Recipient:</strong> <span style="margin-left:8px;color:#334155;">${recipient.isPrimary ? 'Yes' : 'Secondary'}</span></div>
-        <div><strong>Verified At:</strong> <span style="margin-left:8px;color:#334155;">$timestamp</span></div>
-      </div>
+                                <p style="margin:0 auto;
+                                          color:#5a667b;
+                                          font-size:15px;
+                                          line-height:1.6;
+                                          max-width:480px;
+                                          text-align:center;">
+                                    Your administrative notification address has been successfully verified for receiving live website inquiries.
+                                </p>
+                            </td>
+                        </tr>
 
-      <div style="text-align:center;">
-        <a href="https://pavanputragarbi.web.app/#/admin" style="display:inline-block;background-color:#205482;color:#FFFFFF;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;">
-          🌐 Open Admin Portal
-        </a>
-      </div>
-    </div>
+                        <tr>
+                            <td style="padding:10px 30px 20px 30px;">
+                                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;
+                                              border:1px solid #e2e8f0;
+                                              border-radius:8px;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding:20px 24px; font-size:14px; line-height:1.7;">
+                                                <div style="margin-bottom:10px;">
+                                                    <strong style="color:#334155;">Officer Name:</strong>
+                                                    <span style="color:#0f172a; font-weight:bold; margin-left:8px;">${recipient.recipientName}</span>
+                                                </div>
+                                                <div style="margin-bottom:10px;">
+                                                    <strong style="color:#334155;">Department:</strong>
+                                                    <span style="color:#0f172a; margin-left:8px;">${recipient.department}</span>
+                                                </div>
+                                                <div style="margin-bottom:10px;">
+                                                    <strong style="color:#334155;">Verified Email:</strong>
+                                                    <span style="color:#1e3a8a; font-weight:bold; margin-left:8px;">${recipient.email}</span>
+                                                </div>
+                                                <div>
+                                                    <strong style="color:#334155;">Timestamp:</strong>
+                                                    <span style="color:#64748b; margin-left:8px;">$timestamp</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
 
-    <div style="border-top:1px solid #E2E8F0;padding:20px 24px;text-align:center;background:#FFFFFF;color:#64748B;font-size:11.5px;line-height:1.6;">
-      <p style="margin:0 0 4px 0;font-weight:700;color:#334155;font-size:13px;">$mandalGu</p>
-      <p style="margin:0 0 6px 0;">$address</p>
-      <p style="margin:0;color:#94A3B8;font-size:11px;">This is a securely generated message. Please do not reply directly to this email.</p>
-    </div>
-  </div>
+                        <tr>
+                            <td align="center" style="padding:10px 30px 34px 30px;">
+                                <a href="https://pavanputragarbi.web.app/#/admin" target="_blank" rel="noopener noreferrer" style="display:inline-block;
+                                          padding:14px 32px;
+                                          background-color:#1a49ba;
+                                          color:#ffffff;
+                                          text-decoration:none;
+                                          font-size:15px;
+                                          font-weight:bold;
+                                          border-radius:8px;">
+                                    🌐 Go to Admin Portal
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td align="center" style="background-color:#f8fafc; padding:30px 20px; border-top:1px solid #e2e8f0;">
+                                <div style="font-size:20px; margin-bottom:10px;">🏢</div>
+                                <div style="font-size:15px; color:#0f172a; font-weight:bold; margin-bottom:6px;">$mandalGu ($mandalEn)</div>
+                                <div style="font-size:12px; color:#64748b; line-height:1.6;">$address</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:600px; margin-top:20px;">
+                    <tbody>
+                        <tr>
+                            <td align="center">
+                                <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.5;">
+                                    This is an automated verification email from pavanputragarbi mandal.
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
 </body>
 </html>
 ''';
   }
 
-  /// Generates Forgot Password HTML email matching Image 3 design.
+  /// Generates Forgot Password HTML email matching the exact template provided by the user.
   String _buildForgotPasswordHtml({required String email, required String resetLink}) {
     final logoUrl = _getLogoUrl();
     final mandalGu = _getMandalNameGu();
@@ -492,59 +719,197 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Forgot Password — $mandalEn</title>
 </head>
-<body style="margin:0;padding:36px 14px;background-color:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#1E293B;">
-  <div style="max-width:540px;margin:0 auto;background:#FFFFFF;border-radius:12px;padding:42px 32px;box-shadow:0 4px 20px rgba(0,0,0,0.05);border:1px solid #E2E8F0;text-align:center;">
-    
-    <!-- Mandal Brand Logo -->
-    <div style="text-align:center;margin-bottom:20px;">
-      <img src="$logoUrl" alt="Mandal Logo" width="80" height="80" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:2px solid #E2E8F0;display:inline-block;background-color:#FFFFFF;" />
-    </div>
+<body style="margin:0;padding:0;background-color:#f4f7f6;">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#f4f7f6; padding:40px 15px; font-family: Arial, sans-serif;">
+    <tbody>
+        <tr>
+            <td align="center">
 
-    <!-- Title -->
-    <h1 style="font-size:24px;font-weight:800;color:#0F172A;margin:0 0 12px 0;">Forgot Password</h1>
+                <!-- Main Content Container -->
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:600px;
+                              background-color:#ffffff;
+                              border-radius:12px;
+                              overflow:hidden;
+                              box-shadow:0 4px 15px rgba(0,0,0,0.05);
+                              border:1px solid #e2e8f0;">
 
-    <!-- Description -->
-    <p style="font-size:14px;color:#475569;line-height:1.6;margin:0 auto 28px auto;max-width:440px;">
-      We received a request to reset the password for your account. Click the button below to securely reset your password.
-    </p>
+                    <tbody>
+                        <!-- Header Section -->
+                        <tr>
+                            <td align="center" style="padding:40px 30px 20px 30px;">
 
-    <!-- Primary Reset Password Button -->
-    <div style="margin-bottom:28px;">
-      <a href="$resetLink" style="display:inline-block;background-color:#1D4ED8;color:#FFFFFF;font-size:14.5px;font-weight:700;padding:13px 32px;border-radius:8px;text-decoration:none;box-shadow:0 2px 8px rgba(29,78,216,0.25);">
-        🔐 Reset Password
-      </a>
-    </div>
+                                <!-- Logo -->
+                                <img src="$logoUrl" alt="Mandal Logo" width="120" height="120" style="display:block;
+                                            border:0;
+                                            margin:0 auto 25px auto;
+                                            border-radius:50%;
+                                            object-fit:cover;
+                                            border:2px solid #C5A059;
+                                            background-color:#ffffff;">
 
-    <!-- Registered Email Card -->
-    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:18px 20px;margin-bottom:24px;text-align:center;">
-      <div style="font-size:22px;margin-bottom:4px;color:#64748B;">✉️</div>
-      <div style="font-size:11.5px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Registered Email</div>
-      <div style="font-size:15px;font-weight:800;color:#1E3A8A;margin-top:4px;">$email</div>
-    </div>
+                                <h1 style="margin:0;
+                                           color:#0a1332;
+                                           font-size:26px;
+                                           font-weight:700;
+                                           margin-bottom:15px;">
+                                    Forgot Password
+                                </h1>
 
-    <!-- Security Notice Card -->
-    <div style="background:#F8FAFC;border-left:4px solid #1D4ED8;padding:16px 20px;text-align:left;margin-bottom:28px;border-radius:4px;border-top:1px solid #E2E8F0;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;">
-      <div style="font-weight:800;color:#0F172A;font-size:13.5px;margin-bottom:6px;">Security Notice</div>
-      <div style="color:#475569;font-size:13px;line-height:1.5;">
-        If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
-      </div>
-    </div>
+                                <p style="margin:0 auto;
+                                          color:#5a667b;
+                                          font-size:15px;
+                                          line-height:1.6;
+                                          max-width:480px;
+                                          text-align:center;">
+                                    We received a request to reset the password
+                                    for your account. Click the button below to
+                                    securely reset your password.
+                                </p>
 
-    <!-- Secondary Reset Password Button -->
-    <div style="margin-bottom:34px;">
-      <a href="$resetLink" style="display:inline-block;background-color:#1D4ED8;color:#FFFFFF;font-size:14.5px;font-weight:700;padding:13px 32px;border-radius:8px;text-decoration:none;box-shadow:0 2px 8px rgba(29,78,216,0.25);">
-        🔐 Reset Password
-      </a>
-    </div>
+                                <!-- Primary Button -->
+                                <table border="0" cellpadding="0" cellspacing="0" style="margin-top:30px;">
+                                    <tbody>
+                                        <tr>
+                                            <td align="center" bgcolor="#1a49ba" style="border-radius:8px;">
+                                                <a href="$resetLink" target="_blank" rel="noopener noreferrer" style="display:inline-block;
+                                                          padding:14px 32px;
+                                                          color:#ffffff;
+                                                          text-decoration:none;
+                                                          font-size:16px;
+                                                          font-weight:bold;
+                                                          border-radius:8px;">
+                                                    🔐 Reset Password
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
 
-    <!-- Clean Footer -->
-    <div style="border-top:1px solid #E2E8F0;padding-top:22px;text-align:center;color:#64748B;font-size:12px;line-height:1.6;">
-      <p style="margin:0 0 4px 0;font-weight:700;color:#334155;font-size:13px;">$mandalGu</p>
-      <p style="margin:0 0 8px 0;color:#64748B;font-size:11.5px;">$address</p>
-      <p style="margin:0;color:#94A3B8;font-size:11px;">This is a securely generated message. Please do not reply directly to this email.</p>
-    </div>
+                            </td>
+                        </tr>
 
-  </div>
+                        <!-- Account Summary (Only Email) -->
+                        <tr>
+                            <td style="padding:10px 30px 20px 30px;">
+                                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;
+                                              border:1px solid #e2e8f0;
+                                              border-radius:8px;">
+                                    <tbody>
+                                        <tr>
+                                            <!-- Email Only -->
+                                            <td align="center" style="padding:20px 10px;">
+                                                <div style="font-size:20px; margin-bottom:8px;">✉️</div>
+                                                <div style="color:#64748b;
+                                                            font-size:12px;
+                                                            margin-bottom:8px;">
+                                                    Registered Email
+                                                </div>
+                                                <div style="color:#1e3a8a;
+                                                            font-size:14px;
+                                                            font-weight:bold;
+                                                            word-break:break-word;">
+                                                    $email
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- Security Notice -->
+                        <tr>
+                            <td style="padding:20px 30px 20px 30px;">
+                                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;
+                                              border-left:4px solid #1a49ba;
+                                              border-radius:8px;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding:18px 20px;
+                                                       font-size:13px;
+                                                       line-height:1.6;
+                                                       color:#475569;">
+                                                <strong style="color:#0f172a;">
+                                                    Security Notice
+                                                </strong>
+                                                <br><br>
+                                                If you did not request a password
+                                                reset, you can safely ignore this
+                                                email. Your password will remain
+                                                unchanged.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- Action Button (Second) -->
+                        <tr>
+                            <td align="center" style="padding:10px 30px 40px 30px;">
+                                <a href="$resetLink" target="_blank" rel="noopener noreferrer" style="display:inline-block;
+                                          padding:12px 28px;
+                                          background-color:#1a49ba;
+                                          color:#ffffff;
+                                          text-decoration:none;
+                                          font-size:15px;
+                                          font-weight:bold;
+                                          border-radius:8px;
+                                          border:1px solid #1a49ba;">
+                                    🔐 Reset Password
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- Inner Footer (Company Info) -->
+                        <tr>
+                            <td align="center" style="background-color:#f8fafc;
+                                       padding:30px 20px;
+                                       border-top:1px solid #e2e8f0;">
+
+                                <div style="font-size:20px; margin-bottom:10px;">🏢</div>
+
+                                <div style="font-size:15px;
+                                            color:#0f172a;
+                                            font-weight:bold;
+                                            margin-bottom:6px;">
+                                    $mandalGu ($mandalEn)
+                                </div>
+
+                                <div style="font-size:12px;
+                                            color:#64748b;
+                                            line-height:1.6;">
+                                    $address
+                                </div>
+
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <!-- Main Footer -->
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:600px;
+                              margin-top:20px;">
+                    <tbody>
+                        <tr>
+                            <td align="center">
+                                <p style="margin:0;
+                                          font-size:12px;
+                                          color:#94a3b8;
+                                          line-height:1.5;">
+                                    This is an automated email from pavanputragarbi mandal.
+                                    Please do not reply.
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+    </tbody>
+</table>
 </body>
 </html>
 ''';
