@@ -11,6 +11,7 @@ import 'core/my_app_bloc/my_app_bloc.dart';
 import 'core/my_app_bloc/my_app_event.dart';
 import 'core/my_app_bloc/my_app_state.dart';
 import 'core/routing/app_router.dart';
+import 'core/seo/app_seo_manager.dart';
 import 'core/theme/app_theme.dart';
 
 class PavanPutraApp extends StatelessWidget {
@@ -23,6 +24,7 @@ class PavanPutraApp extends StatelessWidget {
       child: BlocBuilder<MyAppBloc, MyAppState>(
         buildWhen: (prev, curr) => prev.themeMode != curr.themeMode || prev.locale != curr.locale,
         builder: (context, state) {
+          AppSeoManager.instance.updateLanguage(state.locale.languageCode);
           return Sizer(
             builder: (context, orientation, deviceType) {
               return MaterialApp.router(

@@ -1,11 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>/</loc></url>
-  <url><loc>/about</loc></url>
-  <url><loc>/history</loc></url>
-  <url><loc>/archive</loc></url>
-  <url><loc>/gallery</loc></url>
-  <url><loc>/videos</loc></url>
-  <url><loc>/blog</loc></url>
-  <url><loc>/contact</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- 1. Home / Landing Page -->
+  <url>
+    <loc>https://pavanputragarbi.web.app/</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="gu" href="https://pavanputragarbi.web.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pavanputragarbi.web.app/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pavanputragarbi.web.app/"/>
+  </url>
+
+  <!-- 2. About The Mandal -->
+  <url>
+    <loc>https://pavanputragarbi.web.app/about</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="gu" href="https://pavanputragarbi.web.app/about"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pavanputragarbi.web.app/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pavanputragarbi.web.app/about"/>
+  </url>
+
+  <!-- 3. Historical Chronology & Milestones -->
+  <url>
+    <loc>https://pavanputragarbi.web.app/history</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="gu" href="https://pavanputragarbi.web.app/history"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pavanputragarbi.web.app/history"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pavanputragarbi.web.app/history"/>
+  </url>
+
+  <!-- 4. Multi-Year Navratri Archive -->
+  <url>
+    <loc>https://pavanputragarbi.web.app/archive</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="gu" href="https://pavanputragarbi.web.app/archive"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pavanputragarbi.web.app/archive"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pavanputragarbi.web.app/archive"/>
+  </url>
+
+  <!-- 5. Archival Photo Gallery -->
+  <url>
+    <loc>https://pavanputragarbi.web.app/gallery</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="gu" href="https://pavanputragarbi.web.app/gallery"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pavanputragarbi.web.app/gallery"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pavanputragarbi.web.app/gallery"/>
+  </url>
+
+  <!-- 6. Video Archive & YouTube Live -->
+  <url>
+    <loc>https://pavanputragarbi.web.app/videos</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="gu" href="https://pavanputragarbi.web.app/videos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pavanputragarbi.web.app/videos"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pavanputragarbi.web.app/videos"/>
+  </url>
+
+  <!-- 7. Cultural Stories & Blog -->
+  <url>
+    <loc>https://pavanputragarbi.web.app/blog</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="gu" href="https://pavanputragarbi.web.app/blog"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pavanputragarbi.web.app/blog"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pavanputragarbi.web.app/blog"/>
+  </url>
+
+  <!-- 8. Contact & Devotional Seva -->
+  <url>
+    <loc>https://pavanputragarbi.web.app/contact</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="gu" href="https://pavanputragarbi.web.app/contact"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://pavanputragarbi.web.app/contact"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pavanputragarbi.web.app/contact"/>
+  </url>
+
 </urlset>

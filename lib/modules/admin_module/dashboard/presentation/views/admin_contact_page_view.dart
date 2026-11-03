@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/dependency_injection/dependency_injection.dart';
@@ -30,20 +31,25 @@ class AdminContactPageView extends StatefulWidget {
 class _AdminContactPageViewState extends State<AdminContactPageView> {
   // Section 1: Contact Details Controllers
   late final TextEditingController _addressCtrl;
+  late final TextEditingController _addressGuCtrl;
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _whatsappCtrl;
   late final TextEditingController _emailCtrl;
   late final TextEditingController _aartiTimeCtrl;
+  late final TextEditingController _aartiTimeGuCtrl;
 
   // Section 2: QR Payment & Offerings Controllers
   late final TextEditingController _upiIdCtrl;
   late final TextEditingController _recipientNameCtrl;
+  late final TextEditingController _recipientNameGuCtrl;
   late final TextEditingController _paymentNotesCtrl;
+  late final TextEditingController _paymentNotesGuCtrl;
   late bool _isPaymentEnabled;
   late String _paymentQrImageUrl;
 
   // Live Preview & Inbox State
   String _previewLang = 'en';
+  String _paymentPreviewLang = 'en';
   String _statusFilter = 'All';
   final TextEditingController _searchCtrl = TextEditingController();
   String _searchQuery = '';
@@ -68,17 +74,37 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     if (mounted) setState(() {});
   }
 
+  void _onFormTextChanged() {
+    if (mounted) setState(() {});
+  }
+
   void _reloadControllersFromStore() {
     final s = widget.store.settings;
-    _addressCtrl = TextEditingController(text: s.address);
-    _phoneCtrl = TextEditingController(text: s.contactPhone);
-    _whatsappCtrl = TextEditingController(text: s.whatsappNumber);
-    _emailCtrl = TextEditingController(text: s.contactEmail);
-    _aartiTimeCtrl = TextEditingController(text: s.dailyAartiTime);
+    _addressCtrl = TextEditingController(text: s.address)
+      ..addListener(_onFormTextChanged);
+    _addressGuCtrl = TextEditingController(text: s.addressGu)
+      ..addListener(_onFormTextChanged);
+    _phoneCtrl = TextEditingController(text: s.contactPhone)
+      ..addListener(_onFormTextChanged);
+    _whatsappCtrl = TextEditingController(text: s.whatsappNumber)
+      ..addListener(_onFormTextChanged);
+    _emailCtrl = TextEditingController(text: s.contactEmail)
+      ..addListener(_onFormTextChanged);
+    _aartiTimeCtrl = TextEditingController(text: s.dailyAartiTime)
+      ..addListener(_onFormTextChanged);
+    _aartiTimeGuCtrl = TextEditingController(text: s.dailyAartiTimeGu)
+      ..addListener(_onFormTextChanged);
 
-    _upiIdCtrl = TextEditingController(text: s.paymentUpiId);
-    _recipientNameCtrl = TextEditingController(text: s.paymentRecipientName);
-    _paymentNotesCtrl = TextEditingController(text: s.paymentNotes);
+    _upiIdCtrl = TextEditingController(text: s.paymentUpiId)
+      ..addListener(_onFormTextChanged);
+    _recipientNameCtrl = TextEditingController(text: s.paymentRecipientName)
+      ..addListener(_onFormTextChanged);
+    _recipientNameGuCtrl = TextEditingController(text: s.paymentRecipientNameGu)
+      ..addListener(_onFormTextChanged);
+    _paymentNotesCtrl = TextEditingController(text: s.paymentNotes)
+      ..addListener(_onFormTextChanged);
+    _paymentNotesGuCtrl = TextEditingController(text: s.paymentNotesGu)
+      ..addListener(_onFormTextChanged);
     _isPaymentEnabled = s.isPaymentEnabled;
     _paymentQrImageUrl = s.paymentQrImageUrl;
   }
@@ -86,19 +112,36 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   @override
   void dispose() {
     widget.store.removeListener(_onStoreUpdated);
+    _addressCtrl.removeListener(_onFormTextChanged);
+    _addressGuCtrl.removeListener(_onFormTextChanged);
+    _phoneCtrl.removeListener(_onFormTextChanged);
+    _whatsappCtrl.removeListener(_onFormTextChanged);
+    _emailCtrl.removeListener(_onFormTextChanged);
+    _aartiTimeCtrl.removeListener(_onFormTextChanged);
+    _aartiTimeGuCtrl.removeListener(_onFormTextChanged);
+    _upiIdCtrl.removeListener(_onFormTextChanged);
+    _recipientNameCtrl.removeListener(_onFormTextChanged);
+    _recipientNameGuCtrl.removeListener(_onFormTextChanged);
+    _paymentNotesCtrl.removeListener(_onFormTextChanged);
+    _paymentNotesGuCtrl.removeListener(_onFormTextChanged);
+
     _addressCtrl.dispose();
+    _addressGuCtrl.dispose();
     _phoneCtrl.dispose();
     _whatsappCtrl.dispose();
     _emailCtrl.dispose();
     _aartiTimeCtrl.dispose();
+    _aartiTimeGuCtrl.dispose();
     _upiIdCtrl.dispose();
     _recipientNameCtrl.dispose();
+    _recipientNameGuCtrl.dispose();
     _paymentNotesCtrl.dispose();
+    _paymentNotesGuCtrl.dispose();
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  // --- External URL Launcher Helper ---
+  // --- External URL & Email Launcher Helpers ---
   Future<void> _launchExternalUrl(String url) async {
     try {
       final uri = Uri.parse(url);
@@ -112,21 +155,95 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     }
   }
 
+  Future<void> _launchEmail({
+    required String email,
+    String subject = '',
+    String body = '',
+    BuildContext? ctx,
+  }) async {
+    final cleanEmail = email.trim();
+    if (cleanEmail.isEmpty) return;
+
+    final List<String> queryParts = [];
+    if (subject.isNotEmpty) {
+      queryParts.add('subject=${Uri.encodeComponent(subject)}');
+    }
+    if (body.isNotEmpty) {
+      queryParts.add('body=${Uri.encodeComponent(body)}');
+    }
+
+    final mailtoUri = Uri(
+      scheme: 'mailto',
+      path: cleanEmail,
+      query: queryParts.isNotEmpty ? queryParts.join('&') : null,
+    );
+
+    bool launched = false;
+    try {
+      if (await canLaunchUrl(mailtoUri)) {
+        launched = await launchUrl(
+          mailtoUri,
+          mode: LaunchMode.externalApplication,
+        );
+      }
+      if (!launched) {
+        launched = await launchUrl(mailtoUri);
+      }
+    } catch (e) {
+      debugPrint('Launch email error: $e');
+    }
+
+    final activeContext = ctx ?? (mounted ? context : null);
+    if (activeContext != null && activeContext.mounted) {
+      if (launched) {
+        MyAppToastMessage.info(
+          activeContext,
+          title: 'Opening Email Client',
+          description: 'Composing email to $cleanEmail',
+        );
+      } else {
+        // Fallback: Copy email to clipboard automatically so user can compose anywhere
+        await Clipboard.setData(ClipboardData(text: cleanEmail));
+        if (mounted) {
+          MyAppToastMessage.info(
+            context,
+            title: 'Email Address Copied',
+            description:
+                '$cleanEmail copied to clipboard. You can paste it into Gmail or your email app.',
+          );
+        }
+      }
+    }
+  }
+
+  void _copyToClipboard(String text, String label) {
+    if (text.trim().isEmpty) return;
+    Clipboard.setData(ClipboardData(text: text.trim()));
+    MyAppToastMessage.info(
+      context,
+      title: '$label Copied',
+      description: '$text copied to clipboard.',
+    );
+  }
+
   // --- Save Operations ---
   void _saveContactInfo() {
     final updated = widget.store.settings.copyWith(
       address: _addressCtrl.text.trim(),
+      addressGu: _addressGuCtrl.text.trim(),
       contactPhone: _phoneCtrl.text.trim(),
       whatsappNumber: _whatsappCtrl.text.trim(),
       contactEmail: _emailCtrl.text.trim(),
       dailyAartiTime: _aartiTimeCtrl.text.trim(),
+      dailyAartiTimeGu: _aartiTimeGuCtrl.text.trim(),
     );
     widget.store.updateSettings(updated);
 
     MyAppToastMessage.success(
       context,
       title: 'Contact Details Saved',
-      description: 'Mandal address, helpline numbers, and timings updated across website.',
+      description:
+          'Mandal address, helpline numbers, and timings updated across website in English & Gujarati.',
     );
   }
 
@@ -135,7 +252,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
       paymentQrImageUrl: _paymentQrImageUrl.trim(),
       paymentUpiId: _upiIdCtrl.text.trim(),
       paymentRecipientName: _recipientNameCtrl.text.trim(),
+      paymentRecipientNameGu: _recipientNameGuCtrl.text.trim(),
       paymentNotes: _paymentNotesCtrl.text.trim(),
+      paymentNotesGu: _paymentNotesGuCtrl.text.trim(),
       isPaymentEnabled: _isPaymentEnabled,
     );
     widget.store.updateSettings(updated);
@@ -144,7 +263,7 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
       context,
       title: 'Payment & Seva Settings Saved',
       description: _isPaymentEnabled
-          ? 'Verified UPI and QR Code are now active on the public Contact page.'
+          ? 'Verified UPI and QR Code are now active on the public Contact page in English & Gujarati.'
           : 'Payment & Seva section is currently hidden from public visitors.',
     );
   }
@@ -154,6 +273,24 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     showMyAppDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: serviceLocator<MyAppColors>().getCardBackgroundColor(
+          context,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: serviceLocator<MyAppColors>().heritageGold.withValues(
+              alpha: 0.6,
+            ),
+            width: 1.2,
+          ),
+        ),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: context.isMobile ? 16 : 24,
+          vertical: 24,
+        ),
+        actionsOverflowButtonSpacing: 8,
+        actionsOverflowDirection: VerticalDirection.down,
         title: const Text('Clear Contact Information?'),
         content: const Text(
           'Are you sure you want to clear venue address, phone lines, and timings in the editor? Changes will not be live until saved.',
@@ -165,16 +302,19 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             onPressed: () {
               setState(() {
                 _addressCtrl.clear();
+                _addressGuCtrl.clear();
                 _phoneCtrl.clear();
                 _whatsappCtrl.clear();
                 _emailCtrl.clear();
                 _aartiTimeCtrl.clear();
+                _aartiTimeGuCtrl.clear();
               });
               Navigator.pop(ctx);
               MyAppToastMessage.warning(
                 context,
                 title: 'Section Cleared',
-                description: 'Fields cleared. Click "Save Contact Details" to publish or revert.',
+                description:
+                    'Fields cleared. Click "Save Contact Details" to publish or revert.',
               );
             },
             label: 'Clear All',
@@ -184,13 +324,659 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     );
   }
 
-  void _confirmClearPaymentSection() {
+  // =========================================================================
+  // 📱 DEVOTIONAL OFFERINGS & QR CODE DIALOGS (View, Add/Edit, Delete)
+  // =========================================================================
+
+  /// View QR Code & Full Payment Details Modal
+  void _openViewQrCodeDialog() {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+    final isMobile = context.isMobile;
+
+    showMyAppDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final isGu = _paymentPreviewLang == 'gu';
+          final upiId = _upiIdCtrl.text.trim().isNotEmpty
+              ? _upiIdCtrl.text.trim()
+              : (widget.store.settings.paymentUpiId.isNotEmpty
+                    ? widget.store.settings.paymentUpiId
+                    : 'pavanputragarbi@upi');
+          final recipient =
+              (isGu && _recipientNameGuCtrl.text.trim().isNotEmpty)
+              ? _recipientNameGuCtrl.text.trim()
+              : (_recipientNameCtrl.text.trim().isNotEmpty
+                    ? _recipientNameCtrl.text.trim()
+                    : (isGu
+                          ? 'શ્રી પવનપુત્ર ગરબી મંડળ ટ્રસ્ટ'
+                          : 'Shree Pavan Putra Garbi Mandal Trust'));
+          final notes = (isGu && _paymentNotesGuCtrl.text.trim().isNotEmpty)
+              ? _paymentNotesGuCtrl.text.trim()
+              : (_paymentNotesCtrl.text.trim().isNotEmpty
+                    ? _paymentNotesCtrl.text.trim()
+                    : (isGu
+                          ? 'સીધું મંદિર સેવા અને નવરાત્રિ મહોત્સવ અનુદાન'
+                          : 'Direct Mandir Seva & Navratri Mahotsav Offerings'));
+          final hasQr = _paymentQrImageUrl.trim().isNotEmpty;
+
+          return AlertDialog(
+            backgroundColor: colors.getCardBackgroundColor(context),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: colors.heritageGold.withValues(alpha: 0.6),
+                width: 1.2,
+              ),
+            ),
+            insetPadding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 12 : 24,
+              vertical: 20,
+            ),
+            titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 8,
+            ),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            actionsOverflowButtonSpacing: 8,
+            actionsOverflowDirection: VerticalDirection.down,
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.heritageGold.withValues(alpha: 0.18),
+                  ),
+                  child: Icon(
+                    Icons.qr_code_scanner_rounded,
+                    color: colors.heritageGold,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isGu
+                            ? 'ગરબી સેવા અને દાન QR કોડ'
+                            : 'Devotional Seva QR & Details',
+                        style: styles.editorialSerif(
+                          context,
+                          size: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          HeritageBadge(
+                            label: _isPaymentEnabled
+                                ? 'ACTIVE ON WEBSITE'
+                                : 'HIDDEN FROM PUBLIC',
+                            backgroundColor: _isPaymentEnabled
+                                ? Colors.green.withValues(alpha: 0.15)
+                                : Colors.grey.withValues(alpha: 0.15),
+                            textColor: _isPaymentEnabled
+                                ? Colors.green
+                                : Colors.grey,
+                            borderColor: _isPaymentEnabled
+                                ? Colors.green.withValues(alpha: 0.4)
+                                : Colors.grey.withValues(alpha: 0.4),
+                          ),
+                          HeritageBadge(
+                            label: isGu ? 'UPI ચકાસાયેલ' : 'UPI VERIFIED',
+                            backgroundColor: colors.heritageGold.withValues(
+                              alpha: 0.15,
+                            ),
+                            textColor: colors.lightGold,
+                            borderColor: colors.heritageGold.withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                MyAppSegmentView.language(
+                  selectedLanguage: _paymentPreviewLang,
+                  onLanguageChanged: (val) {
+                    setState(() => _paymentPreviewLang = val);
+                    setDialogState(() {});
+                  },
+                ),
+              ],
+            ),
+            content: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 540,
+                minWidth: isMobile
+                    ? (MediaQuery.sizeOf(context).width - 32).clamp(
+                        260.0,
+                        540.0,
+                      )
+                    : 480,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // High-resolution QR code container
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: colors.heritageGold.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 14,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: hasQr
+                            ? CachedNetworkImage(
+                                imageUrl: _paymentQrImageUrl.trim(),
+                                width: 220,
+                                height: 220,
+                                fit: BoxFit.contain,
+                                placeholder: (_, _) => const SizedBox(
+                                  width: 220,
+                                  height: 220,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                                errorWidget: (_, _, _) => Container(
+                                  width: 220,
+                                  height: 220,
+                                  color: Colors.grey.shade100,
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.broken_image_rounded,
+                                      size: 56,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                width: 220,
+                                height: 220,
+                                color: Colors.grey.shade100,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.qr_code_2_rounded,
+                                      size: 68,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      isGu
+                                          ? 'કોઈ QR ઈમેજ નથી'
+                                          : 'No QR Image Configured',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      isGu
+                                          ? '"વિગતો સુધારો" પર ક્લિક કરો'
+                                          : 'Click "Edit QR Details" to upload',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Verified UPI Box with One-tap Copy
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.getSurfaceColor(context),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colors.heritageGold.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.payment_rounded,
+                            color: colors.heritageGold,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isGu
+                                      ? 'ચકાસાયેલ UPI આઈડી'
+                                      : 'Verified Mandal UPI ID',
+                                  style: styles.cleanSans(
+                                    context,
+                                    size: 11,
+                                    color: colors.getSecondaryTextColor(
+                                      context,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                SelectableText(
+                                  upiId,
+                                  style: styles.cleanSans(
+                                    context,
+                                    size: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.getPrimaryTextColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.copy_rounded, size: 18),
+                            color: colors.heritageGold,
+                            tooltip: 'Copy UPI ID',
+                            onPressed: () => _copyToClipboard(upiId, 'UPI ID'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Beneficiary & Notes Card
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: colors.getSurfaceColor(context),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colors.getBorderColor(context),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.account_balance_rounded,
+                                size: 16,
+                                color: colors.heritageGold,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isGu
+                                          ? 'ખાતાધારક / ટ્રસ્ટનું નામ'
+                                          : 'Beneficiary / Account Name',
+                                      style: styles.cleanSans(
+                                        context,
+                                        size: 11,
+                                        color: colors.getSecondaryTextColor(
+                                          context,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    SelectableText(
+                                      recipient,
+                                      style: styles.cleanSans(
+                                        context,
+                                        size: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: colors.getPrimaryTextColor(
+                                          context,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 16),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.notes_rounded,
+                                size: 16,
+                                color: colors.heritageGold,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isGu
+                                          ? 'સેવા નોંધ અને સૂચના'
+                                          : 'Seva Instructions & Notes',
+                                      style: styles.cleanSans(
+                                        context,
+                                        size: 11,
+                                        color: colors.getSecondaryTextColor(
+                                          context,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    SelectableText(
+                                      notes,
+                                      style: styles.cleanSans(
+                                        context,
+                                        size: 12.5,
+                                        color: colors.getPrimaryTextColor(
+                                          context,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              MyAppTextButton(
+                onPressed: () => Navigator.pop(ctx),
+                label: 'Close',
+              ),
+              MyAppOutlineButton(
+                isDanger: true,
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _confirmDeleteQrCode();
+                },
+                label: 'Delete QR',
+              ),
+              MyAppFillButton.icon(
+                icon: const Icon(Icons.edit_rounded, size: 16),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _openAddOrEditQrDialog();
+                },
+                label: 'Edit QR Details',
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Add / Edit QR Code & Payment Details Modal Dialog
+  void _openAddOrEditQrDialog() {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+    final isMobile = context.isMobile;
+
+    final tempUpiCtrl = TextEditingController(text: _upiIdCtrl.text);
+    final tempNameCtrl = TextEditingController(text: _recipientNameCtrl.text);
+    final tempNameGuCtrl = TextEditingController(
+      text: _recipientNameGuCtrl.text,
+    );
+    final tempNotesCtrl = TextEditingController(text: _paymentNotesCtrl.text);
+    final tempNotesGuCtrl = TextEditingController(
+      text: _paymentNotesGuCtrl.text,
+    );
+    String tempQrUrl = _paymentQrImageUrl;
+    bool tempIsEnabled = _isPaymentEnabled;
+    final formKey = GlobalKey<FormState>();
+
+    showMyAppDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: colors.getCardBackgroundColor(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(
+              color: colors.heritageGold.withValues(alpha: 0.6),
+              width: 1.2,
+            ),
+          ),
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 12 : 24,
+            vertical: 20,
+          ),
+          actionsOverflowButtonSpacing: 8,
+          actionsOverflowDirection: VerticalDirection.down,
+          title: Text(
+            tempQrUrl.isNotEmpty
+                ? 'Edit QR Code & Payment Details'
+                : 'Add Verified QR Code & Seva Details',
+            style: styles.editorialSerif(
+              context,
+              size: 19,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 540,
+              minWidth: isMobile
+                  ? (MediaQuery.sizeOf(context).width - 32).clamp(260.0, 540.0)
+                  : 480,
+            ),
+            child: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Configure verified UPI QR Code, account recipient, and devotional seva notes for devotees.',
+                      style: styles.cleanSans(
+                        context,
+                        size: 12,
+                        color: colors.getSecondaryTextColor(context),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // QR Code Image Picker
+                    MyAppImagePicker(
+                      label: 'Verified UPI QR Code Image',
+                      helperText:
+                          'Pick QR image from device or paste image URL.',
+                      initialImageUrl: tempQrUrl,
+                      height: 180,
+                      onImageChanged: (url) =>
+                          setDialogState(() => tempQrUrl = url),
+                      onImageRemoved: () =>
+                          setDialogState(() => tempQrUrl = ''),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // UPI ID
+                    MyAppTextFormField(
+                      controller: tempUpiCtrl,
+                      labelText: 'Verified UPI ID *',
+                      hintText:
+                          'e.g. pavanputragarbi@okhdfcbank or 9876543210@upi',
+                      prefixIcon: const Icon(Icons.payment_rounded),
+                      validator: (val) => val == null || val.trim().isEmpty
+                          ? 'Please enter UPI ID'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Recipient Name (EN)
+                    MyAppTextFormField(
+                      controller: tempNameCtrl,
+                      labelText: 'Account / Trust Name (English) *',
+                      hintText: 'e.g. Shree Pavan Putra Garbi Mandal Trust',
+                      prefixIcon: const Icon(Icons.account_balance_rounded),
+                      validator: (val) => val == null || val.trim().isEmpty
+                          ? 'Please enter account name'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Recipient Name (GU)
+                    MyAppTextFormField(
+                      controller: tempNameGuCtrl,
+                      labelText:
+                          'Account / Trust Name (Gujarati / ખાતાધારકનું નામ)',
+                      hintText: 'દા.ત. શ્રી પવનપુત્ર ગરબી મંડળ ટ્રસ્ટ',
+                      prefixIcon: const Icon(Icons.account_balance_rounded),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Notes (EN)
+                    MyAppTextFormField(
+                      controller: tempNotesCtrl,
+                      labelText: 'Payment Instructions (English)',
+                      hintText:
+                          'e.g. Direct mandal seva for Navratri Mahotsav 2026',
+                      prefixIcon: const Icon(Icons.notes_rounded),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Notes (GU)
+                    MyAppTextFormField(
+                      controller: tempNotesGuCtrl,
+                      labelText:
+                          'Payment Instructions (Gujarati / ચુકવણી નોંધ)',
+                      hintText:
+                          'દા.ત. નવરાત્રિ મહોત્સવ સેવા અર્થે સીધું અનુદાન',
+                      prefixIcon: const Icon(Icons.notes_rounded),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Master Toggle
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: tempIsEnabled,
+                      activeThumbColor: colors.heritageGold,
+                      title: Text(
+                        'Show on Website',
+                        style: styles.cleanSans(
+                          context,
+                          size: 13.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Display verified QR and UPI details on public Contact page',
+                        style: styles.cleanSans(
+                          context,
+                          size: 11,
+                          color: colors.getSecondaryTextColor(context),
+                        ),
+                      ),
+                      onChanged: (val) =>
+                          setDialogState(() => tempIsEnabled = val),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            MyAppTextButton(
+              onPressed: () => Navigator.pop(ctx),
+              label: 'Cancel',
+            ),
+            MyAppFillButton(
+              onPressed: () {
+                if (formKey.currentState?.validate() ?? false) {
+                  setState(() {
+                    _upiIdCtrl.text = tempUpiCtrl.text.trim();
+                    _recipientNameCtrl.text = tempNameCtrl.text.trim();
+                    _recipientNameGuCtrl.text = tempNameGuCtrl.text.trim();
+                    _paymentNotesCtrl.text = tempNotesCtrl.text.trim();
+                    _paymentNotesGuCtrl.text = tempNotesGuCtrl.text.trim();
+                    _paymentQrImageUrl = tempQrUrl.trim();
+                    _isPaymentEnabled = tempIsEnabled;
+                  });
+                  _savePaymentSettings();
+                  Navigator.pop(ctx);
+                }
+              },
+              label: 'Save & Update QR',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Delete / Remove QR Code & Seva Confirmation
+  void _confirmDeleteQrCode() {
     showMyAppDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reset Payment & Seva Details?'),
+        backgroundColor: serviceLocator<MyAppColors>().getCardBackgroundColor(
+          context,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: serviceLocator<MyAppColors>().heritageGold.withValues(
+              alpha: 0.6,
+            ),
+            width: 1.2,
+          ),
+        ),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: context.isMobile ? 16 : 24,
+          vertical: 24,
+        ),
+        actionsOverflowButtonSpacing: 8,
+        actionsOverflowDirection: VerticalDirection.down,
+        title: const Text('Delete / Remove QR Code & Seva?'),
         content: const Text(
-          'Are you sure you want to clear UPI ID, recipient name, notes, and QR code in the editor?',
+          'Are you sure you want to delete the QR code image and payment details? This will immediately remove the devotional offering section from the public website.',
         ),
         actions: [
           MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Cancel'),
@@ -200,17 +986,22 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               setState(() {
                 _upiIdCtrl.clear();
                 _recipientNameCtrl.clear();
+                _recipientNameGuCtrl.clear();
                 _paymentNotesCtrl.clear();
+                _paymentNotesGuCtrl.clear();
                 _paymentQrImageUrl = '';
+                _isPaymentEnabled = false;
               });
+              _savePaymentSettings();
               Navigator.pop(ctx);
               MyAppToastMessage.warning(
                 context,
-                title: 'Payment Section Cleared',
-                description: 'Payment fields reset in editor.',
+                title: 'QR Code & Seva Removed',
+                description:
+                    'Payment QR details deleted and hidden from website.',
               );
             },
-            label: 'Clear Payment',
+            label: 'Delete QR Code',
           ),
         ],
       ),
@@ -218,16 +1009,22 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   }
 
   // =========================================================================
-  // ✉️ NOTIFICATION EMAILS DIALOGS & ACTIONS (Add, Edit, Delete, Test)
+  // ✉️ NOTIFICATION EMAILS DIALOGS & ACTIONS (Add, Edit, Delete, View, Test)
   // =========================================================================
   void _openNotificationEmailDialog({AdminNotificationEmail? emailToEdit}) {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
     final isEditing = emailToEdit != null;
 
-    final nameCtrl = TextEditingController(text: isEditing ? emailToEdit.recipientName : '');
-    final emailCtrl = TextEditingController(text: isEditing ? emailToEdit.email : '');
-    final deptCtrl = TextEditingController(text: isEditing ? emailToEdit.department : 'General Inquiries & Helpline');
+    final nameCtrl = TextEditingController(
+      text: isEditing ? emailToEdit.recipientName : '',
+    );
+    final emailCtrl = TextEditingController(
+      text: isEditing ? emailToEdit.email : '',
+    );
+    final deptCtrl = TextEditingController(
+      text: isEditing ? emailToEdit.department : 'General Inquiries & Helpline',
+    );
     bool isPrimary = isEditing ? emailToEdit.isPrimary : false;
     bool isEnabled = isEditing ? emailToEdit.isEnabled : true;
     final formKey = GlobalKey<FormState>();
@@ -239,12 +1036,26 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           backgroundColor: colors.getCardBackgroundColor(context),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
-            side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
+            side: BorderSide(
+              color: colors.heritageGold.withValues(alpha: 0.6),
+              width: 1.2,
+            ),
           ),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: context.isMobile ? 14 : 24,
+            vertical: 20,
+          ),
+          actionsOverflowButtonSpacing: 8,
+          actionsOverflowDirection: VerticalDirection.down,
           title: Text(
-            isEditing ? 'Edit Inbound Notification Email' : 'Add Inbound Notification Email',
-            style: styles.editorialSerif(context, size: 19, fontWeight: FontWeight.w700),
+            isEditing
+                ? 'Edit Inbound Notification Email'
+                : 'Add Inbound Notification Email',
+            style: styles.editorialSerif(
+              context,
+              size: 19,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
@@ -257,7 +1068,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   children: [
                     Text(
                       'When a citizen submits an inquiry on the Contact page, real-time emails are dispatched to this address.',
-                      style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                      style: styles.cleanSans(
+                        context,
+                        size: 12,
+                        color: colors.getSecondaryTextColor(context),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     MyAppTextFormField(
@@ -265,7 +1080,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                       labelText: 'Recipient Officer / Trust Name',
                       hintText: 'e.g. Trustee President or Mandal Office',
                       prefixIcon: const Icon(Icons.person_outline_rounded),
-                      validator: (val) => val == null || val.trim().isEmpty ? 'Please enter recipient name' : null,
+                      validator: (val) => val == null || val.trim().isEmpty
+                          ? 'Please enter recipient name'
+                          : null,
                     ),
                     const SizedBox(height: 12),
                     MyAppTextFormField(
@@ -275,8 +1092,12 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                       hintText: 'e.g. admin@pavanputragarbi.org or gmail.com',
                       prefixIcon: const Icon(Icons.email_outlined),
                       validator: (val) {
-                        if (val == null || val.trim().isEmpty) return 'Please enter email address';
-                        if (!val.contains('@') || !val.contains('.')) return 'Please enter a valid email address';
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Please enter email address';
+                        }
+                        if (!val.contains('@') || !val.contains('.')) {
+                          return 'Please enter a valid email address';
+                        }
                         return null;
                       },
                     ),
@@ -284,7 +1105,8 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     MyAppTextFormField(
                       controller: deptCtrl,
                       labelText: 'Department / Category',
-                      hintText: 'e.g. General Inquiries, Donations & Seva, Aarti Timings',
+                      hintText:
+                          'e.g. General Inquiries, Donations & Seva, Aarti Timings',
                       prefixIcon: const Icon(Icons.category_outlined),
                     ),
                     const SizedBox(height: 14),
@@ -293,17 +1115,36 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                       value: isPrimary,
                       activeColor: colors.deepMaroon,
                       checkColor: colors.heritageGold,
-                      title: const Text('Primary Recipient', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                      subtitle: const Text('Primary recipient appears as default sender in automated devotee acknowledgments.', style: TextStyle(fontSize: 11)),
-                      onChanged: (val) => setDialogState(() => isPrimary = val ?? false),
+                      title: const Text(
+                        'Primary Recipient',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Primary recipient appears as default sender in automated devotee acknowledgments.',
+                        style: TextStyle(fontSize: 11),
+                      ),
+                      onChanged: (val) =>
+                          setDialogState(() => isPrimary = val ?? false),
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       value: isEnabled,
                       activeThumbColor: colors.heritageGold,
                       activeTrackColor: colors.deepMaroon,
-                      title: const Text('Active for Inbound Alerts', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                      subtitle: const Text('Receive real-time notifications when devotees submit form.', style: TextStyle(fontSize: 11)),
+                      title: const Text(
+                        'Active for Inbound Alerts',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Receive real-time notifications when devotees submit form.',
+                        style: TextStyle(fontSize: 11),
+                      ),
                       onChanged: (val) => setDialogState(() => isEnabled = val),
                     ),
                   ],
@@ -312,26 +1153,42 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             ),
           ),
           actions: [
-            MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Cancel'),
+            MyAppTextButton(
+              onPressed: () => Navigator.pop(ctx),
+              label: 'Cancel',
+            ),
             MyAppFillButton(
               onPressed: () {
                 if (formKey.currentState?.validate() ?? false) {
                   final now = DateTime.now();
                   final item = AdminNotificationEmail(
-                    id: isEditing ? emailToEdit.id : 'notif-${now.millisecondsSinceEpoch}',
+                    id: isEditing
+                        ? emailToEdit.id
+                        : 'notif-${now.millisecondsSinceEpoch}',
                     email: emailCtrl.text.trim(),
                     recipientName: nameCtrl.text.trim(),
-                    department: deptCtrl.text.trim().isNotEmpty ? deptCtrl.text.trim() : 'General Inquiries',
+                    department: deptCtrl.text.trim().isNotEmpty
+                        ? deptCtrl.text.trim()
+                        : 'General Inquiries',
                     isPrimary: isPrimary,
                     isEnabled: isEnabled,
                   );
 
                   if (isEditing) {
                     widget.store.updateNotificationEmail(item);
-                    MyAppToastMessage.success(context, title: 'Notification Email Updated', description: 'Settings saved.');
+                    MyAppToastMessage.success(
+                      context,
+                      title: 'Notification Email Updated',
+                      description: 'Settings saved.',
+                    );
                   } else {
                     widget.store.addNotificationEmail(item);
-                    MyAppToastMessage.success(context, title: 'Notification Email Added', description: '${item.email} will now receive inquiry alerts.');
+                    MyAppToastMessage.success(
+                      context,
+                      title: 'Notification Email Added',
+                      description:
+                          '${item.email} will now receive inquiry alerts.',
+                    );
                   }
                   Navigator.pop(ctx);
                 }
@@ -348,8 +1205,28 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     showMyAppDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: serviceLocator<MyAppColors>().getCardBackgroundColor(
+          context,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: serviceLocator<MyAppColors>().heritageGold.withValues(
+              alpha: 0.6,
+            ),
+            width: 1.2,
+          ),
+        ),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: context.isMobile ? 16 : 24,
+          vertical: 24,
+        ),
+        actionsOverflowButtonSpacing: 8,
+        actionsOverflowDirection: VerticalDirection.down,
         title: const Text('Delete Notification Email?'),
-        content: Text('Remove "${email.email}" from receiving devotee inquiries?'),
+        content: Text(
+          'Remove "${email.email}" from receiving devotee inquiries?',
+        ),
         actions: [
           MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Cancel'),
           MyAppFillButton(
@@ -357,7 +1234,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             onPressed: () {
               widget.store.deleteNotificationEmail(email.id);
               Navigator.pop(ctx);
-              MyAppToastMessage.warning(context, title: 'Email Address Removed', description: 'Address will no longer receive alerts.');
+              MyAppToastMessage.warning(
+                context,
+                title: 'Email Address Removed',
+                description: 'Address will no longer receive alerts.',
+              );
             },
             label: 'Delete',
           ),
@@ -379,16 +1260,606 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         MyAppToastMessage.success(
           context,
           title: 'Test Email Sent Successfully!',
-          description: 'A live notification was dispatched to ${rec.email}. Please check your inbox.',
+          description:
+              'A live notification was dispatched to ${rec.email}. Please check your inbox.',
         );
       } else {
         MyAppToastMessage.warning(
           context,
           title: 'Test Email Dispatched',
-          description: 'Dispatched to ${rec.email}. If not in primary inbox in 1-2 minutes, check Spam/Junk.',
+          description:
+              'Dispatched to ${rec.email}. If not in primary inbox in 1-2 minutes, check Spam/Junk.',
         );
       }
     }
+  }
+
+  // --- View Notification Email Modal with Live Template Preview ---
+  void _openViewNotificationEmailDialog(AdminNotificationEmail rec) {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+    final isMobile = context.isMobile;
+
+    showMyAppDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.getCardBackgroundColor(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: colors.heritageGold.withValues(alpha: 0.6),
+            width: 1.2,
+          ),
+        ),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 12 : 24,
+          vertical: 20,
+        ),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        actionsOverflowButtonSpacing: 8,
+        actionsOverflowDirection: VerticalDirection.down,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.heritageGold.withValues(alpha: 0.18),
+              ),
+              child: Icon(
+                Icons.mark_email_read_rounded,
+                color: colors.heritageGold,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    rec.recipientName,
+                    style: styles.editorialSerif(
+                      context,
+                      size: 19,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      if (rec.isPrimary)
+                        HeritageBadge(
+                          label: 'PRIMARY RECIPIENT',
+                          backgroundColor: colors.heritageGold.withValues(
+                            alpha: 0.18,
+                          ),
+                          textColor: colors.lightGold,
+                          borderColor: colors.heritageGold.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
+                      HeritageBadge(
+                        label: rec.isEnabled ? 'ACTIVE ALERTS' : 'DISABLED',
+                        backgroundColor: rec.isEnabled
+                            ? Colors.green.withValues(alpha: 0.15)
+                            : Colors.grey.withValues(alpha: 0.15),
+                        textColor: rec.isEnabled ? Colors.green : Colors.grey,
+                        borderColor: rec.isEnabled
+                            ? Colors.green.withValues(alpha: 0.4)
+                            : Colors.grey.withValues(alpha: 0.4),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 580,
+            minWidth: isMobile
+                ? (MediaQuery.sizeOf(context).width - 32).clamp(260.0, 580.0)
+                : 500,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Info Box
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.getSurfaceColor(context),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colors.getBorderColor(context)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.email_rounded,
+                            size: 16,
+                            color: colors.heritageGold,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Inbound Alert Address',
+                                  style: styles.cleanSans(
+                                    context,
+                                    size: 10.5,
+                                    color: colors.getSecondaryTextColor(
+                                      context,
+                                    ),
+                                  ),
+                                ),
+                                SelectableText(
+                                  rec.email,
+                                  style: styles.cleanSans(
+                                    context,
+                                    size: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.getPrimaryTextColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.copy_rounded, size: 18),
+                            tooltip: 'Copy Email Address',
+                            onPressed: () =>
+                                _copyToClipboard(rec.email, 'Email Address'),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.open_in_new_rounded,
+                              size: 18,
+                            ),
+                            tooltip: 'Compose to this Email',
+                            onPressed: () =>
+                                _launchEmail(email: rec.email, ctx: context),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 14),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.category_rounded,
+                            size: 16,
+                            color: colors.heritageGold,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Assigned Department: ${rec.department}',
+                              style: styles.cleanSans(
+                                context,
+                                size: 12,
+                                color: colors.getSecondaryTextColor(context),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Section header
+                Row(
+                  children: [
+                    Icon(
+                      Icons.visibility_rounded,
+                      size: 16,
+                      color: colors.heritageGold,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'LIVE INCOMING DEVOTEE EMAIL PREVIEW',
+                        style: styles.cleanSans(
+                          context,
+                          size: 11,
+                          fontWeight: FontWeight.w700,
+                          color: colors.heritageGold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Below is the exact email layout delivered to ${rec.email} whenever a devotee submits the public contact form.',
+                  style: styles.cleanSans(
+                    context,
+                    size: 11,
+                    color: colors.getSecondaryTextColor(context),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Formatted Email Card Preview
+                _buildEmailTemplateCardPreview(
+                  recipientEmail: rec.email,
+                  recipientName: rec.recipientName,
+                  devoteeName: 'Bhavik Dave',
+                  devoteePhone: '+91 98250 12345',
+                  devoteeEmail: 'bhavik.dave@example.com',
+                  submissionDate: 'Today (Real-Time)',
+                  inquiryMessage:
+                      'Pranam mandal trustees. Requesting information regarding upcoming Navratri 2026 pass distribution and daily Maha Aarti timings.',
+                  colors: colors,
+                  styles: styles,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Close'),
+          MyAppOutlineButton.icon(
+            icon: const Icon(Icons.copy_rounded, size: 14),
+            label: 'Copy Email',
+            color: colors.heritageGold,
+            onPressed: () => _copyToClipboard(rec.email, 'Email Address'),
+          ),
+          MyAppOutlineButton.icon(
+            icon: const Icon(Icons.edit_outlined, size: 14),
+            label: 'Edit',
+            color: colors.heritageGold,
+            onPressed: () {
+              Navigator.pop(ctx);
+              _openNotificationEmailDialog(emailToEdit: rec);
+            },
+          ),
+          MyAppFillButton.icon(
+            icon: const Icon(Icons.send_rounded, size: 15),
+            label: 'Send Test Email',
+            onPressed: () {
+              Navigator.pop(ctx);
+              _sendTestEmailToRecipient(rec);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Reusable Email Template Card Preview Widget ---
+  Widget _buildEmailTemplateCardPreview({
+    required String recipientEmail,
+    required String recipientName,
+    required String devoteeName,
+    required String devoteePhone,
+    required String devoteeEmail,
+    required String submissionDate,
+    required String inquiryMessage,
+    required MyAppColors colors,
+    required MyAppTextStyles styles,
+    VoidCallback? onReplyDevotee,
+  }) {
+    final s = widget.store.settings;
+    final mandalGu = s.mandalNameGu.isNotEmpty
+        ? s.mandalNameGu
+        : 'શ્રી પવન પુત્ર ગરબી મંડળ - રાજકોટ';
+    final mandalEn = s.mandalNameEn.isNotEmpty
+        ? s.mandalNameEn
+        : 'SHREE PAVAN PUTRA GARBI MANDAL TRUST';
+    final address = s.address.isNotEmpty
+        ? s.address
+        : 'પવનપુત્ર ચોક, માવડી મેઈન રોડ, રાજકોટ - ૩૬૦૦૦૪';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.isDarkMode(context)
+            ? const Color(0xFF13080A)
+            : const Color(0xFFFAF7F2),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: colors.heritageGold.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Email Header Metadata Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: colors.isDarkMode(context)
+                  ? const Color(0xFF200C10)
+                  : const Color(0xFFEFE8DB),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(13),
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: colors.heritageGold.withValues(alpha: 0.25),
+                ),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.mail_outline_rounded,
+                      size: 14,
+                      color: colors.heritageGold,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'To: $recipientEmail (${recipientName.isNotEmpty ? recipientName : "Administrator"})',
+                        style: styles.cleanSans(
+                          context,
+                          size: 11.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Subject: [pavanputragarbi mandal] New Devotee Inquiry: $devoteeName',
+                  style: styles.cleanSans(
+                    context,
+                    size: 11,
+                    color: colors.getSecondaryTextColor(context),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+
+          // Email Content Body
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                BrandLogoWidget(
+                  size: 42,
+                  isCircular: true,
+                  border: Border.all(color: colors.heritageGold, width: 1.5),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'New Devotee Inquiry Received',
+                  style: styles.editorialSerif(
+                    context,
+                    size: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  mandalGu,
+                  style: styles.cleanSans(
+                    context,
+                    size: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: colors.heritageGold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+
+                // Devotee Summary Table Box
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.getSurfaceColor(context),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: colors.getBorderColor(context)),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildPreviewEmailRow(
+                        'Devotee Name:',
+                        devoteeName,
+                        colors,
+                        styles,
+                        isBold: true,
+                      ),
+                      const Divider(height: 12),
+                      _buildPreviewEmailRow(
+                        'Contact Phone:',
+                        devoteePhone.isNotEmpty ? devoteePhone : 'Not provided',
+                        colors,
+                        styles,
+                      ),
+                      const Divider(height: 12),
+                      _buildPreviewEmailRow(
+                        'Email Address:',
+                        devoteeEmail.isNotEmpty ? devoteeEmail : 'Not provided',
+                        colors,
+                        styles,
+                      ),
+                      const Divider(height: 12),
+                      _buildPreviewEmailRow(
+                        'Submission Date:',
+                        submissionDate,
+                        colors,
+                        styles,
+                      ),
+                      const Divider(height: 12),
+                      _buildPreviewEmailRow(
+                        'Target Officer:',
+                        recipientEmail,
+                        colors,
+                        styles,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Devotee Message Callout
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.isDarkMode(context)
+                        ? const Color(0xFF1E0E12)
+                        : const Color(0xFFF3ECE0),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border(
+                      left: BorderSide(color: colors.heritageGold, width: 3.5),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '📝 DEVOTEE MESSAGE / PRAYER REQUEST:',
+                        style: styles.cleanSans(
+                          context,
+                          size: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: colors.heritageGold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      SelectableText(
+                        inquiryMessage.isNotEmpty
+                            ? inquiryMessage
+                            : '(No message body provided)',
+                        style: styles.cleanSans(
+                          context,
+                          size: 12.5,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Quick Action Buttons inside Email
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    if (devoteeEmail.isNotEmpty)
+                      MyAppFillButton.icon(
+                        icon: const Icon(Icons.reply_rounded, size: 13),
+                        label: 'Reply to Devotee',
+                        onPressed:
+                            onReplyDevotee ??
+                            () => _launchEmail(
+                              email: devoteeEmail,
+                              subject:
+                                  'Pranam $devoteeName ji — Response from $mandalGu',
+                              ctx: context,
+                            ),
+                      ),
+                    if (devoteePhone.isNotEmpty)
+                      MyAppOutlineButton.icon(
+                        icon: const Icon(Icons.call_rounded, size: 13),
+                        label: 'Call Devotee',
+                        color: Colors.green,
+                        onPressed: () => _launchExternalUrl(
+                          'tel:${devoteePhone.replaceAll(RegExp(r'[^0-9+]'), '')}',
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Email Footer
+                Text(
+                  '$mandalEn • $address',
+                  style: styles.cleanSans(
+                    context,
+                    size: 10,
+                    color: colors.getSecondaryTextColor(context),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  '|| જાગતી જોગમાયા || || જય માતાજી ||',
+                  style: styles.devotionalMotto(
+                    context,
+                    size: 12,
+                    color: colors.heritageGold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewEmailRow(
+    String label,
+    String value,
+    MyAppColors colors,
+    MyAppTextStyles styles, {
+    bool isBold = false,
+  }) {
+    final isMobile = context.isMobile;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: isMobile ? 95 : 110,
+          child: Text(
+            label,
+            style: styles.cleanSans(
+              context,
+              size: 11,
+              color: colors.getSecondaryTextColor(context),
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: styles.cleanSans(
+              context,
+              size: 12,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
+              color: colors.getPrimaryTextColor(context),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   // =========================================================================
@@ -397,19 +1868,36 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   void _openReplyDevoteeDialog(AdminEnquiry enquiry) {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
+    final isMobile = context.isMobile;
 
     final primaryEmail = widget.store.notificationEmails.firstWhere(
       (e) => e.isPrimary,
       orElse: () => widget.store.notificationEmails.isNotEmpty
           ? widget.store.notificationEmails.first
-          : AdminNotificationEmail(id: '', email: widget.store.settings.contactEmail, recipientName: 'Shree Pavan Putra Mandal'),
+          : AdminNotificationEmail(
+              id: '',
+              email: widget.store.settings.contactEmail,
+              recipientName: 'Shree Pavan Putra Mandal',
+            ),
     );
 
-    final senderNameCtrl = TextEditingController(text: primaryEmail.recipientName.isNotEmpty ? primaryEmail.recipientName : 'Shree Pavan Putra Trust Office');
-    final senderEmailCtrl = TextEditingController(text: primaryEmail.email.isNotEmpty ? primaryEmail.email : widget.store.settings.contactEmail);
-    final subjectCtrl = TextEditingController(text: 'Pranam ${enquiry.name} ji — Response from Shree Pavan Putra Garbi Mandal');
+    final senderNameCtrl = TextEditingController(
+      text: primaryEmail.recipientName.isNotEmpty
+          ? primaryEmail.recipientName
+          : 'Shree Pavan Putra Trust Office',
+    );
+    final senderEmailCtrl = TextEditingController(
+      text: primaryEmail.email.isNotEmpty
+          ? primaryEmail.email
+          : widget.store.settings.contactEmail,
+    );
+    final subjectCtrl = TextEditingController(
+      text:
+          'Pranam ${enquiry.name} ji — Response from Shree Pavan Putra Garbi Mandal',
+    );
     final bodyCtrl = TextEditingController(
-      text: 'Jai Mataji.\n\nThank you for reaching out to Shree Pavan Putra Garbi Mandal, Rajkot regarding your inquiry.\n\nWith reference to your message: "${enquiry.message}"\n\n[Please write your response message here]\n\nWarm regards,\n${senderNameCtrl.text}\nShree Pavan Putra Garbi Mandal Trust, Rajkot',
+      text:
+          'Jai Mataji.\n\nThank you for reaching out to Shree Pavan Putra Garbi Mandal, Rajkot regarding your inquiry.\n\nWith reference to your message: "${enquiry.message}"\n\n[Please write your response message here]\n\nWarm regards,\n${senderNameCtrl.text}\nShree Pavan Putra Garbi Mandal Trust, Rajkot',
     );
     final formKey = GlobalKey<FormState>();
 
@@ -419,15 +1907,32 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         backgroundColor: colors.getCardBackgroundColor(context),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
+          side: BorderSide(
+            color: colors.heritageGold.withValues(alpha: 0.6),
+            width: 1.2,
+          ),
         ),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 12 : 24,
+          vertical: 20,
+        ),
+        actionsOverflowButtonSpacing: 8,
+        actionsOverflowDirection: VerticalDirection.down,
         title: Text(
           'Compose Email Reply to ${enquiry.name}',
-          style: styles.editorialSerif(context, size: 19, fontWeight: FontWeight.w700),
+          style: styles.editorialSerif(
+            context,
+            size: 19,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 540),
+          constraints: BoxConstraints(
+            maxWidth: 540,
+            minWidth: isMobile
+                ? (MediaQuery.sizeOf(context).width - 32).clamp(260.0, 540.0)
+                : 480,
+          ),
           child: SingleChildScrollView(
             child: Form(
               key: formKey,
@@ -444,13 +1949,28 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.send_rounded, size: 16, color: colors.heritageGold),
+                        Icon(
+                          Icons.send_rounded,
+                          size: 16,
+                          color: colors.heritageGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
+                          child: SelectableText(
                             'Recipient: ${enquiry.email} (Devotee)',
-                            style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
+                            style: styles.cleanSans(
+                              context,
+                              size: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.copy_rounded, size: 16),
+                          tooltip: 'Copy Devotee Email',
+                          onPressed: () =>
+                              _copyToClipboard(enquiry.email, 'Devotee Email'),
                         ),
                       ],
                     ),
@@ -460,7 +1980,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     controller: subjectCtrl,
                     labelText: 'Email Subject',
                     prefixIcon: const Icon(Icons.subject_rounded),
-                    validator: (val) => val == null || val.trim().isEmpty ? 'Please enter email subject' : null,
+                    validator: (val) => val == null || val.trim().isEmpty
+                        ? 'Please enter email subject'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   MyAppTextAreaField(
@@ -468,7 +1990,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     labelText: 'Response Body / Message',
                     minLines: 5,
                     maxLines: 8,
-                    validator: (val) => val == null || val.trim().isEmpty ? 'Please enter response message' : null,
+                    validator: (val) => val == null || val.trim().isEmpty
+                        ? 'Please enter response message'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   MyAppTextFormField(
@@ -484,12 +2008,26 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         actions: [
           MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Cancel'),
           MyAppOutlineButton.icon(
+            icon: const Icon(Icons.copy_rounded, size: 14),
+            label: 'Copy Draft',
+            color: colors.heritageGold,
+            onPressed: () => _copyToClipboard(
+              'Subject: ${subjectCtrl.text.trim()}\n\n${bodyCtrl.text.trim()}',
+              'Response Draft',
+            ),
+          ),
+          MyAppOutlineButton.icon(
             icon: const Icon(Icons.open_in_new_rounded, size: 14),
             label: 'Open in Email App',
             color: colors.heritageGold,
             onPressed: () {
               Navigator.pop(ctx);
-              _launchExternalUrl('mailto:${enquiry.email}?subject=${Uri.encodeComponent(subjectCtrl.text)}&body=${Uri.encodeComponent(bodyCtrl.text)}');
+              _launchEmail(
+                email: enquiry.email,
+                subject: subjectCtrl.text.trim(),
+                body: bodyCtrl.text.trim(),
+                ctx: context,
+              );
             },
           ),
           MyAppFillButton.icon(
@@ -498,15 +2036,20 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
                 Navigator.pop(ctx);
-                MyAppToastMessage.info(context, title: 'Sending Email...', description: 'Dispatching message to ${enquiry.email}');
-
-                final success = await EmailNotificationService.instance.sendResponseEmail(
-                  enquiry: enquiry,
-                  replySubject: subjectCtrl.text.trim(),
-                  replyMessage: bodyCtrl.text.trim(),
-                  senderName: senderNameCtrl.text.trim(),
-                  senderEmail: senderEmailCtrl.text.trim(),
+                MyAppToastMessage.info(
+                  context,
+                  title: 'Sending Email...',
+                  description: 'Dispatching message to ${enquiry.email}',
                 );
+
+                final success = await EmailNotificationService.instance
+                    .sendResponseEmail(
+                      enquiry: enquiry,
+                      replySubject: subjectCtrl.text.trim(),
+                      replyMessage: bodyCtrl.text.trim(),
+                      senderName: senderNameCtrl.text.trim(),
+                      senderEmail: senderEmailCtrl.text.trim(),
+                    );
 
                 widget.store.updateEnquiryStatus(enquiry.id, 'Responded');
 
@@ -515,13 +2058,15 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     MyAppToastMessage.success(
                       context,
                       title: 'Email Sent to Devotee!',
-                      description: 'Response successfully delivered to ${enquiry.email}. Status set to Responded.',
+                      description:
+                          'Response successfully delivered to ${enquiry.email}. Status set to Responded.',
                     );
                   } else {
                     MyAppToastMessage.warning(
                       context,
-                      title: 'Email Dispatched',
-                      description: 'Message queued and status updated to Responded.',
+                      title: 'Email Queued',
+                      description:
+                          'Message queued and status updated to Responded.',
                     );
                   }
                 }
@@ -537,186 +2082,429 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
     final isNew = enquiry.status == 'New';
+    final isMobile = context.isMobile;
+
+    int selectedTab =
+        0; // 0: Inquiry & Contact Details, 1: Dispatched Email Preview
+
+    final primaryNotificationEmail = widget.store.notificationEmails.firstWhere(
+      (e) => e.isPrimary,
+      orElse: () => widget.store.notificationEmails.isNotEmpty
+          ? widget.store.notificationEmails.first
+          : AdminNotificationEmail(
+              id: '',
+              email: widget.store.settings.contactEmail,
+              recipientName: 'Admin Office',
+            ),
+    );
 
     showMyAppDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: colors.getCardBackgroundColor(context),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
-        ),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        actionsPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isNew
-                    ? Colors.red.withValues(alpha: 0.15)
-                    : Colors.green.withValues(alpha: 0.15),
-              ),
-              child: Icon(
-                isNew ? Icons.mark_email_unread_rounded : Icons.mark_email_read_rounded,
-                color: isNew ? Colors.redAccent : Colors.green,
-                size: 22,
-              ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: colors.getCardBackgroundColor(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: colors.heritageGold.withValues(alpha: 0.6),
+              width: 1.2,
             ),
-            const SizedBox(width: 12),
-            Expanded(
+          ),
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 12 : 24,
+            vertical: 20,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 8,
+          ),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          actionsOverflowButtonSpacing: 8,
+          actionsOverflowDirection: VerticalDirection.down,
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isNew
+                      ? Colors.red.withValues(alpha: 0.15)
+                      : Colors.green.withValues(alpha: 0.15),
+                ),
+                child: Icon(
+                  isNew
+                      ? Icons.mark_email_unread_rounded
+                      : Icons.mark_email_read_rounded,
+                  color: isNew ? Colors.redAccent : Colors.green,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      enquiry.name,
+                      style: styles.editorialSerif(
+                        context,
+                        size: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        HeritageBadge(
+                          label: enquiry.status.toUpperCase(),
+                          backgroundColor: isNew
+                              ? Colors.red.withValues(alpha: 0.15)
+                              : Colors.green.withValues(alpha: 0.15),
+                          textColor: isNew ? Colors.redAccent : Colors.green,
+                          borderColor: isNew
+                              ? Colors.redAccent.withValues(alpha: 0.4)
+                              : Colors.green.withValues(alpha: 0.4),
+                        ),
+                        Text(
+                          enquiry.date,
+                          style: styles.cleanSans(
+                            context,
+                            size: 11.5,
+                            color: colors.getSecondaryTextColor(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 580,
+              minWidth: isMobile
+                  ? (MediaQuery.sizeOf(context).width - 32).clamp(260.0, 580.0)
+                  : 500,
+            ),
+            child: SingleChildScrollView(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    enquiry.name,
-                    style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  // Tab Switcher: Inquiry Details vs Dispatched Email Notification
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: colors.getSurfaceColor(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colors.getBorderColor(context)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => setDialogState(() => selectedTab = 0),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: selectedTab == 0
+                                    ? colors.deepMaroon
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.message_rounded,
+                                    size: 14,
+                                    color: selectedTab == 0
+                                        ? colors.heritageGold
+                                        : colors.getSecondaryTextColor(context),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      isMobile ? 'Inquiry' : 'Inquiry Message',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: selectedTab == 0
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        color: selectedTab == 0
+                                            ? Colors.white
+                                            : colors.getPrimaryTextColor(
+                                                context,
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => setDialogState(() => selectedTab = 1),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: selectedTab == 1
+                                    ? colors.deepMaroon
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.mark_email_read_rounded,
+                                    size: 14,
+                                    color: selectedTab == 1
+                                        ? colors.heritageGold
+                                        : colors.getSecondaryTextColor(context),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      isMobile
+                                          ? 'Dispatched Email'
+                                          : 'View Dispatched Email',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: selectedTab == 1
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                        color: selectedTab == 1
+                                            ? Colors.white
+                                            : colors.getPrimaryTextColor(
+                                                context,
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      HeritageBadge(
-                        label: enquiry.status.toUpperCase(),
-                        backgroundColor: isNew
-                            ? Colors.red.withValues(alpha: 0.15)
-                            : Colors.green.withValues(alpha: 0.15),
-                        textColor: isNew ? Colors.redAccent : Colors.green,
-                        borderColor: isNew
-                            ? Colors.redAccent.withValues(alpha: 0.4)
-                            : Colors.green.withValues(alpha: 0.4),
+
+                  if (selectedTab == 0) ...[
+                    // Contact Details Box
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colors.getSurfaceColor(context),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colors.getBorderColor(context),
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        enquiry.date,
-                        style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                      child: Column(
+                        children: [
+                          if (enquiry.phone.isNotEmpty)
+                            _buildDialogContactRow(
+                              icon: Icons.phone_rounded,
+                              label: 'Devotee Phone',
+                              value: enquiry.phone,
+                              colors: colors,
+                              styles: styles,
+                              onAction: () => _launchExternalUrl(
+                                'tel:${enquiry.phone.replaceAll(RegExp(r'[^0-9+]'), '')}',
+                              ),
+                              actionLabel: 'Call',
+                              actionIcon: Icons.call_rounded,
+                              onCopy: () => _copyToClipboard(
+                                enquiry.phone,
+                                'Phone Number',
+                              ),
+                            ),
+                          if (enquiry.phone.isNotEmpty &&
+                              enquiry.email.isNotEmpty)
+                            const Divider(height: 16),
+                          if (enquiry.email.isNotEmpty)
+                            _buildDialogContactRow(
+                              icon: Icons.email_rounded,
+                              label: 'Devotee Email',
+                              value: enquiry.email,
+                              colors: colors,
+                              styles: styles,
+                              onAction: () => _openReplyDevoteeDialog(enquiry),
+                              actionLabel: 'Reply Email',
+                              actionIcon: Icons.reply_rounded,
+                              onCopy: () => _copyToClipboard(
+                                enquiry.email,
+                                'Email Address',
+                              ),
+                              onSecondaryAction: () => _launchEmail(
+                                email: enquiry.email,
+                                ctx: context,
+                              ),
+                              secondaryActionLabel: 'Email App',
+                              secondaryActionIcon: Icons.open_in_new_rounded,
+                            ),
+                          if (enquiry.phone.isEmpty && enquiry.email.isEmpty)
+                            Text(
+                              'No direct contact phone or email provided.',
+                              style: styles.cleanSans(
+                                context,
+                                size: 12,
+                                color: colors.getSecondaryTextColor(context),
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Message Text Section
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.notes_rounded,
+                          size: 16,
+                          color: colors.heritageGold,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'DEVOTEE MESSAGE / PRAYER INQUIRY',
+                            style: styles.cleanSans(
+                              context,
+                              size: 11,
+                              fontWeight: FontWeight.w700,
+                              color: colors.heritageGold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        if (enquiry.message.isNotEmpty)
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: const Icon(Icons.copy_rounded, size: 16),
+                            tooltip: 'Copy Message',
+                            onPressed: () => _copyToClipboard(
+                              enquiry.message,
+                              'Inquiry Message',
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: colors.isDarkMode(context)
+                            ? const Color(0xFF160A0D)
+                            : const Color(0xFFFAF6EE),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colors.heritageGold.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: SelectableText(
+                        enquiry.message.isNotEmpty
+                            ? enquiry.message
+                            : '(No message body provided)',
+                        style: styles
+                            .bodyText(context)
+                            .copyWith(fontSize: 13.5, height: 1.5),
+                      ),
+                    ),
+                  ] else ...[
+                    // Tab 1: Rendered HTML/Card Email Notification
+                    _buildEmailTemplateCardPreview(
+                      recipientEmail: primaryNotificationEmail.email.isNotEmpty
+                          ? primaryNotificationEmail.email
+                          : widget.store.settings.contactEmail,
+                      recipientName:
+                          primaryNotificationEmail.recipientName.isNotEmpty
+                          ? primaryNotificationEmail.recipientName
+                          : 'Mandal Trustee Office',
+                      devoteeName: enquiry.name,
+                      devoteePhone: enquiry.phone,
+                      devoteeEmail: enquiry.email,
+                      submissionDate: enquiry.date,
+                      inquiryMessage: enquiry.message,
+                      colors: colors,
+                      styles: styles,
+                      onReplyDevotee: enquiry.email.isNotEmpty
+                          ? () {
+                              Navigator.pop(ctx);
+                              _openReplyDevoteeDialog(enquiry);
+                            }
+                          : null,
+                    ),
+                  ],
                 ],
               ),
             ),
+          ),
+          actions: [
+            MyAppTextButton(
+              onPressed: () => Navigator.pop(ctx),
+              label: 'Close',
+            ),
+            if (enquiry.email.isNotEmpty)
+              MyAppFillButton.icon(
+                icon: const Icon(Icons.reply_rounded, size: 16),
+                label: 'Reply Email',
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _openReplyDevoteeDialog(enquiry);
+                },
+              ),
+            if (enquiry.status == 'New')
+              MyAppOutlineButton.icon(
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
+                label: 'Mark Responded',
+                onPressed: () {
+                  widget.store.updateEnquiryStatus(enquiry.id, 'Responded');
+                  Navigator.pop(ctx);
+                  MyAppToastMessage.success(
+                    context,
+                    title: 'Marked Responded',
+                    description:
+                        'Enquiry from ${enquiry.name} marked as responded.',
+                  );
+                },
+              )
+            else
+              MyAppOutlineButton.icon(
+                icon: const Icon(Icons.mark_email_unread_outlined, size: 16),
+                label: 'Mark as New',
+                onPressed: () {
+                  widget.store.updateEnquiryStatus(enquiry.id, 'New');
+                  Navigator.pop(ctx);
+                  MyAppToastMessage.info(
+                    context,
+                    title: 'Marked as New',
+                    description: 'Enquiry moved back to unread queue.',
+                  );
+                },
+              ),
           ],
         ),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 540),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8),
-                // Contact Details Box
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colors.getSurfaceColor(context),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: colors.getBorderColor(context)),
-                  ),
-                  child: Column(
-                    children: [
-                      if (enquiry.phone.isNotEmpty)
-                        _buildDialogContactRow(
-                          icon: Icons.phone_rounded,
-                          label: 'Phone Number',
-                          value: enquiry.phone,
-                          colors: colors,
-                          styles: styles,
-                          onAction: () => _launchExternalUrl('tel:${enquiry.phone.replaceAll(RegExp(r'[^0-9+]'), '')}'),
-                          actionLabel: 'Call',
-                          actionIcon: Icons.call_rounded,
-                        ),
-                      if (enquiry.phone.isNotEmpty && enquiry.email.isNotEmpty)
-                        const Divider(height: 16),
-                      if (enquiry.email.isNotEmpty)
-                        _buildDialogContactRow(
-                          icon: Icons.email_rounded,
-                          label: 'Email Address',
-                          value: enquiry.email,
-                          colors: colors,
-                          styles: styles,
-                          onAction: () => _openReplyDevoteeDialog(enquiry),
-                          actionLabel: 'Reply Email',
-                          actionIcon: Icons.reply_rounded,
-                        ),
-                      if (enquiry.phone.isEmpty && enquiry.email.isEmpty)
-                        Text(
-                          'No direct contact phone or email provided.',
-                          style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Message Text Section
-                Text(
-                  'DEVOTEE MESSAGE / PRAYER INQUIRY',
-                  style: styles.cleanSans(context, size: 11, fontWeight: FontWeight.w700, color: colors.heritageGold, letterSpacing: 0.5),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: colors.isDarkMode(context) ? const Color(0xFF160A0D) : const Color(0xFFFAF6EE),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: colors.heritageGold.withValues(alpha: 0.3)),
-                  ),
-                  child: SelectableText(
-                    enquiry.message.isNotEmpty ? enquiry.message : '(No message body provided)',
-                    style: styles.bodyText(context).copyWith(fontSize: 13.5, height: 1.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Close'),
-          if (enquiry.email.isNotEmpty)
-            MyAppFillButton.icon(
-              icon: const Icon(Icons.reply_rounded, size: 16),
-              label: 'Reply Email',
-              onPressed: () {
-                Navigator.pop(ctx);
-                _openReplyDevoteeDialog(enquiry);
-              },
-            ),
-          if (enquiry.status == 'New')
-            MyAppOutlineButton.icon(
-              icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
-              label: 'Mark Responded',
-              onPressed: () {
-                widget.store.updateEnquiryStatus(enquiry.id, 'Responded');
-                Navigator.pop(ctx);
-                MyAppToastMessage.success(
-                  context,
-                  title: 'Marked Responded',
-                  description: 'Enquiry from ${enquiry.name} marked as responded.',
-                );
-              },
-            )
-          else
-            MyAppOutlineButton.icon(
-              icon: const Icon(Icons.mark_email_unread_outlined, size: 16),
-              label: 'Mark as New',
-              onPressed: () {
-                widget.store.updateEnquiryStatus(enquiry.id, 'New');
-                Navigator.pop(ctx);
-                MyAppToastMessage.info(
-                  context,
-                  title: 'Marked as New',
-                  description: 'Enquiry moved back to unread queue.',
-                );
-              },
-            ),
-        ],
       ),
     );
   }
@@ -730,69 +2518,111 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     required VoidCallback onAction,
     required String actionLabel,
     required IconData actionIcon,
+    VoidCallback? onCopy,
+    VoidCallback? onSecondaryAction,
+    String? secondaryActionLabel,
+    IconData? secondaryActionIcon,
   }) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isTight = constraints.maxWidth < 340;
+    final isTight = context.isMobile || MediaQuery.sizeOf(context).width < 500;
 
-        if (isTight) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final actionButtons = Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        MyAppOutlineButton.icon(
+          onPressed: onAction,
+          icon: Icon(actionIcon, size: 14),
+          label: actionLabel,
+          color: colors.heritageGold,
+        ),
+        if (onSecondaryAction != null && secondaryActionLabel != null)
+          MyAppOutlineButton.icon(
+            onPressed: onSecondaryAction,
+            icon: Icon(
+              secondaryActionIcon ?? Icons.open_in_new_rounded,
+              size: 14,
+            ),
+            label: secondaryActionLabel,
+            color: colors.heritageGold,
+          ),
+        if (onCopy != null)
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.copy_rounded, size: 16),
+            tooltip: 'Copy $label',
+            onPressed: onCopy,
+          ),
+      ],
+    );
+
+    if (isTight) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Icon(icon, size: 16, color: colors.heritageGold),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: styles.cleanSans(context, size: 10.5, color: colors.getSecondaryTextColor(context)),
-                    ),
+              Icon(icon, size: 16, color: colors.heritageGold),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: styles.cleanSans(
+                    context,
+                    size: 10.5,
+                    color: colors.getSecondaryTextColor(context),
                   ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              SelectableText(
-                value,
-                style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: colors.getPrimaryTextColor(context)),
-              ),
-              const SizedBox(height: 6),
-              MyAppOutlineButton.icon(
-                onPressed: onAction,
-                icon: Icon(actionIcon, size: 14),
-                label: actionLabel,
-                color: colors.heritageGold,
+                ),
               ),
             ],
-          );
-        }
+          ),
+          const SizedBox(height: 2),
+          SelectableText(
+            value,
+            style: styles.cleanSans(
+              context,
+              size: 13,
+              fontWeight: FontWeight.w600,
+              color: colors.getPrimaryTextColor(context),
+            ),
+          ),
+          const SizedBox(height: 8),
+          actionButtons,
+        ],
+      );
+    }
 
-        return Row(
-          children: [
-            Icon(icon, size: 16, color: colors.heritageGold),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: styles.cleanSans(context, size: 10.5, color: colors.getSecondaryTextColor(context))),
-                  SelectableText(
-                    value,
-                    style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: colors.getPrimaryTextColor(context)),
-                  ),
-                ],
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: colors.heritageGold),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: styles.cleanSans(
+                  context,
+                  size: 10.5,
+                  color: colors.getSecondaryTextColor(context),
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            MyAppOutlineButton.icon(
-              onPressed: onAction,
-              icon: Icon(actionIcon, size: 14),
-              label: actionLabel,
-              color: colors.heritageGold,
-            ),
-          ],
-        );
-      },
+              SelectableText(
+                value,
+                style: styles.cleanSans(
+                  context,
+                  size: 13,
+                  fontWeight: FontWeight.w600,
+                  color: colors.getPrimaryTextColor(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        actionButtons,
+      ],
     );
   }
 
@@ -800,8 +2630,28 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     showMyAppDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: serviceLocator<MyAppColors>().getCardBackgroundColor(
+          context,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: serviceLocator<MyAppColors>().heritageGold.withValues(
+              alpha: 0.6,
+            ),
+            width: 1.2,
+          ),
+        ),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: context.isMobile ? 16 : 24,
+          vertical: 24,
+        ),
+        actionsOverflowButtonSpacing: 8,
+        actionsOverflowDirection: VerticalDirection.down,
         title: const Text('Delete Devotee Inquiry?'),
-        content: Text('Permanently remove inquiry message from "${enquiry.name}" submitted on ${enquiry.date}?'),
+        content: Text(
+          'Permanently remove inquiry message from "${enquiry.name}" submitted on ${enquiry.date}?',
+        ),
         actions: [
           MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Cancel'),
           MyAppFillButton(
@@ -830,7 +2680,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
 
     final allEnquiries = widget.store.enquiries;
     final newCount = allEnquiries.where((e) => e.status == 'New').length;
-    final respondedCount = allEnquiries.where((e) => e.status == 'Responded').length;
+    final respondedCount = allEnquiries
+        .where((e) => e.status == 'Responded')
+        .length;
 
     // Filter by tab + search query
     final filteredEnquiries = allEnquiries.where((e) {
@@ -854,7 +2706,8 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         const AdminWebsiteContextBanner(
           websitePageTitle: 'Contact Us Page',
           websiteRoute: '/contact',
-          explanation: 'Controls what visitors see on the public Contact page: venue location, phone helpline, WhatsApp, email, daily aarti timings, QR offerings/UPI seva, and receives messages submitted by citizens.',
+          explanation:
+              'Controls what visitors see on the public Contact page: venue location, phone helpline, WhatsApp, email, daily aarti timings, QR offerings/UPI seva, and receives messages submitted by citizens.',
         ),
 
         // Header
@@ -862,17 +2715,31 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         const SizedBox(height: 6),
         Text(
           'Contact Information, Seva Offerings & Devotee Inbox',
-          style: styles.editorialSerif(context, size: isMobile ? 20 : 24, fontWeight: FontWeight.w700),
+          style: styles.editorialSerif(
+            context,
+            size: isMobile ? 20 : 24,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           'Manage mandal helpline numbers, venue location, daily aarti timings, UPI payment QR code, inbound email routing, and devotee messages.',
-          style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
+          style: styles.cleanSans(
+            context,
+            size: 12.5,
+            color: colors.getSecondaryTextColor(context),
+          ),
         ),
         const SizedBox(height: 20),
 
         // TOP STATS OVERVIEW CARDS (Responsive Grid)
-        _buildTopMetricsGrid(colors, styles, allEnquiries.length, newCount, respondedCount),
+        _buildTopMetricsGrid(
+          colors,
+          styles,
+          allEnquiries.length,
+          newCount,
+          respondedCount,
+        ),
         const SizedBox(height: 24),
 
         // SECTION 1: MANDAL CONTACT INFORMATION
@@ -888,7 +2755,15 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         const SizedBox(height: 28),
 
         // SECTION 4: DEVOTEE INQUIRIES INBOX
-        _buildDevoteeInboxSection(colors, styles, isMobile, filteredEnquiries, allEnquiries.length, newCount, respondedCount),
+        _buildDevoteeInboxSection(
+          colors,
+          styles,
+          isMobile,
+          filteredEnquiries,
+          allEnquiries.length,
+          newCount,
+          respondedCount,
+        ),
       ],
     );
   }
@@ -938,9 +2813,13 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           _buildStatCard(
             title: 'Seva & Dan QR',
             value: _isPaymentEnabled ? 'ACTIVE' : 'DISABLED',
-            subtitle: _isPaymentEnabled ? 'Visible on website' : 'Hidden from visitors',
+            subtitle: _isPaymentEnabled
+                ? 'Visible on website'
+                : 'Hidden from visitors',
             icon: Icons.qr_code_scanner_rounded,
-            color: _isPaymentEnabled ? const Color(0xFF2E7D32) : Colors.orangeAccent,
+            color: _isPaymentEnabled
+                ? const Color(0xFF2E7D32)
+                : Colors.orangeAccent,
             colors: colors,
             styles: styles,
           ),
@@ -952,7 +2831,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             children: [
               for (int i = 0; i < cards.length; i++)
                 Padding(
-                  padding: EdgeInsets.only(bottom: i == cards.length - 1 ? 0 : 10),
+                  padding: EdgeInsets.only(
+                    bottom: i == cards.length - 1 ? 0 : 10,
+                  ),
                   child: cards[i],
                 ),
             ],
@@ -999,7 +2880,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: colors.isDarkMode(context) ? 0.2 : 0.04),
+            color: Colors.black.withValues(
+              alpha: colors.isDarkMode(context) ? 0.2 : 0.04,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -1015,9 +2898,7 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               color: color.withValues(alpha: 0.14),
               shape: BoxShape.circle,
             ),
-            child: Center(
-              child: Icon(icon, color: color, size: 20),
-            ),
+            child: Center(child: Icon(icon, color: color, size: 20)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1072,7 +2953,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   // =========================================================================
   // 🏛️ SECTION 1: MANDAL CONTACT INFORMATION
   // =========================================================================
-  Widget _buildContactDetailsSection(MyAppColors colors, MyAppTextStyles styles, bool isMobile) {
+  Widget _buildContactDetailsSection(
+    MyAppColors colors,
+    MyAppTextStyles styles,
+    bool isMobile,
+  ) {
     return CulturalFrameCard(
       padding: EdgeInsets.all(isMobile ? 14 : 24),
       child: Column(
@@ -1106,12 +2991,19 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.location_on_rounded, color: colors.heritageGold),
+                        Icon(
+                          Icons.location_on_rounded,
+                          color: colors.heritageGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '1. Mandal Official Contact Information',
-                            style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700),
+                            style: styles.editorialSerif(
+                              context,
+                              size: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -1128,12 +3020,19 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(Icons.location_on_rounded, color: colors.heritageGold),
+                        Icon(
+                          Icons.location_on_rounded,
+                          color: colors.heritageGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '1. Mandal Official Contact Information',
-                            style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
+                            style: styles.editorialSerif(
+                              context,
+                              size: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -1148,7 +3047,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           const SizedBox(height: 6),
           Text(
             'Official venue address, helpline numbers, email address, and daily aarti timings shown on the public Contact page.',
-            style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+            style: styles.cleanSans(
+              context,
+              size: 12,
+              color: colors.getSecondaryTextColor(context),
+            ),
           ),
           const SizedBox(height: 20),
 
@@ -1165,27 +3068,70 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '1.1 Venue Address & Chowk (સ્થળનું સરનામું)',
-                    style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
+                    '1.1 Venue Address & Chowk (સ્થળનું સરનામું - English)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   MyAppTextAreaField(
                     controller: _addressCtrl,
-                    labelText: 'Venue Address & Chowk Details',
-                    hintText: 'e.g. Near Pavanputra Chowk, 150 Feet Ring Road, Rajkot - 360004',
-                    minLines: 3,
-                    maxLines: 4,
+                    labelText: 'Venue Address & Chowk Details (English)',
+                    hintText:
+                        'e.g. Near Pavanputra Chowk, 150 Feet Ring Road, Rajkot - 360004',
+                    minLines: 2,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '1.2 Venue Address & Chowk (સ્થળનું સરનામું - ગુજરાતી)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  MyAppTextAreaField(
+                    controller: _addressGuCtrl,
+                    labelText: 'Venue Address & Chowk Details (Gujarati)',
+                    hintText:
+                        'દા.ત. પવનપુત્ર ચોક, સોરઠીયાવાડી ચોક, રાજકોટ - ૩૬૦૦૦૨, ગુજરાત',
+                    minLines: 2,
+                    maxLines: 3,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '1.2 Daily Aarti Schedule & Timings (દૈનિક આરતી સમય)',
-                    style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
+                    '1.3 Daily Aarti Schedule & Timings (દૈનિક આરતી સમય - English)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   MyAppTextFormField(
                     controller: _aartiTimeCtrl,
-                    labelText: 'Daily Aarti Timings',
-                    hintText: 'e.g. 7:30 PM & 11:45 PM Daily',
+                    labelText: 'Daily Aarti Timings (English)',
+                    hintText: 'e.g. 8:30 PM Daily',
+                    prefixIcon: const Icon(Icons.schedule_rounded),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '1.4 Daily Aarti Schedule & Timings (દૈનિક આરતી સમય - ગુજરાતી)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  MyAppTextFormField(
+                    controller: _aartiTimeGuCtrl,
+                    labelText: 'Daily Aarti Timings (Gujarati)',
+                    hintText: 'દા.ત. રાત્રે ૮:૩૦ કલાકે / 8:30 PM Daily',
                     prefixIcon: const Icon(Icons.schedule_rounded),
                   ),
                 ],
@@ -1195,38 +3141,50 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '1.3 Contact Phone Numbers (સંપર્ક ફોન નંબર)',
-                    style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
+                    '1.5 Contact Phone Numbers (સંપર્ક ફોન નંબર)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   MyAppTextFormField(
                     controller: _phoneCtrl,
                     labelText: 'Helpline Phone Number',
-                    hintText: 'e.g. +91 98765 43210',
+                    hintText: 'e.g. +91 94280 12345',
                     prefixIcon: const Icon(Icons.phone_rounded),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '1.4 Official WhatsApp Helpline (વોટ્સએપ હેલ્પલાઇન)',
-                    style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
+                    '1.6 Official WhatsApp Helpline (વોટ્સએપ હેલ્પલાઇન)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   MyAppTextFormField(
                     controller: _whatsappCtrl,
                     labelText: 'WhatsApp Helpline',
-                    hintText: 'e.g. +91 98765 43210',
+                    hintText: 'e.g. +919876543210',
                     prefixIcon: const Icon(Icons.chat_bubble_rounded),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '1.5 Official Contact Email (ઈમેલ સરનામું)',
-                    style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
+                    '1.7 Official Contact Email (ઈમેલ સરનામું)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   MyAppTextFormField(
                     controller: _emailCtrl,
                     labelText: 'Official Email Address',
-                    hintText: 'e.g. contact@pavanputragarbi.org',
+                    hintText: 'e.g. pavanputragarbi@gmail.com',
                     prefixIcon: const Icon(Icons.email_rounded),
                   ),
                 ],
@@ -1250,30 +3208,48 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   }
 
   // --- Live Contact Card Preview ---
-  Widget _buildLiveContactPreviewCard(MyAppColors colors, MyAppTextStyles styles) {
+  Widget _buildLiveContactPreviewCard(
+    MyAppColors colors,
+    MyAppTextStyles styles,
+  ) {
     final s = widget.store.settings;
-    final address = _addressCtrl.text.trim().isNotEmpty
-        ? _addressCtrl.text.trim()
-        : 'Near Pavanputra Chowk, 150 Feet Ring Road, Rajkot - 360004';
+    final isGu = _previewLang == 'gu';
+
+    final address = (isGu && _addressGuCtrl.text.trim().isNotEmpty)
+        ? _addressGuCtrl.text.trim()
+        : (_addressCtrl.text.trim().isNotEmpty
+              ? _addressCtrl.text.trim()
+              : (isGu
+                    ? 'પવનપુત્ર ચોક, સોરઠીયાવાડી ચોક, રાજકોટ - ૩૬૦૦૦૨, ગુજરાત'
+                    : 'Near Pavanputra Chowk, 150 Feet Ring Road, Rajkot - 360004'));
     final phone = _phoneCtrl.text.trim().isNotEmpty
         ? _phoneCtrl.text.trim()
-        : '+91 98765 43210';
+        : '+91 94280 12345';
     final whatsapp = _whatsappCtrl.text.trim();
     final email = _emailCtrl.text.trim().isNotEmpty
         ? _emailCtrl.text.trim()
-        : 'contact@pavanputragarbi.org';
-    final aarti = _aartiTimeCtrl.text.trim().isNotEmpty
-        ? _aartiTimeCtrl.text.trim()
-        : '7:30 PM & 11:45 PM Daily';
-
-    final isGu = _previewLang == 'gu';
+        : 'pavanputragarbimandal@gmail.com';
+    final aarti = (isGu && _aartiTimeGuCtrl.text.trim().isNotEmpty)
+        ? _aartiTimeGuCtrl.text.trim()
+        : (_aartiTimeCtrl.text.trim().isNotEmpty
+              ? _aartiTimeCtrl.text.trim()
+              : (isGu ? 'રાત્રે ૮:૩૦ કલાકે / 8:30 PM Daily' : '8:30 PM Daily'));
 
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1B0306),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.4), width: 1.2),
-        boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 16, offset: Offset(0, 6))],
+        border: Border.all(
+          color: colors.heritageGold.withValues(alpha: 0.4),
+          width: 1.2,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black38,
+            blurRadius: 16,
+            offset: Offset(0, 6),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -1294,12 +3270,21 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.visibility_rounded, color: colors.heritageGold, size: 16),
+                        Icon(
+                          Icons.visibility_rounded,
+                          color: colors.heritageGold,
+                          size: 16,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             'Live Public Contact Preview',
-                            style: styles.editorialSerif(context, size: 13, fontWeight: FontWeight.w700, color: colors.lightGold),
+                            style: styles.editorialSerif(
+                              context,
+                              size: 13,
+                              fontWeight: FontWeight.w700,
+                              color: colors.lightGold,
+                            ),
                           ),
                         ),
                       ],
@@ -1312,12 +3297,21 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
 
               return Row(
                 children: [
-                  Icon(Icons.visibility_rounded, color: colors.heritageGold, size: 16),
+                  Icon(
+                    Icons.visibility_rounded,
+                    color: colors.heritageGold,
+                    size: 16,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       'Live Public Contact Preview (as seen by devotees)',
-                      style: styles.editorialSerif(context, size: 13, fontWeight: FontWeight.w700, color: colors.lightGold),
+                      style: styles.editorialSerif(
+                        context,
+                        size: 13,
+                        fontWeight: FontWeight.w700,
+                        color: colors.lightGold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -1342,7 +3336,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isGu && s.mandalNameGu.isNotEmpty ? s.mandalNameGu : (s.mandalNameEn.isNotEmpty ? s.mandalNameEn : 'Shree Pavan Putra Garbi Mandal'),
+                      isGu && s.mandalNameGu.isNotEmpty
+                          ? s.mandalNameGu
+                          : (s.mandalNameEn.isNotEmpty
+                                ? s.mandalNameEn
+                                : 'Shree Pavan Putra Garbi Mandal'),
                       style: styles.editorialSerif(
                         context,
                         size: 18,
@@ -1353,7 +3351,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      isGu ? 'રાજકોટ • સ્થાપના ૧૯૯૭' : 'Rajkot • Established 1997',
+                      isGu
+                          ? 'રાજકોટ • સ્થાપના ૧૯૯૭'
+                          : 'Rajkot • Established 1997',
                       style: styles.cleanSans(
                         context,
                         size: 11.5,
@@ -1424,7 +3424,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           Center(
             child: Text(
               '|| જાગતી જોગમાયા || || જય માતાજી ||',
-              style: styles.devotionalMotto(context, size: 15, color: colors.lightGold),
+              style: styles.devotionalMotto(
+                context,
+                size: 15,
+                color: colors.lightGold,
+              ),
             ),
           ),
         ],
@@ -1457,12 +3461,21 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             children: [
               Text(
                 label,
-                style: styles.cleanSans(context, size: 10.5, color: colors.lightGold.withValues(alpha: 0.75)),
+                style: styles.cleanSans(
+                  context,
+                  size: 10.5,
+                  color: colors.lightGold.withValues(alpha: 0.75),
+                ),
               ),
               const SizedBox(height: 1),
               Text(
                 value,
-                style: styles.cleanSans(context, size: 13, color: colors.white, fontWeight: FontWeight.w600),
+                style: styles.cleanSans(
+                  context,
+                  size: 13,
+                  color: colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -1474,7 +3487,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   // =========================================================================
   // 💳 SECTION 2: DEVOTIONAL OFFERINGS & QR PAYMENTS
   // =========================================================================
-  Widget _buildPaymentQrSection(MyAppColors colors, MyAppTextStyles styles, bool isMobile) {
+  Widget _buildPaymentQrSection(
+    MyAppColors colors,
+    MyAppTextStyles styles,
+    bool isMobile,
+  ) {
     return CulturalFrameCard(
       padding: EdgeInsets.all(isMobile ? 14 : 24),
       child: Column(
@@ -1489,15 +3506,25 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 runSpacing: 8,
                 children: [
                   MyAppOutlineButton.icon(
+                    onPressed: _openViewQrCodeDialog,
+                    icon: const Icon(Icons.visibility_rounded, size: 16),
+                    label: 'View QR',
+                  ),
+                  MyAppOutlineButton.icon(
+                    onPressed: _openAddOrEditQrDialog,
+                    icon: const Icon(Icons.edit_rounded, size: 16),
+                    label: 'Edit Details',
+                  ),
+                  MyAppOutlineButton.icon(
                     isDanger: true,
-                    onPressed: _confirmClearPaymentSection,
-                    icon: const Icon(Icons.delete_sweep_rounded, size: 16),
-                    label: 'Clear Payment',
+                    onPressed: _confirmDeleteQrCode,
+                    icon: const Icon(Icons.delete_outline_rounded, size: 16),
+                    label: 'Delete QR',
                   ),
                   MyAppFillButton.icon(
                     onPressed: _savePaymentSettings,
                     icon: const Icon(Icons.save_rounded, size: 16),
-                    label: 'Save Payment & Seva',
+                    label: 'Save & Publish',
                   ),
                 ],
               );
@@ -1508,12 +3535,19 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.qr_code_scanner_rounded, color: colors.heritageGold),
+                        Icon(
+                          Icons.qr_code_scanner_rounded,
+                          color: colors.heritageGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '2. Devotional Offerings & QR Payments (Seva / Dan)',
-                            style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700),
+                            style: styles.editorialSerif(
+                              context,
+                              size: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -1530,12 +3564,19 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(Icons.qr_code_scanner_rounded, color: colors.heritageGold),
+                        Icon(
+                          Icons.qr_code_scanner_rounded,
+                          color: colors.heritageGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '2. Devotional Offerings & QR Payments (Seva / Dan)',
-                            style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
+                            style: styles.editorialSerif(
+                              context,
+                              size: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -1550,7 +3591,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           const SizedBox(height: 6),
           Text(
             'Configure the mandal verified UPI ID and payment QR code displayed to devotees on the Contact page.',
-            style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+            style: styles.cleanSans(
+              context,
+              size: 12,
+              color: colors.getSecondaryTextColor(context),
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -1581,8 +3626,12 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _isPaymentEnabled ? Icons.payments_rounded : Icons.money_off_rounded,
-                        color: _isPaymentEnabled ? colors.heritageGold : Colors.grey,
+                        _isPaymentEnabled
+                            ? Icons.payments_rounded
+                            : Icons.money_off_rounded,
+                        color: _isPaymentEnabled
+                            ? colors.heritageGold
+                            : Colors.grey,
                         size: 20,
                       ),
                     ),
@@ -1590,14 +3639,21 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     Expanded(
                       child: Text(
                         'Show QR Payment & Seva on Website',
-                        style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.w700),
+                        style: styles.editorialSerif(
+                          context,
+                          size: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     Switch(
                       value: _isPaymentEnabled,
                       activeThumbColor: colors.heritageGold,
                       activeTrackColor: colors.deepMaroon,
-                      onChanged: (val) => setState(() => _isPaymentEnabled = val),
+                      onChanged: (val) {
+                        setState(() => _isPaymentEnabled = val);
+                        _savePaymentSettings();
+                      },
                     ),
                   ],
                 ),
@@ -1608,7 +3664,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     HeritageBadge(
-                      label: _isPaymentEnabled ? 'ACTIVE ON WEBSITE' : 'HIDDEN FROM VISITORS',
+                      label: _isPaymentEnabled
+                          ? 'ACTIVE ON WEBSITE'
+                          : 'HIDDEN FROM VISITORS',
                       backgroundColor: _isPaymentEnabled
                           ? Colors.green.withValues(alpha: 0.15)
                           : Colors.grey.withValues(alpha: 0.15),
@@ -1618,141 +3676,244 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                           : Colors.grey.withValues(alpha: 0.4),
                     ),
                     Text(
-                      'When enabled, the verified QR code and UPI details appear on the public Contact page.',
-                      style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                      _isPaymentEnabled
+                          ? 'When enabled, the verified QR code and UPI details appear on the public Contact page.'
+                          : 'QR donations are paused & hidden from public website. You can configure and preview below.',
+                      style: styles.cleanSans(
+                        context,
+                        size: 11.5,
+                        color: colors.getSecondaryTextColor(context),
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 20),
 
-          if (_isPaymentEnabled) ...[
-            const SizedBox(height: 20),
+          // LIVE PAYMENT QR PREVIEW CARD (Replicating Public Contact Page)
+          _buildLivePaymentQrPreviewCard(colors, styles),
+          const SizedBox(height: 24),
 
-            // LIVE PAYMENT QR PREVIEW CARD (Replicating Public Contact Page)
-            _buildLivePaymentQrPreviewCard(colors, styles),
-            const SizedBox(height: 24),
+          // FORM INPUTS
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth > 850;
 
-            // FORM INPUTS
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth > 850;
+              final leftImagePicker = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Verified Bank / Mandal QR Code Image',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  MyAppImagePicker(
+                    label: 'Verified UPI QR Code Image',
+                    helperText:
+                        'Pick from device or paste image URL. Devotees scan this code to contribute seva.',
+                    initialImageUrl: _paymentQrImageUrl,
+                    height: 220,
+                    onImageChanged: (url) =>
+                        setState(() => _paymentQrImageUrl = url),
+                    onImageRemoved: () =>
+                        setState(() => _paymentQrImageUrl = ''),
+                  ),
+                ],
+              );
 
-                final leftImagePicker = Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Verified Bank / Mandal QR Code Image',
-                      style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
+              final rightInputs = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '2.1 Verified Mandal UPI ID (UPI આઈડી)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
                     ),
-                    const SizedBox(height: 6),
-                    MyAppImagePicker(
-                      label: 'Verified UPI QR Code Image',
-                      helperText: 'Pick from device or paste image URL. Devotees scan this code to contribute seva.',
-                      initialImageUrl: _paymentQrImageUrl,
-                      height: 220,
-                      onImageChanged: (url) => setState(() => _paymentQrImageUrl = url),
-                      onImageRemoved: () => setState(() => _paymentQrImageUrl = ''),
+                  ),
+                  const SizedBox(height: 6),
+                  MyAppTextFormField(
+                    controller: _upiIdCtrl,
+                    labelText: 'Verified UPI ID',
+                    hintText:
+                        'e.g. pavanputragarbi@okhdfcbank or 9876543210@upi',
+                    prefixIcon: const Icon(Icons.payment_rounded),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '2.2 Recipient / Account Name (ખાતાધારકનું નામ - English)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                );
+                  ),
+                  const SizedBox(height: 6),
+                  MyAppTextFormField(
+                    controller: _recipientNameCtrl,
+                    labelText: 'Account / Trust Name (English)',
+                    hintText: 'e.g. Shree Pavan Putra Garbi Mandal Trust',
+                    prefixIcon: const Icon(Icons.account_balance_rounded),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '2.3 Recipient / Account Name (ખાતાધારકનું નામ - ગુજરાતી)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  MyAppTextFormField(
+                    controller: _recipientNameGuCtrl,
+                    labelText: 'Account / Trust Name (Gujarati)',
+                    hintText: 'દા.ત. શ્રી પવનપુત્ર ગરબી મંડળ ટ્રસ્ટ',
+                    prefixIcon: const Icon(Icons.account_balance_rounded),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '2.4 Payment Notes & Seva Instructions (ચુકવણી નોંધ - English)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  MyAppTextFormField(
+                    controller: _paymentNotesCtrl,
+                    labelText: 'Payment Instructions (English)',
+                    hintText:
+                        'e.g. Direct mandal seva for Navratri Mahotsav 2026',
+                    prefixIcon: const Icon(Icons.notes_rounded),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '2.5 Payment Notes & Seva Instructions (ચુકવણી નોંધ - ગુજરાતી)',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  MyAppTextFormField(
+                    controller: _paymentNotesGuCtrl,
+                    labelText: 'Payment Instructions (Gujarati)',
+                    hintText: 'દા.ત. નવરાત્રિ મહોત્સવ સેવા અર્થે સીધું અનુદાન',
+                    prefixIcon: const Icon(Icons.notes_rounded),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                ],
+              );
 
-                final rightInputs = Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '2.1 Verified Mandal UPI ID (UPI આઈડી)',
-                      style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 6),
-                    MyAppTextFormField(
-                      controller: _upiIdCtrl,
-                      labelText: 'Verified UPI ID',
-                      hintText: 'e.g. pavanputragarbi@okhdfcbank or 9876543210@upi',
-                      prefixIcon: const Icon(Icons.payment_rounded),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '2.2 Verified Recipient / Account Name (ખાતાધારકનું નામ)',
-                      style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 6),
-                    MyAppTextFormField(
-                      controller: _recipientNameCtrl,
-                      labelText: 'Account / Trust Name',
-                      hintText: 'e.g. Shree Pavan Putra Garbi Mandal Trust',
-                      prefixIcon: const Icon(Icons.account_balance_rounded),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '2.3 Payment Notes & Seva Instructions (ચુકવણી નોંધ / સૂચના)',
-                      style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 6),
-                    MyAppTextFormField(
-                      controller: _paymentNotesCtrl,
-                      labelText: 'Payment Instructions',
-                      hintText: 'e.g. Direct mandal seva for Navratri Mahotsav 2026',
-                      prefixIcon: const Icon(Icons.notes_rounded),
-                    ),
-                  ],
-                );
-
-                return isWide
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 4, child: leftImagePicker),
-                          const SizedBox(width: 24),
-                          Expanded(flex: 6, child: rightInputs),
-                        ],
-                      )
-                    : Column(
-                        children: [
-                          leftImagePicker,
-                          const SizedBox(height: 20),
-                          rightInputs,
-                        ],
-                      );
-              },
-            ),
-          ],
+              return isWide
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 4, child: leftImagePicker),
+                        const SizedBox(width: 24),
+                        Expanded(flex: 6, child: rightInputs),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        leftImagePicker,
+                        const SizedBox(height: 20),
+                        rightInputs,
+                      ],
+                    );
+            },
+          ),
         ],
       ),
     );
   }
 
   // --- Live Payment QR Preview Card ---
-  Widget _buildLivePaymentQrPreviewCard(MyAppColors colors, MyAppTextStyles styles) {
-    final upiId = _upiIdCtrl.text.trim().isNotEmpty ? _upiIdCtrl.text.trim() : 'pavanputragarbi@upi';
-    final recipient = _recipientNameCtrl.text.trim().isNotEmpty
-        ? _recipientNameCtrl.text.trim()
-        : 'Shree Pavan Putra Garbi Mandal Trust';
-    final notes = _paymentNotesCtrl.text.trim().isNotEmpty
-        ? _paymentNotesCtrl.text.trim()
-        : 'Direct Mandir Seva & Navratri Mahotsav Offerings';
+  Widget _buildLivePaymentQrPreviewCard(
+    MyAppColors colors,
+    MyAppTextStyles styles,
+  ) {
+    final isGu = _paymentPreviewLang == 'gu';
+
+    final upiId = _upiIdCtrl.text.trim().isNotEmpty
+        ? _upiIdCtrl.text.trim()
+        : 'pavanputragarbi@upi';
+    final recipient = (isGu && _recipientNameGuCtrl.text.trim().isNotEmpty)
+        ? _recipientNameGuCtrl.text.trim()
+        : (_recipientNameCtrl.text.trim().isNotEmpty
+              ? _recipientNameCtrl.text.trim()
+              : (isGu
+                    ? 'શ્રી પવનપુત્ર ગરબી મંડળ ટ્રસ્ટ'
+                    : 'Shree Pavan Putra Garbi Mandal Trust'));
+    final notes = (isGu && _paymentNotesGuCtrl.text.trim().isNotEmpty)
+        ? _paymentNotesGuCtrl.text.trim()
+        : (_paymentNotesCtrl.text.trim().isNotEmpty
+              ? _paymentNotesCtrl.text.trim()
+              : (isGu
+                    ? 'સીધું મંદિર સેવા અને નવરાત્રિ મહોત્સવ અનુદાન'
+                    : 'Direct Mandir Seva & Navratri Mahotsav Offerings'));
     final hasQrImage = _paymentQrImageUrl.trim().isNotEmpty;
 
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1B0306),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.4), width: 1.2),
-        boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 16, offset: Offset(0, 6))],
+        border: Border.all(
+          color: colors.heritageGold.withValues(alpha: 0.4),
+          width: 1.2,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black38,
+            blurRadius: 16,
+            offset: Offset(0, 6),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Live Preview Top Toolbar
           LayoutBuilder(
             builder: (context, previewConstraints) {
-              final isTight = previewConstraints.maxWidth < 450;
+              final isTight = previewConstraints.maxWidth < 580;
               final badge = HeritageBadge(
-                label: 'UPI VERIFIED',
+                label: isGu ? 'UPI ચકાસાયેલ' : 'UPI VERIFIED',
                 backgroundColor: colors.heritageGold.withValues(alpha: 0.15),
                 textColor: colors.lightGold,
                 borderColor: colors.heritageGold.withValues(alpha: 0.4),
+              );
+              final activeBadge = HeritageBadge(
+                label: _isPaymentEnabled
+                    ? (isGu ? 'વેબસાઇટ પર સક્રિય' : 'ACTIVE ON WEBSITE')
+                    : (isGu ? 'જાહેરથી છુપાયેલ' : 'HIDDEN FROM PUBLIC'),
+                backgroundColor: _isPaymentEnabled
+                    ? Colors.green.withValues(alpha: 0.15)
+                    : Colors.grey.withValues(alpha: 0.15),
+                textColor: _isPaymentEnabled ? Colors.green : Colors.grey,
+                borderColor: _isPaymentEnabled
+                    ? Colors.green.withValues(alpha: 0.4)
+                    : Colors.grey.withValues(alpha: 0.4),
+              );
+              final langToggle = MyAppSegmentView.language(
+                selectedLanguage: _paymentPreviewLang,
+                onLanguageChanged: (val) =>
+                    setState(() => _paymentPreviewLang = val),
               );
 
               if (isTight) {
@@ -1761,39 +3922,95 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.visibility_rounded, color: colors.heritageGold, size: 16),
+                        Icon(
+                          Icons.visibility_rounded,
+                          color: colors.heritageGold,
+                          size: 16,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            'Live Devotional Offering Preview',
-                            style: styles.editorialSerif(context, size: 13, fontWeight: FontWeight.w700, color: colors.lightGold),
+                            isGu
+                                ? 'જીવંત સેવા પૂર્વાવલોકન'
+                                : 'Live Devotional Offering Preview',
+                            style: styles.editorialSerif(
+                              context,
+                              size: 13,
+                              fontWeight: FontWeight.w700,
+                              color: colors.lightGold,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    badge,
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [langToggle, badge, activeBadge],
+                    ),
                   ],
                 );
               }
 
               return Row(
                 children: [
-                  Icon(Icons.visibility_rounded, color: colors.heritageGold, size: 16),
+                  Icon(
+                    Icons.visibility_rounded,
+                    color: colors.heritageGold,
+                    size: 16,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Live Devotional Offering Preview (as seen by public visitors)',
-                      style: styles.editorialSerif(context, size: 13, fontWeight: FontWeight.w700, color: colors.lightGold),
+                      isGu
+                          ? 'જીવંત સેવા પૂર્વાવલોકન (જાહેર દર્શનાર્થીઓ માટે)'
+                          : 'Live Devotional Offering Preview (as seen by public visitors)',
+                      style: styles.editorialSerif(
+                        context,
+                        size: 13,
+                        fontWeight: FontWeight.w700,
+                        color: colors.lightGold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
+                  langToggle,
+                  const SizedBox(width: 8),
                   badge,
+                  const SizedBox(width: 8),
+                  activeBadge,
                 ],
               );
             },
           ),
           const Divider(height: 24, color: Colors.white24),
+
+          // Quick Action Bar on Preview Card
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              MyAppOutlineButton.icon(
+                onPressed: _openViewQrCodeDialog,
+                icon: const Icon(Icons.zoom_in_rounded, size: 15),
+                label: isGu ? 'વિગતવાર QR જુઓ' : 'View Full QR',
+              ),
+              MyAppOutlineButton.icon(
+                onPressed: _openAddOrEditQrDialog,
+                icon: const Icon(Icons.edit_rounded, size: 15),
+                label: isGu ? 'QR વિગતો સુધારો' : 'Edit QR Details',
+              ),
+              MyAppOutlineButton.icon(
+                isDanger: true,
+                onPressed: _confirmDeleteQrCode,
+                icon: const Icon(Icons.delete_outline_rounded, size: 15),
+                label: isGu ? 'QR કાઢી નાખો' : 'Delete QR',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
 
           // Header
           Row(
@@ -1804,7 +4021,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   shape: BoxShape.circle,
                   color: colors.heritageGold.withValues(alpha: 0.15),
                 ),
-                child: Icon(Icons.qr_code_scanner_rounded, color: colors.heritageGold, size: 24),
+                child: Icon(
+                  Icons.qr_code_scanner_rounded,
+                  color: colors.heritageGold,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1812,12 +4033,25 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Devotional Offerings / Garbi Seva & Dan',
-                      style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700, color: colors.white),
+                      isGu
+                          ? 'ભક્તિમય અર્પણ / ગરબી સેવા અને દાન'
+                          : 'Devotional Offerings / Garbi Seva & Dan',
+                      style: styles.editorialSerif(
+                        context,
+                        size: 17,
+                        fontWeight: FontWeight.w700,
+                        color: colors.white,
+                      ),
                     ),
                     Text(
-                      'Scan with Google Pay, PhonePe, Paytm, or BHIM UPI',
-                      style: styles.cleanSans(context, size: 11.5, color: colors.lightGold.withValues(alpha: 0.75)),
+                      isGu
+                          ? 'Google Pay, PhonePe, Paytm, અથવા BHIM UPI થી સ્કેન કરો'
+                          : 'Scan with Google Pay, PhonePe, Paytm, or BHIM UPI',
+                      style: styles.cleanSans(
+                        context,
+                        size: 11.5,
+                        color: colors.lightGold.withValues(alpha: 0.75),
+                      ),
                     ),
                   ],
                 ),
@@ -1826,78 +4060,182 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           ),
           const SizedBox(height: 18),
 
-          // QR Code Graphic Preview
+          // QR Code Graphic Preview with Tap-to-Inspect Action
           Center(
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: colors.heritageGold.withValues(alpha: 0.5), width: 1.5),
-                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
-              ),
-              child: hasQrImage
-                  ? CachedNetworkImage(
-                      imageUrl: _paymentQrImageUrl,
-                      width: 160,
-                      height: 160,
-                      fit: BoxFit.contain,
-                      placeholder: (_, _) => const SizedBox(
-                        width: 160,
-                        height: 160,
-                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                      ),
-                      errorWidget: (_, _, _) => Container(
-                        width: 160,
-                        height: 160,
-                        color: Colors.grey.shade200,
-                        child: const Center(child: Icon(Icons.broken_image_rounded, size: 48, color: Colors.grey)),
-                      ),
-                    )
-                  : Container(
-                      width: 160,
-                      height: 160,
-                      color: Colors.grey.shade100,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.qr_code_2_rounded, size: 64, color: Colors.grey.shade500),
-                          const SizedBox(height: 4),
-                          Text('Upload QR Image', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                        ],
-                      ),
+            child: InkWell(
+              onTap: hasQrImage
+                  ? _openViewQrCodeDialog
+                  : _openAddOrEditQrDialog,
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: colors.heritageGold.withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
                     ),
+                  ],
+                ),
+                child: hasQrImage
+                    ? Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: _paymentQrImageUrl,
+                            width: 160,
+                            height: 160,
+                            fit: BoxFit.contain,
+                            placeholder: (_, _) => const SizedBox(
+                              width: 160,
+                              height: 160,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (_, _, _) => Container(
+                              width: 160,
+                              height: 160,
+                              color: Colors.grey.shade200,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.broken_image_rounded,
+                                  size: 48,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.7),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.zoom_in_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(
+                        width: 160,
+                        height: 160,
+                        color: Colors.grey.shade100,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.qr_code_2_rounded,
+                              size: 56,
+                              color: Colors.grey.shade500,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              isGu ? 'QR કોડ ઉમેરો' : 'Add QR Code',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: colors.deepMaroon,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              isGu ? 'અહીં ટેપ કરો' : 'Tap to configure',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 8),
 
-          // UPI ID Pill Box
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: colors.heritageGold.withValues(alpha: 0.3)),
+          // Tap Hint
+          Center(
+            child: Text(
+              hasQrImage
+                  ? (isGu
+                        ? '🔍 પૂર્ણ કદમાં જોવા અને ચકાસવા માટે QR કોડ પર ટેપ કરો'
+                        : '🔍 Tap QR code to inspect full size & verify details')
+                  : (isGu
+                        ? '➕ QR કોડ ઈમેજ અપલોડ કરવા માટે ઉપર ટેપ કરો'
+                        : '➕ Tap above to upload / configure QR code'),
+              style: styles.cleanSans(
+                context,
+                size: 11,
+                color: colors.lightGold.withValues(alpha: 0.8),
+                fontWeight: FontWeight.w500,
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.payment_rounded, color: colors.lightGold, size: 16),
-                const SizedBox(width: 8),
-                Text(
-                  'UPI ID: ',
-                  style: styles.cleanSans(context, size: 12, color: colors.lightGold.withValues(alpha: 0.8)),
+          ),
+          const SizedBox(height: 16),
+
+          // UPI ID Pill Box with Tap-to-Copy
+          InkWell(
+            onTap: () => _copyToClipboard(upiId, 'UPI ID'),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: colors.heritageGold.withValues(alpha: 0.3),
                 ),
-                Flexible(
-                  child: Text(
-                    upiId,
-                    style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w700, color: colors.white),
-                    overflow: TextOverflow.ellipsis,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.payment_rounded,
+                    color: colors.lightGold,
+                    size: 16,
                   ),
-                ),
-                const SizedBox(width: 8),
-                Icon(Icons.copy_rounded, color: colors.heritageGold, size: 15),
-              ],
+                  const SizedBox(width: 8),
+                  Text(
+                    isGu ? 'UPI આઈડી: ' : 'UPI ID: ',
+                    style: styles.cleanSans(
+                      context,
+                      size: 12,
+                      color: colors.lightGold.withValues(alpha: 0.8),
+                    ),
+                  ),
+                  Flexible(
+                    child: Text(
+                      upiId,
+                      style: styles.cleanSans(
+                        context,
+                        size: 13,
+                        fontWeight: FontWeight.w700,
+                        color: colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.copy_rounded,
+                    color: colors.heritageGold,
+                    size: 15,
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -1907,14 +4245,23 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             child: Column(
               children: [
                 Text(
-                  'Account: $recipient',
-                  style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w600, color: colors.white),
+                  '${isGu ? 'ખાતાધારક' : 'Account'}: $recipient',
+                  style: styles.cleanSans(
+                    context,
+                    size: 12,
+                    fontWeight: FontWeight.w600,
+                    color: colors.white,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   notes,
-                  style: styles.cleanSans(context, size: 11.5, color: colors.lightGold.withValues(alpha: 0.75)),
+                  style: styles.cleanSans(
+                    context,
+                    size: 11.5,
+                    color: colors.lightGold.withValues(alpha: 0.75),
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -1928,7 +4275,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   // =========================================================================
   // ✉️ SECTION 3: INBOUND ADMIN NOTIFICATION EMAILS (Add, Edit, Delete, View)
   // =========================================================================
-  Widget _buildNotificationEmailsSection(MyAppColors colors, MyAppTextStyles styles, bool isMobile) {
+  Widget _buildNotificationEmailsSection(
+    MyAppColors colors,
+    MyAppTextStyles styles,
+    bool isMobile,
+  ) {
     final emails = widget.store.notificationEmails;
 
     return CulturalFrameCard(
@@ -1952,12 +4303,19 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.mark_email_read_rounded, color: colors.heritageGold),
+                        Icon(
+                          Icons.mark_email_read_rounded,
+                          color: colors.heritageGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '3. Inbound Admin Notification Emails',
-                            style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700),
+                            style: styles.editorialSerif(
+                              context,
+                              size: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -1974,12 +4332,19 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(Icons.mark_email_read_rounded, color: colors.heritageGold),
+                        Icon(
+                          Icons.mark_email_read_rounded,
+                          color: colors.heritageGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '3. Inbound Admin Notification Emails (ઈમેલ સૂચના સરનામાં)',
-                            style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
+                            style: styles.editorialSerif(
+                              context,
+                              size: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -1994,7 +4359,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           const SizedBox(height: 6),
           Text(
             'Inquiries submitted by devotees on the public Contact page are automatically delivered in real-time to these email addresses. You can add, edit, test, and manage them here.',
-            style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+            style: styles.cleanSans(
+              context,
+              size: 12,
+              color: colors.getSecondaryTextColor(context),
+            ),
           ),
           const SizedBox(height: 18),
 
@@ -2009,16 +4378,28 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.alternate_email_rounded, size: 36, color: colors.heritageGold.withValues(alpha: 0.7)),
+                    Icon(
+                      Icons.alternate_email_rounded,
+                      size: 36,
+                      color: colors.heritageGold.withValues(alpha: 0.7),
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       'No Notification Emails Configured',
-                      style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
+                      style: styles.editorialSerif(
+                        context,
+                        size: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Click "Add Notification Email" above to receive devotee inquiries in your inbox.',
-                      style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                      style: styles.cleanSans(
+                        context,
+                        size: 11.5,
+                        color: colors.getSecondaryTextColor(context),
+                      ),
                     ),
                   ],
                 ),
@@ -2032,7 +4413,12 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final rec = emails[index];
-                return _buildNotificationEmailCard(rec, colors, styles, isMobile);
+                return _buildNotificationEmailCard(
+                  rec,
+                  colors,
+                  styles,
+                  isMobile,
+                );
               },
             ),
         ],
@@ -2072,40 +4458,71 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 children: [
                   Text(
                     rec.recipientName,
-                    style: styles.cleanSans(context, size: 14, fontWeight: FontWeight.w700),
+                    style: styles.cleanSans(
+                      context,
+                      size: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   if (rec.isPrimary)
                     HeritageBadge(
                       label: 'PRIMARY RECIPIENT',
-                      backgroundColor: colors.heritageGold.withValues(alpha: 0.18),
+                      backgroundColor: colors.heritageGold.withValues(
+                        alpha: 0.18,
+                      ),
                       textColor: colors.lightGold,
                       borderColor: colors.heritageGold.withValues(alpha: 0.5),
                     ),
                   HeritageBadge(
                     label: rec.isEnabled ? 'ACTIVE' : 'DISABLED',
-                    backgroundColor: rec.isEnabled ? Colors.green.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.15),
+                    backgroundColor: rec.isEnabled
+                        ? Colors.green.withValues(alpha: 0.15)
+                        : Colors.grey.withValues(alpha: 0.15),
                     textColor: rec.isEnabled ? Colors.green : Colors.grey,
-                    borderColor: rec.isEnabled ? Colors.green.withValues(alpha: 0.4) : Colors.grey.withValues(alpha: 0.4),
+                    borderColor: rec.isEnabled
+                        ? Colors.green.withValues(alpha: 0.4)
+                        : Colors.grey.withValues(alpha: 0.4),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.email_outlined, size: 14, color: colors.heritageGold),
+                  Icon(
+                    Icons.email_outlined,
+                    size: 14,
+                    color: colors.heritageGold,
+                  ),
                   const SizedBox(width: 6),
                   Flexible(
                     child: SelectableText(
                       rec.email,
-                      style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: colors.getPrimaryTextColor(context)),
+                      style: styles.cleanSans(
+                        context,
+                        size: 13,
+                        fontWeight: FontWeight.w600,
+                        color: colors.getPrimaryTextColor(context),
+                      ),
                     ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.copy_rounded, size: 15),
+                    tooltip: 'Copy Email',
+                    onPressed: () =>
+                        _copyToClipboard(rec.email, 'Email Address'),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
               Text(
                 'Department: ${rec.department}',
-                style: styles.cleanSans(context, size: 11, color: colors.getSecondaryTextColor(context)),
+                style: styles.cleanSans(
+                  context,
+                  size: 11,
+                  color: colors.getSecondaryTextColor(context),
+                ),
               ),
             ],
           );
@@ -2115,6 +4532,12 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             runSpacing: 6,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
+              MyAppOutlineButton.icon(
+                icon: const Icon(Icons.visibility_outlined, size: 14),
+                label: 'View Email',
+                color: colors.heritageGold,
+                onPressed: () => _openViewNotificationEmailDialog(rec),
+              ),
               MyAppOutlineButton.icon(
                 icon: const Icon(Icons.send_rounded, size: 14),
                 label: 'Test Email',
@@ -2184,7 +4607,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             Expanded(
               child: Text(
                 '4. Devotee Inquiries Inbox & Message Center (${filteredEnquiries.length})',
-                style: styles.editorialSerif(context, size: isMobile ? 18 : 20, fontWeight: FontWeight.w700),
+                style: styles.editorialSerif(
+                  context,
+                  size: isMobile ? 18 : 20,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -2192,7 +4619,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         const SizedBox(height: 4),
         Text(
           'Messages, prayer requests, and feedback submitted by public visitors through the Contact Us form.',
-          style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+          style: styles.cleanSans(
+            context,
+            size: 12,
+            color: colors.getSecondaryTextColor(context),
+          ),
         ),
         const SizedBox(height: 14),
 
@@ -2208,7 +4639,8 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   final searchField = MyAppTextFormField(
                     controller: _searchCtrl,
                     labelText: 'Search Inquiries',
-                    hintText: 'Search by devotee name, phone, email, or message...',
+                    hintText:
+                        'Search by devotee name, phone, email, or message...',
                     prefixIcon: const Icon(Icons.search_rounded),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -2264,7 +4696,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    _searchQuery.isNotEmpty ? Icons.search_off_rounded : Icons.inbox_rounded,
+                    _searchQuery.isNotEmpty
+                        ? Icons.search_off_rounded
+                        : Icons.inbox_rounded,
                     size: 48,
                     color: colors.heritageGold.withValues(alpha: 0.6),
                   ),
@@ -2273,16 +4707,24 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     _searchQuery.isNotEmpty
                         ? 'No inquiries match "$_searchQuery"'
                         : (_statusFilter == 'All'
-                            ? 'No inquiries received yet'
-                            : 'No inquiries in $_statusFilter status'),
-                    style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.w700),
+                              ? 'No inquiries received yet'
+                              : 'No inquiries in $_statusFilter status'),
+                    style: styles.editorialSerif(
+                      context,
+                      size: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _searchQuery.isNotEmpty
                         ? 'Try searching with a different name, phone, or keyword.'
                         : 'Devotee messages submitted from the public Contact page will appear here.',
-                    style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                    style: styles.cleanSans(
+                      context,
+                      size: 12,
+                      color: colors.getSecondaryTextColor(context),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -2346,7 +4788,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? colors.white : colors.getPrimaryTextColor(context),
+                color: isSelected
+                    ? colors.white
+                    : colors.getPrimaryTextColor(context),
               ),
             ),
             const SizedBox(width: 6),
@@ -2355,7 +4799,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               decoration: BoxDecoration(
                 color: isSelected
                     ? colors.heritageGold
-                    : (isNewTab && count > 0 ? Colors.redAccent.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.15)),
+                    : (isNewTab && count > 0
+                          ? Colors.redAccent.withValues(alpha: 0.15)
+                          : Colors.grey.withValues(alpha: 0.15)),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -2365,7 +4811,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   fontWeight: FontWeight.w700,
                   color: isSelected
                       ? colors.deepMaroon
-                      : (isNewTab && count > 0 ? Colors.redAccent : colors.getSecondaryTextColor(context)),
+                      : (isNewTab && count > 0
+                            ? Colors.redAccent
+                            : colors.getSecondaryTextColor(context)),
                 ),
               ),
             ),
@@ -2376,11 +4824,17 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   }
 
   // --- Mobile Enquiry Card ---
-  Widget _buildMobileEnquiryCard(AdminEnquiry enq, bool isNew, MyAppColors colors, MyAppTextStyles styles) {
+  Widget _buildMobileEnquiryCard(
+    AdminEnquiry enq,
+    bool isNew,
+    MyAppColors colors,
+    MyAppTextStyles styles,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: 36,
@@ -2393,7 +4847,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               ),
               child: Center(
                 child: Icon(
-                  isNew ? Icons.mark_email_unread_rounded : Icons.mark_email_read_rounded,
+                  isNew
+                      ? Icons.mark_email_unread_rounded
+                      : Icons.mark_email_read_rounded,
                   color: isNew ? Colors.redAccent : Colors.green,
                   size: 18,
                 ),
@@ -2406,17 +4862,27 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 children: [
                   Text(
                     enq.name,
-                    style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
+                    style: styles.editorialSerif(
+                      context,
+                      size: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     enq.date,
-                    style: styles.cleanSans(context, size: 11, color: colors.getSecondaryTextColor(context)),
+                    style: styles.cleanSans(
+                      context,
+                      size: 11,
+                      color: colors.getSecondaryTextColor(context),
+                    ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 6),
             HeritageBadge(
               label: enq.status.toUpperCase(),
               backgroundColor: isNew
@@ -2431,77 +4897,144 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         ),
         const SizedBox(height: 8),
 
-        // Contact info line
+        // Contact info line with interactive quick tap actions
         if (enq.phone.isNotEmpty || enq.email.isNotEmpty)
-          Text(
-            '${enq.phone.isNotEmpty ? enq.phone : ''}${enq.phone.isNotEmpty && enq.email.isNotEmpty ? " • " : ""}${enq.email}',
-            style: styles.cleanSans(context, size: 11.5, color: colors.heritageGold, fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: colors.getSurfaceColor(context),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: colors.getBorderColor(context).withValues(alpha: 0.5),
+              ),
+            ),
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (enq.phone.isNotEmpty)
+                  InkWell(
+                    onTap: () => _launchExternalUrl(
+                      'tel:${enq.phone.replaceAll(RegExp(r'[^0-9+]'), '')}',
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.phone_rounded,
+                          size: 13,
+                          color: colors.heritageGold,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          enq.phone,
+                          style: styles.cleanSans(
+                            context,
+                            size: 11.5,
+                            color: colors.heritageGold,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (enq.email.isNotEmpty)
+                  InkWell(
+                    onTap: () => _openReplyDevoteeDialog(enq),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.email_rounded,
+                          size: 13,
+                          color: colors.heritageGold,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          enq.email,
+                          style: styles.cleanSans(
+                            context,
+                            size: 11.5,
+                            color: colors.heritageGold,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
 
         // Message snippet
         Text(
           enq.message.isNotEmpty ? enq.message : '(No message)',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+          style: styles.cleanSans(
+            context,
+            size: 12,
+            color: colors.getSecondaryTextColor(context),
+          ),
         ),
         const SizedBox(height: 8),
         const Divider(height: 1),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
 
         // Action Toolbar
         Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          alignment: WrapAlignment.spaceBetween,
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            MyAppTextButton.icon(
-              icon: const Icon(Icons.visibility_outlined, size: 16),
-              label: 'View',
+            MyAppOutlineButton.icon(
+              icon: const Icon(Icons.visibility_outlined, size: 15),
+              label: 'View Email',
+              color: colors.heritageGold,
               onPressed: () => _openEnquiryDialog(enq),
             ),
             if (enq.email.isNotEmpty)
-              MyAppOutlineButton.icon(
-                icon: const Icon(Icons.reply_rounded, size: 14),
+              MyAppFillButton.icon(
+                icon: const Icon(Icons.reply_rounded, size: 15),
                 label: 'Reply',
-                color: colors.heritageGold,
                 onPressed: () => _openReplyDevoteeDialog(enq),
               ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (enq.status == 'New')
-                  MyAppIconButton(
-                    icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-                    tooltip: 'Mark Responded',
-                    color: Colors.green,
-                    onPressed: () {
-                      widget.store.updateEnquiryStatus(enq.id, 'Responded');
-                      MyAppToastMessage.success(context, title: 'Marked Responded', description: 'Status updated.');
-                    },
-                  )
-                else
-                  MyAppIconButton(
-                    icon: const Icon(Icons.mark_email_unread_outlined, size: 18),
-                    tooltip: 'Mark New',
-                    color: Colors.orangeAccent,
-                    onPressed: () {
-                      widget.store.updateEnquiryStatus(enq.id, 'New');
-                      MyAppToastMessage.info(context, title: 'Marked as New', description: 'Moved to unread queue.');
-                    },
-                  ),
-                const SizedBox(width: 4),
-                MyAppIconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                  tooltip: 'Delete',
-                  color: Colors.redAccent,
-                  onPressed: () => _confirmDeleteEnquiry(enq),
-                ),
-              ],
+            if (enq.status == 'New')
+              MyAppIconButton(
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                tooltip: 'Mark Responded',
+                color: Colors.green,
+                onPressed: () {
+                  widget.store.updateEnquiryStatus(enq.id, 'Responded');
+                  MyAppToastMessage.success(
+                    context,
+                    title: 'Marked Responded',
+                    description: 'Status updated.',
+                  );
+                },
+              )
+            else
+              MyAppIconButton(
+                icon: const Icon(Icons.mark_email_unread_outlined, size: 18),
+                tooltip: 'Mark New',
+                color: Colors.orangeAccent,
+                onPressed: () {
+                  widget.store.updateEnquiryStatus(enq.id, 'New');
+                  MyAppToastMessage.info(
+                    context,
+                    title: 'Marked as New',
+                    description: 'Moved to unread queue.',
+                  );
+                },
+              ),
+            MyAppIconButton(
+              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+              tooltip: 'Delete',
+              color: Colors.redAccent,
+              onPressed: () => _confirmDeleteEnquiry(enq),
             ),
           ],
         ),
@@ -2510,7 +5043,12 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   }
 
   // --- Desktop / Tablet Enquiry Card ---
-  Widget _buildDesktopEnquiryCard(AdminEnquiry enq, bool isNew, MyAppColors colors, MyAppTextStyles styles) {
+  Widget _buildDesktopEnquiryCard(
+    AdminEnquiry enq,
+    bool isNew,
+    MyAppColors colors,
+    MyAppTextStyles styles,
+  ) {
     return Row(
       children: [
         Container(
@@ -2524,7 +5062,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           ),
           child: Center(
             child: Icon(
-              isNew ? Icons.mark_email_unread_rounded : Icons.mark_email_read_rounded,
+              isNew
+                  ? Icons.mark_email_unread_rounded
+                  : Icons.mark_email_read_rounded,
               color: isNew ? Colors.redAccent : Colors.green,
               size: 20,
             ),
@@ -2542,7 +5082,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 children: [
                   Text(
                     enq.name,
-                    style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.w700),
+                    style: styles.editorialSerif(
+                      context,
+                      size: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   HeritageBadge(
                     label: enq.status.toUpperCase(),
@@ -2556,7 +5100,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   ),
                   Text(
                     enq.date,
-                    style: styles.cleanSans(context, size: 11, color: colors.getSecondaryTextColor(context)),
+                    style: styles.cleanSans(
+                      context,
+                      size: 11,
+                      color: colors.getSecondaryTextColor(context),
+                    ),
                   ),
                 ],
               ),
@@ -2564,27 +5112,36 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               if (enq.phone.isNotEmpty || enq.email.isNotEmpty)
                 Text(
                   '${enq.phone.isNotEmpty ? enq.phone : ''}${enq.phone.isNotEmpty && enq.email.isNotEmpty ? " • " : ""}${enq.email}',
-                  style: styles.cleanSans(context, size: 11.5, color: colors.heritageGold, fontWeight: FontWeight.w600),
+                  style: styles.cleanSans(
+                    context,
+                    size: 11.5,
+                    color: colors.heritageGold,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               const SizedBox(height: 3),
               Text(
                 enq.message.isNotEmpty ? enq.message : '(No message)',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                style: styles.cleanSans(
+                  context,
+                  size: 12,
+                  color: colors.getSecondaryTextColor(context),
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(width: 12),
         Wrap(
-          spacing: 6,
+          spacing: 8,
           runSpacing: 6,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             MyAppOutlineButton.icon(
               icon: const Icon(Icons.visibility_outlined, size: 16),
-              label: 'View',
+              label: 'View Email',
               color: colors.heritageGold,
               onPressed: () => _openEnquiryDialog(enq),
             ),
@@ -2602,7 +5159,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 color: Colors.green,
                 onPressed: () {
                   widget.store.updateEnquiryStatus(enq.id, 'Responded');
-                  MyAppToastMessage.success(context, title: 'Marked Responded', description: 'Status updated.');
+                  MyAppToastMessage.success(
+                    context,
+                    title: 'Marked Responded',
+                    description: 'Status updated.',
+                  );
                 },
               )
             else
@@ -2612,7 +5173,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                 color: Colors.orangeAccent,
                 onPressed: () {
                   widget.store.updateEnquiryStatus(enq.id, 'New');
-                  MyAppToastMessage.info(context, title: 'Marked as New', description: 'Moved to unread queue.');
+                  MyAppToastMessage.info(
+                    context,
+                    title: 'Marked as New',
+                    description: 'Moved to unread queue.',
+                  );
                 },
               ),
             MyAppIconButton(

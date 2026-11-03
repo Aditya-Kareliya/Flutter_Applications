@@ -1,5 +1,29 @@
+# robots.txt for Shree Pavan Putra Garbi Mandal, Rajkot
+# Official Website: https://pavanputragarbi.web.app/
+
 User-agent: *
 Allow: /
+Allow: /about
+Allow: /history
+Allow: /archive
+Allow: /gallery
+Allow: /videos
+Allow: /blog
+Allow: /contact
+Allow: /assets/
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.svg$
+Allow: /*.webp$
+Allow: /*.ico$
+Allow: /*.css$
+Allow: /*.js$
+
+# Protect private admin and authentication areas from search indexing
 Disallow: /admin
 Disallow: /admin/
-Sitemap: /sitemap.xml
+Disallow: /admin/*
+
+# Canonical XML Sitemap
+Sitemap: https://pavanputragarbi.web.app/sitemap.xml

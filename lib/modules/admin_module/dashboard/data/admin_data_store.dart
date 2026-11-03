@@ -1761,7 +1761,9 @@ class AdminSettings {
   final String contactPhone;
   final String contactEmail;
   final String address;
+  final String addressGu;
   final String dailyAartiTime;
+  final String dailyAartiTimeGu;
   final String youtubeChannel;
   final String instagramHandle;
   final String facebookUrl;
@@ -1770,7 +1772,9 @@ class AdminSettings {
   final String paymentQrImageUrl;
   final String paymentUpiId;
   final String paymentRecipientName;
+  final String paymentRecipientNameGu;
   final String paymentNotes;
+  final String paymentNotesGu;
   final bool isPaymentEnabled;
   String get logoUrl => logoImageUrl;
 
@@ -1780,7 +1784,9 @@ class AdminSettings {
     this.contactPhone = '',
     this.contactEmail = '',
     this.address = '',
+    this.addressGu = '',
     this.dailyAartiTime = '',
+    this.dailyAartiTimeGu = '',
     this.youtubeChannel = '',
     this.instagramHandle = '',
     this.facebookUrl = 'https://facebook.com/PavanPutraGarbiRajkot',
@@ -1789,7 +1795,9 @@ class AdminSettings {
     this.paymentQrImageUrl = '',
     this.paymentUpiId = '',
     this.paymentRecipientName = '',
+    this.paymentRecipientNameGu = '',
     this.paymentNotes = '',
+    this.paymentNotesGu = '',
     this.isPaymentEnabled = false,
   });
 
@@ -1804,8 +1812,12 @@ class AdminSettings {
       'contact_email': contactEmail,
       'contactEmail': contactEmail,
       'address': address,
+      'address_gu': addressGu,
+      'addressGu': addressGu,
       'daily_aarti_time': dailyAartiTime,
+      'daily_aarti_time_gu': dailyAartiTimeGu,
       'dailyAartiTime': dailyAartiTime,
+      'dailyAartiTimeGu': dailyAartiTimeGu,
       'youtube_channel': youtubeChannel,
       'youtubeChannel': youtubeChannel,
       'instagram_handle': instagramHandle,
@@ -1816,7 +1828,9 @@ class AdminSettings {
       'payment_qr_image_url': paymentQrImageUrl,
       'payment_upi_id': paymentUpiId,
       'payment_recipient_name': paymentRecipientName,
+      'payment_recipient_name_gu': paymentRecipientNameGu,
       'payment_notes': paymentNotes,
+      'payment_notes_gu': paymentNotesGu,
       'is_payment_enabled': isPaymentEnabled,
       'updated_at': DateTime.now().toIso8601String(),
     };
@@ -1829,7 +1843,9 @@ class AdminSettings {
       contactPhone: map['contact_phone'] as String? ?? map['contactPhone'] as String? ?? '',
       contactEmail: map['contact_email'] as String? ?? map['contactEmail'] as String? ?? '',
       address: map['address'] as String? ?? '',
+      addressGu: map['address_gu'] as String? ?? map['addressGu'] as String? ?? '',
       dailyAartiTime: map['daily_aarti_time'] as String? ?? map['dailyAartiTime'] as String? ?? '',
+      dailyAartiTimeGu: map['daily_aarti_time_gu'] as String? ?? map['dailyAartiTimeGu'] as String? ?? '',
       youtubeChannel: map['youtube_channel'] as String? ?? map['youtubeChannel'] as String? ?? '',
       instagramHandle: map['instagram_handle'] as String? ?? map['instagramHandle'] as String? ?? '',
       facebookUrl: map['facebook_url'] as String? ?? map['facebookUrl'] as String? ?? 'https://facebook.com/PavanPutraGarbiRajkot',
@@ -1841,7 +1857,9 @@ class AdminSettings {
       paymentQrImageUrl: map['payment_qr_image_url'] as String? ?? map['paymentQrImageUrl'] as String? ?? '',
       paymentUpiId: map['payment_upi_id'] as String? ?? map['paymentUpiId'] as String? ?? '',
       paymentRecipientName: map['payment_recipient_name'] as String? ?? map['paymentRecipientName'] as String? ?? '',
+      paymentRecipientNameGu: map['payment_recipient_name_gu'] as String? ?? map['paymentRecipientNameGu'] as String? ?? '',
       paymentNotes: map['payment_notes'] as String? ?? map['paymentNotes'] as String? ?? '',
+      paymentNotesGu: map['payment_notes_gu'] as String? ?? map['paymentNotesGu'] as String? ?? '',
       isPaymentEnabled: map['is_payment_enabled'] as bool? ?? map['isPaymentEnabled'] as bool? ?? false,
     );
   }
@@ -1852,7 +1870,9 @@ class AdminSettings {
     String? contactPhone,
     String? contactEmail,
     String? address,
+    String? addressGu,
     String? dailyAartiTime,
+    String? dailyAartiTimeGu,
     String? youtubeChannel,
     String? instagramHandle,
     String? facebookUrl,
@@ -1861,7 +1881,9 @@ class AdminSettings {
     String? paymentQrImageUrl,
     String? paymentUpiId,
     String? paymentRecipientName,
+    String? paymentRecipientNameGu,
     String? paymentNotes,
+    String? paymentNotesGu,
     bool? isPaymentEnabled,
   }) {
     return AdminSettings(
@@ -1870,7 +1892,9 @@ class AdminSettings {
       contactPhone: contactPhone ?? this.contactPhone,
       contactEmail: contactEmail ?? this.contactEmail,
       address: address ?? this.address,
+      addressGu: addressGu ?? this.addressGu,
       dailyAartiTime: dailyAartiTime ?? this.dailyAartiTime,
+      dailyAartiTimeGu: dailyAartiTimeGu ?? this.dailyAartiTimeGu,
       youtubeChannel: youtubeChannel ?? this.youtubeChannel,
       instagramHandle: instagramHandle ?? this.instagramHandle,
       facebookUrl: facebookUrl ?? this.facebookUrl,
@@ -1879,7 +1903,9 @@ class AdminSettings {
       paymentQrImageUrl: paymentQrImageUrl ?? this.paymentQrImageUrl,
       paymentUpiId: paymentUpiId ?? this.paymentUpiId,
       paymentRecipientName: paymentRecipientName ?? this.paymentRecipientName,
+      paymentRecipientNameGu: paymentRecipientNameGu ?? this.paymentRecipientNameGu,
       paymentNotes: paymentNotes ?? this.paymentNotes,
+      paymentNotesGu: paymentNotesGu ?? this.paymentNotesGu,
       isPaymentEnabled: isPaymentEnabled ?? this.isPaymentEnabled,
     );
   }

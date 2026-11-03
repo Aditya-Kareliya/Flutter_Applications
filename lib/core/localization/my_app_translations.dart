@@ -248,6 +248,11 @@ class MyAppTranslations {
       'contact_email': 'info@pavanputragarbi.org',
       'contact_phone_label': 'Helpline',
       'contact_phone': '+91 98250 12345 / +91 94280 67890',
+      'contact_whatsapp_label': 'WhatsApp Helpline',
+      'tooltip_call': 'Call Helpline',
+      'tooltip_whatsapp': 'Chat on WhatsApp',
+      'tooltip_email': 'Send Email',
+      'tooltip_maps': 'Open in Google Maps',
       'contact_hours_label': 'Navratri Hours',
       'contact_hours': 'Daily: 8:00 PM to 12:30 AM (During Navratri Festival)',
       'contact_form_title': 'Send a Devotional Message or Inquiry',
@@ -255,9 +260,26 @@ class MyAppTranslations {
       'form_phone': 'Mobile Number',
       'form_email': 'Email Address',
       'form_message': 'Your Message / Inquiry',
+      'form_message_hint': 'Write your message, blessings, or seva inquiry...',
       'form_submit': 'SEND MESSAGE',
       'form_success':
           'Thank you! Your message has been received by the Mandal committee.',
+
+      // Devotional Offerings & QR Payments
+      'payment_title': 'Devotional Offerings / Garbi Seva & Dan',
+      'payment_subtitle': 'Scan with Google Pay, PhonePe, Paytm, or BHIM UPI',
+      'payment_badge': 'UPI VERIFIED • 100% DIRECT SEVA',
+      'payment_beneficiary_label': 'VERIFIED MANDAL BENEFICIARY',
+      'payment_upi_label': 'DIRECT UPI ID',
+      'payment_copy_btn': 'Copy UPI',
+      'payment_copied_toast': 'UPI ID Copied',
+      'payment_copied_desc': 'copied to clipboard.',
+      'payment_accepted_apps': 'ACCEPTED VIA ANY UPI APP:',
+      'payment_tap_enlarge': 'Tap to enlarge QR code',
+      'payment_modal_title': 'Devotional Offering QR Code',
+      'payment_pledge':
+          '100% of devotional contributions directly support Shree Pavan Putra Garbi Mandal activities, daily aarti, and traditional Navratri arrangements. No third-party deductions.',
+      'payment_done_btn': 'Done',
 
       // Admin Module
       'admin_title': 'Mandal Administration Portal',
@@ -529,6 +551,11 @@ class MyAppTranslations {
       'contact_email': 'info@pavanputragarbi.org',
       'contact_phone_label': 'હેલ્પલાઇન નંબર',
       'contact_phone': '+91 98250 12345 / +91 94280 67890',
+      'contact_whatsapp_label': 'વોટ્સએપ હેલ્પલાઇન',
+      'tooltip_call': 'હેલ્પલાઇન પર કૉલ કરો',
+      'tooltip_whatsapp': 'વોટ્સએપ પર વાત કરો',
+      'tooltip_email': 'ઈમેઇલ મોકલો',
+      'tooltip_maps': 'ગૂગલ મેપ્સમાં સરનામું જુઓ',
       'contact_hours_label': 'નવરાત્રિ સમય',
       'contact_hours': 'દરરોજ: રાત્રે ૮:૦૦ થી ૧૨:૩૦ (નવરાત્રિ મહોત્સવ દરમિયાન)',
       'contact_form_title': 'ભાવપૂર્વક સંદેશ અથવા પૂછપરછ મોકલો',
@@ -536,8 +563,26 @@ class MyAppTranslations {
       'form_phone': 'મોબાઇલ નંબર',
       'form_email': 'ઈમેઇલ એડ્રેસ',
       'form_message': 'તમારો સંદેશ / વિગત',
+      'form_message_hint': 'તમારો સંદેશ, આશીર્વાદ અથવા સેવા પૂછપરછ લખો...',
       'form_submit': 'સંદેશ મોકલો',
       'form_success': 'આભાર! તમારો સંદેશ મંડળ સમિતિને સફળતાપૂર્વક મળી ગયો છે.',
+
+      // Devotional Offerings & QR Payments
+      'payment_title': 'ભાવપૂર્વક અર્પણ / ગરબી સેવા અને દાન',
+      'payment_subtitle':
+          'Google Pay, PhonePe, Paytm અથવા BHIM UPI દ્વારા સ્કેન કરો',
+      'payment_badge': 'UPI વેરિફાઇડ • ૧૦૦% સીધી સેવા',
+      'payment_beneficiary_label': 'પ્રમાણિત મંડળ લાભાર્થી',
+      'payment_upi_label': 'સીધો UPI આઈડી',
+      'payment_copy_btn': 'UPI કૉપિ',
+      'payment_copied_toast': 'UPI આઈડી કૉપિ થયો',
+      'payment_copied_desc': 'ક્લિપબોર્ડ પર કૉપિ થઈ ગયો છે.',
+      'payment_accepted_apps': 'કોઈપણ UPI એપ દ્વારા સ્વીકાર્ય:',
+      'payment_tap_enlarge': 'QR કોડ મોટો કરવા ક્લિક કરો',
+      'payment_modal_title': 'સેવા અર્પણ QR કોડ',
+      'payment_pledge':
+          '૧૦૦% ભક્તિભાવપૂર્ણ યોગદાન સીધું શ્રી પવનપુત્ર ગરબી મંડળની પ્રવૃત્તિઓ, દૈનિક આરતી અને નવરાત્રિ મહોત્સવના આયોજન માટે જ વપરાય છે. કોઈ વચેટિયા નથી.',
+      'payment_done_btn': 'પૂર્ણ',
 
       // Admin Module
       'admin_title': 'મંડળ સંચાલન પોર્ટલ',

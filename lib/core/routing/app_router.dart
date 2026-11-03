@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../modules/about_module/presentation/about_screen.dart';
@@ -9,13 +10,17 @@ import '../../modules/gallery_module/presentation/gallery_screen.dart';
 import '../../modules/history_module/presentation/history_screen.dart';
 import '../../modules/videos_module/presentation/videos_screen.dart';
 import '../bootstrap/app_startup_gate.dart';
+import '../seo/app_seo_manager.dart';
 import '../widgets/not_found_screen.dart';
-
-import 'package:flutter/material.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-CustomTransitionPage<T> _buildPageWithDefaultTransition<T>({required BuildContext context, required GoRouterState state, required Widget child}) {
+CustomTransitionPage<T> _buildPageWithDefaultTransition<T>({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}) {
+  AppSeoManager.instance.updatePath(state.uri.path);
   return CustomTransitionPage<T>(
     key: state.pageKey,
     child: child,
