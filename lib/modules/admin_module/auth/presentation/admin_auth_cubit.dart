@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/services/email_notification_service.dart';
 import '../data/firebase_auth_service.dart';
 
 sealed class AdminAuthState {
@@ -154,21 +155,28 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
     if (trimmed.isEmpty || !trimmed.contains('@')) {
       throw Exception('Please provide a valid administrator email address.');
     }
+
+    bool firebaseSent = false;
     try {
       await _authService.sendPasswordResetEmail(trimmed);
+      firebaseSent = true;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        throw Exception('No administrator account found with email $trimmed.');
-      } else if (e.code == 'invalid-email') {
+      debugPrint('Firebase sendPasswordResetEmail notice: ${e.code}');
+      if (e.code == 'invalid-email') {
         throw Exception('The email address $trimmed is not valid.');
       }
-      throw Exception(e.message ?? 'Authentication error [${e.code}]');
     } catch (e) {
-      final msg = e.toString().replaceFirst('Exception: ', '');
-      if (msg.contains('EMAIL_NOT_FOUND') || msg.contains('user-not-found')) {
-        throw Exception('No administrator account found with email $trimmed.');
+      debugPrint('Password reset auth service notice: $e');
+    }
+
+    // Always dispatch the custom branded Forgot Password email (Image 3 design)
+    try {
+      await EmailNotificationService.instance.sendForgotPasswordEmail(email: trimmed);
+    } catch (e) {
+      debugPrint('Branded forgot password email dispatch notice: $e');
+      if (!firebaseSent) {
+        throw Exception('Unable to dispatch password reset email to $trimmed. Please try again.');
       }
-      throw Exception(msg);
     }
   }
 

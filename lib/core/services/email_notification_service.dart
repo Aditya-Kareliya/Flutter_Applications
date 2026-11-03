@@ -68,22 +68,21 @@ class EmailNotificationService {
     bool anySuccess = false;
 
     for (final email in targetEmails) {
+      final recipientObj = activeRecipients.where((r) => r.email.trim() == email).firstOrNull;
+      final recipientName = recipientObj?.recipientName ?? 'Administrator';
+
       try {
         final success = await _dispatchEmailViaGateway(
           toEmail: email,
-          subject: '🕉️ New Devotee Inquiry: ${enquiry.name} — ${_getMandalNameGu()}',
+          subject: 'New Devotee Inquiry Received — ${_getMandalNameGu()}',
           fields: {
-            '🏛️ Mandal / સંસ્થા': '${_getMandalNameGu()} (${_getMandalNameEn()})',
-            '🙏 Sacred Invocation': '|| શ્રી ગણેશાય નમઃ || || ૐ નમઃ શિવાય || || જય માતાજી ||',
-            '👤 Devotee Name (ભાવિકનું નામ)': enquiry.name,
-            '📞 Helpline / Phone (ફોન)': enquiry.phone.isNotEmpty ? enquiry.phone : 'Not provided',
-            '✉️ Devotee Email (ઈમેલ)': enquiry.email.isNotEmpty ? enquiry.email : 'Not provided',
-            '📅 Submission Date (તારીખ)': enquiry.date,
-            '📝 Devotee Message / Prayer Request (સંદેશ)': enquiry.message,
-            '📍 Mandal Venue / સરનામું': _getVenueAddress(),
-            '⏰ Aarti Timings / આરતી સમય': _getAartiSchedule(),
-            '🎯 Routed Recipient / લક્ષ્ય ઈમેલ': email,
-            '🌐 Admin Portal Link': 'https://pavanputragarbi.web.app/#/admin',
+            'Recipient': recipientName,
+            'Devotee Name': enquiry.name,
+            'Contact Phone': enquiry.phone.isNotEmpty ? enquiry.phone : 'Not provided',
+            'Email Address': enquiry.email.isNotEmpty ? enquiry.email : 'Not provided',
+            'Submission Date': enquiry.date,
+            'Inquiry Message': enquiry.message,
+            'Mandal': '${_getMandalNameGu()} (${_getMandalNameEn()})',
           },
           replyTo: enquiry.email.isNotEmpty ? enquiry.email : null,
         );
@@ -99,9 +98,13 @@ class EmailNotificationService {
           await FirebaseFirestore.instance.collection('mail').add({
             'to': [email],
             'message': {
-              'subject': '🕉️ New Devotee Inquiry: ${enquiry.name} — ${_getMandalNameGu()}',
+              'subject': 'New Devotee Inquiry Received — ${_getMandalNameGu()}',
               'text': _buildPlainTextNotification(enquiry: enquiry, recipientEmail: email),
-              'html': _buildHtmlNotification(enquiry: enquiry, recipientEmail: email),
+              'html': _buildHtmlNotification(
+                enquiry: enquiry,
+                recipientEmail: email,
+                recipientName: recipientName,
+              ),
             },
             'created_at': FieldValue.serverTimestamp(),
           });
@@ -125,18 +128,15 @@ class EmailNotificationService {
     try {
       final success = await _dispatchEmailViaGateway(
         toEmail: email,
-        subject: '✅ Verification: ${_getMandalNameGu()} Admin Mail System Active',
+        subject: 'Admin Notification System Active — ${_getMandalNameGu()}',
         fields: {
-          '🏛️ Mandal / સંસ્થા': '${_getMandalNameGu()} (${_getMandalNameEn()})',
-          '🙏 Sacred Invocation': '|| શ્રી ગણેશાય નમઃ || || જય માતાજી || || ૐ નમઃ શિવાય ||',
-          '🔔 System Status': 'ACTIVE & OPERATIONAL (સક્રિય અને ચકાસાયેલ)',
-          '👤 Recipient Officer / અધિકારી': recipient.recipientName,
-          '🏢 Department / વિભાગ': recipient.department,
-          '✉️ Verified Address / ઈમેલ': email,
-          '📅 Verification Time / સમય': timestampStr,
-          '📍 Mandal Venue / સરનામું': _getVenueAddress(),
-          '💬 System Notice': 'Devotee messages submitted from the public contact form will be delivered to this verified administrative address.',
-          '🌐 Admin Portal Link': 'https://pavanputragarbi.web.app/#/admin',
+          'System Status': 'Active & Operational',
+          'Officer Name': recipient.recipientName,
+          'Department': recipient.department,
+          'Verified Email': email,
+          'Verified Time': timestampStr,
+          'Mandal': '${_getMandalNameGu()} (${_getMandalNameEn()})',
+          'Notice': 'Devotee inquiries submitted on the public Contact page will arrive at this address.',
         },
       );
 
@@ -145,7 +145,7 @@ class EmailNotificationService {
         await FirebaseFirestore.instance.collection('mail').add({
           'to': [email],
           'message': {
-            'subject': '✅ Verification: ${_getMandalNameGu()} Admin Mail System Active',
+            'subject': 'Admin Notification System Active — ${_getMandalNameGu()}',
             'html': _buildTestHtml(recipient: recipient, timestamp: timestampStr),
           },
           'created_at': FieldValue.serverTimestamp(),
@@ -155,6 +155,50 @@ class EmailNotificationService {
       return success;
     } catch (e) {
       debugPrint('Test email error for $email: $e');
+      return false;
+    }
+  }
+
+  /// Sends a Forgot Password recovery email matching the MedSaral-style card layout.
+  Future<bool> sendForgotPasswordEmail({
+    required String email,
+    String? resetLink,
+  }) async {
+    final cleanEmail = email.trim();
+    if (cleanEmail.isEmpty) return false;
+
+    final link = (resetLink != null && resetLink.isNotEmpty)
+        ? resetLink
+        : 'https://pavanputragarbi.firebaseapp.com/__/auth/action?mode=resetPassword';
+
+    try {
+      final success = await _dispatchEmailViaGateway(
+        toEmail: cleanEmail,
+        subject: 'Forgot Password — ${_getMandalNameGu()}',
+        fields: {
+          'Action': 'Password Reset Request',
+          'Registered Email': cleanEmail,
+          'Reset Link': link,
+          'Mandal': '${_getMandalNameGu()} (${_getMandalNameEn()})',
+          'Security Notice': 'If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.',
+        },
+      );
+
+      // Record in Firestore `mail` collection
+      try {
+        await FirebaseFirestore.instance.collection('mail').add({
+          'to': [cleanEmail],
+          'message': {
+            'subject': 'Forgot Password — ${_getMandalNameGu()}',
+            'html': _buildForgotPasswordHtml(email: cleanEmail, resetLink: link),
+          },
+          'created_at': FieldValue.serverTimestamp(),
+        });
+      } catch (_) {}
+
+      return success;
+    } catch (e) {
+      debugPrint('Forgot password email dispatch error: $e');
       return false;
     }
   }
@@ -283,16 +327,13 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
 ''';
   }
 
-  String _buildHtmlNotification({required AdminEnquiry enquiry, required String recipientEmail}) {
+  String _buildHtmlNotification({required AdminEnquiry enquiry, required String recipientEmail, String? recipientName}) {
     final logoUrl = _getLogoUrl();
     final mandalGu = _getMandalNameGu();
     final mandalEn = _getMandalNameEn();
     final address = _getVenueAddress();
-    final aarti = _getAartiSchedule();
     final phone = _getContactPhone();
-    final refId = enquiry.id.isNotEmpty
-        ? enquiry.id
-        : DateTime.now().millisecondsSinceEpoch.toString().substring(7);
+    final nameGreeting = (recipientName != null && recipientName.isNotEmpty) ? recipientName : 'Administrator';
 
     return '''
 <!DOCTYPE html>
@@ -300,118 +341,77 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Devotee Inquiry — $mandalEn</title>
+  <title>New Devotee Inquiry Received — $mandalEn</title>
 </head>
-<body style="margin:0;padding:24px 12px;background-color:#FAF6EE;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#222222;">
-  <div style="max-width:620px;margin:0 auto;background:#FFFFFF;border-radius:16px;overflow:hidden;border:1.5px solid #C5A059;box-shadow:0 8px 24px rgba(74,0,11,0.08);">
+<body style="margin:0;padding:32px 14px;background-color:#F0F4F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#1E293B;">
+  <div style="max-width:580px;margin:0 auto;background:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #E2E8F0;">
     
-    <!-- Top Ornamental Gradient Bar -->
-    <div style="height:6px;background:linear-gradient(90deg, #946E24 0%, #D4AF37 25%, #FFF0B8 50%, #D4AF37 75%, #946E24 100%);"></div>
-
-    <!-- Royal Header with Brand Logo & Bilingual Titles -->
-    <div style="background-color:#4A000B;padding:28px 20px 22px 20px;text-align:center;border-bottom:3px solid #C5A059;">
-      <p style="margin:0 0 12px 0;color:#E6C875;font-size:12.5px;letter-spacing:2px;font-weight:700;">|| શ્રી ગણેશાય નમઃ || || ૐ નમઃ શિવાય || || જય માતાજી ||</p>
-      
-      <!-- Mandal Brand Logo -->
-      <div style="text-align:center;margin-bottom:12px;">
-        <img src="$logoUrl" alt="Shree Pavan Putra Garbi Mandal Logo" width="82" height="82" style="width:82px;height:82px;object-fit:cover;border-radius:50%;border:3px solid #C5A059;box-shadow:0 4px 14px rgba(0,0,0,0.35);vertical-align:middle;background-color:#FAF6EE;display:inline-block;" />
+    <!-- Top Solid Brand Header with Centered Logo (Matches MedSaral Style) -->
+    <div style="background-color:#205482;padding:32px 20px 26px 20px;text-align:center;">
+      <div style="text-align:center;margin-bottom:14px;">
+        <img src="$logoUrl" alt="Mandal Logo" width="76" height="76" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,0.85);display:inline-block;background-color:#FFFFFF;" />
       </div>
-
-      <!-- Mandal Title in Gujarati & English -->
-      <h1 style="margin:0 0 4px 0;color:#FFFFFF;font-size:22px;font-weight:800;letter-spacing:0.5px;">$mandalGu</h1>
-      <h2 style="margin:0 0 12px 0;color:#F0D590;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">$mandalEn — RAJKOT</h2>
-      
-      <!-- Official Badge -->
-      <div style="display:inline-block;background:rgba(197,160,89,0.22);border:1px solid #C5A059;border-radius:20px;padding:5px 16px;color:#FCE8B3;font-size:11px;font-weight:700;letter-spacing:0.8px;">
-        🏛️ OFFICIAL MANDAL INBOX • આધિકારિક મંડળ સૂચના
-      </div>
+      <h1 style="margin:0;color:#FFFFFF;font-size:22px;font-weight:700;letter-spacing:0.3px;line-height:1.3;">New Devotee Inquiry Received</h1>
+      <p style="margin:4px 0 0 0;color:#CBD5E1;font-size:12px;letter-spacing:0.5px;">$mandalGu</p>
     </div>
 
-    <!-- Main Content Container -->
-    <div style="padding:26px 24px;">
-      
-      <!-- Alert Box -->
-      <div style="background:#FFF9EE;border-left:4px solid #C5A059;border-top:1px solid #EFE4D0;border-right:1px solid #EFE4D0;border-bottom:1px solid #EFE4D0;padding:14px 16px;border-radius:8px;margin-bottom:22px;">
-        <div style="color:#4A000B;font-size:14px;font-weight:800;margin-bottom:2px;">
-          📬 New Public Inquiry Received from <strong>${enquiry.name}</strong>
+    <!-- White Content Body -->
+    <div style="padding:32px 28px;">
+      <h2 style="font-size:17px;font-weight:700;color:#0F172A;margin:0 0 10px 0;">Dear $nameGreeting,</h2>
+      <p style="font-size:14px;color:#475569;line-height:1.55;margin:0 0 24px 0;">
+        A new devotee inquiry has been submitted for you. Please review the details below.
+      </p>
+
+      <!-- Rounded Details Card Container -->
+      <div style="background-color:#F8FAFC;border-radius:10px;padding:20px 22px;margin-bottom:24px;border:1px solid #E2E8F0;">
+        <div style="margin-bottom:12px;font-size:14px;">
+          <strong style="color:#334155;">Devotee Name:</strong>
+          <span style="color:#0F172A;font-weight:600;margin-left:8px;">${enquiry.name}</span>
         </div>
-        <div style="color:#7A5812;font-size:12px;">
-          Reference ID: <span style="font-family:monospace;font-weight:700;color:#4A000B;">#PPGM-$refId</span> • Date: <strong>${enquiry.date}</strong>
+        <div style="margin-bottom:12px;font-size:14px;">
+          <strong style="color:#334155;">Contact Phone:</strong>
+          <span style="margin-left:8px;">${enquiry.phone.isNotEmpty ? '<a href="tel:${enquiry.phone}" style="color:#0284C7;text-decoration:none;font-weight:600;">${enquiry.phone}</a>' : '<span style="color:#94A3B8;">Not provided</span>'}</span>
+        </div>
+        <div style="margin-bottom:12px;font-size:14px;">
+          <strong style="color:#334155;">Email Address:</strong>
+          <span style="margin-left:8px;">${enquiry.email.isNotEmpty ? '<a href="mailto:${enquiry.email}" style="color:#0284C7;text-decoration:none;font-weight:600;">${enquiry.email}</a>' : '<span style="color:#94A3B8;">Not provided</span>'}</span>
+        </div>
+        <div style="margin-bottom:14px;font-size:14px;">
+          <strong style="color:#334155;">Submission Date:</strong>
+          <span style="color:#0F172A;margin-left:8px;">${enquiry.date}</span>
+        </div>
+        <div style="font-size:14px;">
+          <strong style="color:#334155;display:block;margin-bottom:6px;">Inquiry / Prayer Request:</strong>
+          <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:6px;padding:12px 14px;color:#0F172A;font-size:13.5px;line-height:1.6;">
+            ${enquiry.message}
+          </div>
         </div>
       </div>
 
-      <!-- Devotee Details Table -->
-      <table style="width:100%;border-collapse:collapse;margin-bottom:22px;font-size:13.5px;">
-        <tr>
-          <td style="padding:11px 14px;background:#FAF6EE;font-weight:700;color:#4A000B;width:34%;border:1px solid #EADFC9;">
-            👤 Devotee Name<br><span style="font-size:11px;color:#7A5812;font-weight:normal;">ભાવિકનું નામ</span>
-          </td>
-          <td style="padding:11px 14px;border:1px solid #EADFC9;color:#111111;font-weight:700;">
-            ${enquiry.name}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:11px 14px;background:#FAF6EE;font-weight:700;color:#4A000B;border:1px solid #EADFC9;">
-            📞 Contact Phone<br><span style="font-size:11px;color:#7A5812;font-weight:normal;">ફોન નંબર</span>
-          </td>
-          <td style="padding:11px 14px;border:1px solid #EADFC9;color:#222222;">
-            ${enquiry.phone.isNotEmpty ? '<a href="tel:${enquiry.phone}" style="color:#4A000B;font-weight:700;text-decoration:none;">📞 ${enquiry.phone}</a>' : '<span style="color:#888888;">Not provided</span>'}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:11px 14px;background:#FAF6EE;font-weight:700;color:#4A000B;border:1px solid #EADFC9;">
-            ✉️ Email Address<br><span style="font-size:11px;color:#7A5812;font-weight:normal;">ઈમેલ એડ્રેસ</span>
-          </td>
-          <td style="padding:11px 14px;border:1px solid #EADFC9;color:#222222;">
-            ${enquiry.email.isNotEmpty ? '<a href="mailto:${enquiry.email}" style="color:#C5A059;font-weight:700;text-decoration:none;">✉️ ${enquiry.email}</a>' : '<span style="color:#888888;">Not provided</span>'}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:11px 14px;background:#FAF6EE;font-weight:700;color:#4A000B;border:1px solid #EADFC9;">
-            🎯 Routed Target<br><span style="font-size:11px;color:#7A5812;font-weight:normal;">સૂચના પ્રાપ્તકર્તા</span>
-          </td>
-          <td style="padding:11px 14px;border:1px solid #EADFC9;color:#555555;font-size:12.5px;">
-            $recipientEmail
-          </td>
-        </tr>
-      </table>
-
-      <!-- Message Parchment Box -->
-      <div style="margin-bottom:24px;">
-        <div style="color:#4A000B;font-size:12.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">
-          📝 DEVOTEE MESSAGE / PRAYER REQUEST (ભાવિકનો સંદેશ):
-        </div>
-        <div style="background:#FFFDF9;border:1px solid #E5D5B8;border-left:4px solid #C5A059;border-radius:10px;padding:18px 20px;font-size:14.5px;line-height:1.7;color:#261611;">
-          "${enquiry.message}"
-        </div>
-      </div>
+      <p style="text-align:center;font-size:13px;color:#64748B;margin:0 0 24px 0;">
+        Please contact the devotee for further consultation.
+      </p>
 
       <!-- Quick Action Buttons -->
-      <div style="text-align:center;margin:24px 0 12px 0;">
+      <div style="text-align:center;margin-bottom:12px;">
         ${enquiry.email.isNotEmpty ? '''
-        <a href="mailto:${enquiry.email}?subject=Pranam ${enquiry.name} ji — $mandalGu" style="display:inline-block;background-color:#4A000B;color:#FFFFFF;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;border:1.5px solid #C5A059;margin:4px 6px;">
+        <a href="mailto:${enquiry.email}?subject=Pranam ${enquiry.name} ji — $mandalGu" style="display:inline-block;background-color:#205482;color:#FFFFFF;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;margin:4px 6px;">
           ✉️ Reply via Email
         </a>
         ''' : ''}
         ${enquiry.phone.isNotEmpty ? '''
-        <a href="tel:${enquiry.phone}" style="display:inline-block;background-color:#1E5E2C;color:#FFFFFF;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;border:1.5px solid #81C784;margin:4px 6px;">
+        <a href="tel:${enquiry.phone}" style="display:inline-block;background-color:#059669;color:#FFFFFF;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;margin:4px 6px;">
           📞 Call Devotee
         </a>
         ''' : ''}
-        <a href="https://pavanputragarbi.web.app/#/admin" style="display:inline-block;background-color:#FAF6EE;color:#4A000B;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;border:1.5px solid #C5A059;margin:4px 6px;">
-          🌐 Open Admin Portal
-        </a>
       </div>
-
     </div>
 
-    <!-- Sacred & Official Footer -->
-    <div style="background:#FAF6EE;padding:20px 24px;text-align:center;border-top:1.5px solid #E8DCBF;color:#666666;font-size:11.5px;line-height:1.6;">
-      <p style="margin:0 0 6px 0;font-weight:700;color:#7A5812;font-size:12.5px;">|| જાગતી જોગમાયા || || જય માતાજી || || ૐ નમઃ શિવાય ||</p>
-      <p style="margin:0 0 4px 0;color:#4A000B;font-weight:600;">📍 $address</p>
-      <p style="margin:0 0 8px 0;color:#555555;">⏰ $aarti • 📞 Helpline: $phone</p>
-      <div style="height:1px;background:#E2D3B8;margin:10px auto;max-width:300px;"></div>
-      <p style="margin:0;color:#888888;font-size:11px;">© 2026 $mandalEn, Rajkot • All Rights Reserved</p>
+    <!-- Clean Footer -->
+    <div style="border-top:1px solid #E2E8F0;padding:22px 24px;text-align:center;background:#FFFFFF;color:#64748B;font-size:12px;line-height:1.6;">
+      <p style="margin:0 0 4px 0;font-weight:700;color:#334155;font-size:13px;">$mandalGu ($mandalEn)</p>
+      <p style="margin:0 0 8px 0;font-size:11.5px;color:#64748B;">$address • Helpline: $phone</p>
+      <p style="margin:0;color:#94A3B8;font-size:11px;">This is a securely generated message. Please do not reply directly to this email.</p>
     </div>
 
   </div>
@@ -432,56 +432,118 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Verification — $mandalEn</title>
+  <title>Admin Notification System Active — $mandalEn</title>
 </head>
-<body style="margin:0;padding:24px 12px;background-color:#FAF6EE;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#222;">
-  <div style="max-width:600px;margin:0 auto;background:#FFFFFF;border-radius:16px;overflow:hidden;border:1.5px solid #C5A059;box-shadow:0 8px 24px rgba(74,0,11,0.08);">
+<body style="margin:0;padding:32px 14px;background-color:#F0F4F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1E293B;">
+  <div style="max-width:580px;margin:0 auto;background:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #E2E8F0;">
     
-    <div style="height:6px;background:linear-gradient(90deg, #946E24 0%, #D4AF37 50%, #946E24 100%);"></div>
-
-    <div style="background-color:#4A000B;padding:26px 20px;text-align:center;border-bottom:3px solid #C5A059;">
-      <p style="margin:0 0 10px 0;color:#E6C875;font-size:12px;letter-spacing:1.5px;font-weight:700;">|| શ્રી ગણેશાય નમઃ || || જય માતાજી ||</p>
-      <img src="$logoUrl" alt="Logo" width="76" height="76" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:3px solid #C5A059;margin-bottom:10px;background:#FAF6EE;display:inline-block;" />
-      <h2 style="margin:0;color:#FFFFFF;font-size:20px;font-weight:800;">✅ Admin Notification System Active</h2>
-      <p style="margin:4px 0 0 0;color:#F0D590;font-size:12px;">$mandalGu — Email Verification Notice</p>
+    <div style="background-color:#205482;padding:32px 20px 26px 20px;text-align:center;">
+      <img src="$logoUrl" alt="Logo" width="76" height="76" style="width:76px;height:76px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,0.85);display:inline-block;background:#FFFFFF;margin-bottom:12px;" />
+      <h1 style="margin:0;color:#FFFFFF;font-size:22px;font-weight:700;">Admin Mail System Verified</h1>
+      <p style="margin:4px 0 0 0;color:#CBD5E1;font-size:12px;">$mandalGu</p>
     </div>
 
-    <div style="padding:26px 24px;">
-      <p style="font-size:15px;margin:0 0 12px 0;">Pranam <strong>${recipient.recipientName}</strong>,</p>
-      <p style="font-size:13.5px;line-height:1.6;color:#444;margin:0 0 18px 0;">
-        Your administrative notification address (<strong>${recipient.email}</strong>) has been successfully verified in the <strong>$mandalEn</strong> portal for the <strong>${recipient.department}</strong> department.
+    <div style="padding:32px 28px;">
+      <h2 style="font-size:17px;font-weight:700;color:#0F172A;margin:0 0 10px 0;">Dear ${recipient.recipientName},</h2>
+      <p style="font-size:14px;color:#475569;line-height:1.55;margin:0 0 20px 0;">
+        Your administrative notification address (<strong>${recipient.email}</strong>) has been successfully verified for the <strong>${recipient.department}</strong> department.
       </p>
 
-      <div style="background:#E8F5E9;border:1.5px solid #81C784;border-radius:10px;padding:14px 16px;margin:18px 0;font-size:13px;color:#1B5E20;line-height:1.5;">
-        <strong>✓ Live Notifications Enabled:</strong> Whenever devotees submit prayer requests or messages on the public Contact page, complete inquiries will immediately arrive formatted to this inbox.
+      <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:14px 18px;margin-bottom:22px;font-size:13px;color:#065F46;line-height:1.5;">
+        <strong>✓ Operational:</strong> Whenever devotees submit inquiries on the public website, you will receive real-time notification alerts at this verified inbox.
       </div>
 
-      <table style="width:100%;border-collapse:collapse;margin:18px 0;font-size:13px;">
-        <tr>
-          <td style="padding:8px 12px;background:#FAF6EE;font-weight:bold;color:#4A000B;border:1px solid #EAE0CE;width:35%;">Department:</td>
-          <td style="padding:8px 12px;border:1px solid #EAE0CE;">${recipient.department}</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 12px;background:#FAF6EE;font-weight:bold;color:#4A000B;border:1px solid #EAE0CE;">Primary Recipient:</td>
-          <td style="padding:8px 12px;border:1px solid #EAE0CE;">${recipient.isPrimary ? 'Yes (મુખ્ય પ્રાપ્તકર્તા)' : 'Secondary'}</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 12px;background:#FAF6EE;font-weight:bold;color:#4A000B;border:1px solid #EAE0CE;">Verified Time:</td>
-          <td style="padding:8px 12px;border:1px solid #EAE0CE;">$timestamp</td>
-        </tr>
-      </table>
+      <div style="background-color:#F8FAFC;border-radius:10px;padding:18px 20px;margin-bottom:24px;border:1px solid #E2E8F0;font-size:13.5px;">
+        <div style="margin-bottom:10px;"><strong>Department:</strong> <span style="margin-left:8px;color:#334155;">${recipient.department}</span></div>
+        <div style="margin-bottom:10px;"><strong>Primary Recipient:</strong> <span style="margin-left:8px;color:#334155;">${recipient.isPrimary ? 'Yes' : 'Secondary'}</span></div>
+        <div><strong>Verified At:</strong> <span style="margin-left:8px;color:#334155;">$timestamp</span></div>
+      </div>
 
-      <div style="text-align:center;margin-top:22px;">
-        <a href="https://pavanputragarbi.web.app/#/admin" style="display:inline-block;background-color:#4A000B;color:#FFFFFF;padding:11px 22px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;border:1px solid #C5A059;">
-          🌐 Go to Admin Portal
+      <div style="text-align:center;">
+        <a href="https://pavanputragarbi.web.app/#/admin" style="display:inline-block;background-color:#205482;color:#FFFFFF;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;">
+          🌐 Open Admin Portal
         </a>
       </div>
     </div>
 
-    <div style="background:#FAF6EE;padding:16px 20px;text-align:center;border-top:1px solid #E8DCBF;color:#666666;font-size:11px;">
-      <p style="margin:0 0 4px 0;font-weight:700;color:#7A5812;">|| જાગતી જોગમાયા || || જય માતાજી ||</p>
-      <p style="margin:0;">$mandalEn Trust • $address</p>
+    <div style="border-top:1px solid #E2E8F0;padding:20px 24px;text-align:center;background:#FFFFFF;color:#64748B;font-size:11.5px;line-height:1.6;">
+      <p style="margin:0 0 4px 0;font-weight:700;color:#334155;font-size:13px;">$mandalGu</p>
+      <p style="margin:0 0 6px 0;">$address</p>
+      <p style="margin:0;color:#94A3B8;font-size:11px;">This is a securely generated message. Please do not reply directly to this email.</p>
     </div>
+  </div>
+</body>
+</html>
+''';
+  }
+
+  /// Generates Forgot Password HTML email matching Image 3 design.
+  String _buildForgotPasswordHtml({required String email, required String resetLink}) {
+    final logoUrl = _getLogoUrl();
+    final mandalGu = _getMandalNameGu();
+    final mandalEn = _getMandalNameEn();
+    final address = _getVenueAddress();
+
+    return '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password — $mandalEn</title>
+</head>
+<body style="margin:0;padding:36px 14px;background-color:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#1E293B;">
+  <div style="max-width:540px;margin:0 auto;background:#FFFFFF;border-radius:12px;padding:42px 32px;box-shadow:0 4px 20px rgba(0,0,0,0.05);border:1px solid #E2E8F0;text-align:center;">
+    
+    <!-- Mandal Brand Logo -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <img src="$logoUrl" alt="Mandal Logo" width="80" height="80" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:2px solid #E2E8F0;display:inline-block;background-color:#FFFFFF;" />
+    </div>
+
+    <!-- Title -->
+    <h1 style="font-size:24px;font-weight:800;color:#0F172A;margin:0 0 12px 0;">Forgot Password</h1>
+
+    <!-- Description -->
+    <p style="font-size:14px;color:#475569;line-height:1.6;margin:0 auto 28px auto;max-width:440px;">
+      We received a request to reset the password for your account. Click the button below to securely reset your password.
+    </p>
+
+    <!-- Primary Reset Password Button -->
+    <div style="margin-bottom:28px;">
+      <a href="$resetLink" style="display:inline-block;background-color:#1D4ED8;color:#FFFFFF;font-size:14.5px;font-weight:700;padding:13px 32px;border-radius:8px;text-decoration:none;box-shadow:0 2px 8px rgba(29,78,216,0.25);">
+        🔐 Reset Password
+      </a>
+    </div>
+
+    <!-- Registered Email Card -->
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:18px 20px;margin-bottom:24px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:4px;color:#64748B;">✉️</div>
+      <div style="font-size:11.5px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Registered Email</div>
+      <div style="font-size:15px;font-weight:800;color:#1E3A8A;margin-top:4px;">$email</div>
+    </div>
+
+    <!-- Security Notice Card -->
+    <div style="background:#F8FAFC;border-left:4px solid #1D4ED8;padding:16px 20px;text-align:left;margin-bottom:28px;border-radius:4px;border-top:1px solid #E2E8F0;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;">
+      <div style="font-weight:800;color:#0F172A;font-size:13.5px;margin-bottom:6px;">Security Notice</div>
+      <div style="color:#475569;font-size:13px;line-height:1.5;">
+        If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
+      </div>
+    </div>
+
+    <!-- Secondary Reset Password Button -->
+    <div style="margin-bottom:34px;">
+      <a href="$resetLink" style="display:inline-block;background-color:#1D4ED8;color:#FFFFFF;font-size:14.5px;font-weight:700;padding:13px 32px;border-radius:8px;text-decoration:none;box-shadow:0 2px 8px rgba(29,78,216,0.25);">
+        🔐 Reset Password
+      </a>
+    </div>
+
+    <!-- Clean Footer -->
+    <div style="border-top:1px solid #E2E8F0;padding-top:22px;text-align:center;color:#64748B;font-size:12px;line-height:1.6;">
+      <p style="margin:0 0 4px 0;font-weight:700;color:#334155;font-size:13px;">$mandalGu</p>
+      <p style="margin:0 0 8px 0;color:#64748B;font-size:11.5px;">$address</p>
+      <p style="margin:0;color:#94A3B8;font-size:11px;">This is a securely generated message. Please do not reply directly to this email.</p>
+    </div>
+
   </div>
 </body>
 </html>
