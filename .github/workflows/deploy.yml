@@ -28,7 +28,6 @@ on:
         default: false
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PUB_CACHE: ~/.pub-cache
   FIREBASE_PROJECT_ID: pavanputragarbi
 
@@ -43,7 +42,7 @@ jobs:
   # =========================================================================
   version:
     name: "📦 Extract Version"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       version_name: ${{ steps.version.outputs.version_name }}
@@ -89,7 +88,7 @@ jobs:
   # =========================================================================
   code-quality:
     name: "🔍 Code Quality & Static Analysis"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
@@ -123,7 +122,7 @@ jobs:
   web-build:
     name: "🌐 Web Build & Firebase Deploy"
     needs: [ version, code-quality ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     if: |
       contains(github.event.head_commit.message, '#build') ||
@@ -178,7 +177,7 @@ jobs:
       - name: ⚡ Set up Node.js for Firebase CLI
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: 🔥 Install Firebase CLI
         run: npm install -g firebase-tools
@@ -206,7 +205,7 @@ jobs:
   create-release:
     name: "🚀 Create GitHub Release"
     needs: [ version, web-build ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     if: |
       contains(github.event.head_commit.message, '#build') ||
