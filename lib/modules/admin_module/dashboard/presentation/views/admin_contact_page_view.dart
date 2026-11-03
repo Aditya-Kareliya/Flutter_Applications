@@ -405,30 +405,68 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     required String actionLabel,
     required IconData actionIcon,
   }) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: colors.heritageGold),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTight = constraints.maxWidth < 340;
+
+        if (isTight) {
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: styles.cleanSans(context, size: 10.5, color: colors.getSecondaryTextColor(context))),
+              Row(
+                children: [
+                  Icon(icon, size: 16, color: colors.heritageGold),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: styles.cleanSans(context, size: 10.5, color: colors.getSecondaryTextColor(context)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
               SelectableText(
                 value,
                 style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: colors.getPrimaryTextColor(context)),
               ),
+              const SizedBox(height: 6),
+              MyAppOutlineButton.icon(
+                onPressed: onAction,
+                icon: Icon(actionIcon, size: 14),
+                label: actionLabel,
+                color: colors.heritageGold,
+              ),
             ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        MyAppOutlineButton.icon(
-          onPressed: onAction,
-          icon: Icon(actionIcon, size: 14),
-          label: actionLabel,
-          color: colors.heritageGold,
-        ),
-      ],
+          );
+        }
+
+        return Row(
+          children: [
+            Icon(icon, size: 16, color: colors.heritageGold),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: styles.cleanSans(context, size: 10.5, color: colors.getSecondaryTextColor(context))),
+                  SelectableText(
+                    value,
+                    style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: colors.getPrimaryTextColor(context)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            MyAppOutlineButton.icon(
+              onPressed: onAction,
+              icon: Icon(actionIcon, size: 14),
+              label: actionLabel,
+              color: colors.heritageGold,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -526,7 +564,7 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   }
 
   // =========================================================================
-  // 📊 TOP METRICS OVERVIEW (4 Stat Cards)
+  // 📊 TOP METRICS OVERVIEW (4 Stat Cards - Fully Responsive)
   // =========================================================================
   Widget _buildTopMetricsGrid(
     MyAppColors colors,
@@ -538,14 +576,6 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final int columns;
-        if (width >= 1100) {
-          columns = 4;
-        } else if (width >= 600) {
-          columns = 2;
-        } else {
-          columns = 1;
-        }
 
         final cards = [
           _buildStatCard(
@@ -586,14 +616,34 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           ),
         ];
 
-        return GridView.count(
+        // 1. Mobile screen (< 580px): Natural vertical stack where cards have intrinsic height and NEVER overflow
+        if (width < 580) {
+          return Column(
+            children: [
+              for (int i = 0; i < cards.length; i++)
+                Padding(
+                  padding: EdgeInsets.only(bottom: i == cards.length - 1 ? 0 : 10),
+                  child: cards[i],
+                ),
+            ],
+          );
+        }
+
+        // 2. Tablet (580px - 1080px): 2 columns with ample mainAxisExtent (94px)
+        // 3. Desktop / Laptop (>= 1080px): 4 columns with ample mainAxisExtent (94px)
+        final int columns = width >= 1080 ? 4 : 2;
+
+        return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: columns,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: columns == 1 ? 3.6 : (columns == 2 ? 2.6 : 2.2),
-          children: cards,
+          itemCount: cards.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            mainAxisExtent: 94,
+          ),
+          itemBuilder: (_, index) => cards[index],
         );
       },
     );
@@ -609,7 +659,7 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     required MyAppTextStyles styles,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: colors.getCardBackgroundColor(context),
         borderRadius: BorderRadius.circular(14),
@@ -626,16 +676,17 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.14),
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(icon, color: color, size: 20),
             ),
           ),
           const SizedBox(width: 12),
@@ -656,12 +707,14 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 Text(
                   value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: styles.cleanSans(
                     context,
-                    size: 18,
+                    size: 17,
                     fontWeight: FontWeight.w800,
                     color: colors.getPrimaryTextColor(context),
                   ),
@@ -696,80 +749,72 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Section Title & Action Buttons
-          if (isMobile)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.location_on_rounded, color: colors.heritageGold),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '1. Mandal Official Contact Information',
-                        style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    MyAppOutlineButton.icon(
-                      isDanger: true,
-                      onPressed: _confirmClearContactSection,
-                      icon: const Icon(Icons.delete_sweep_rounded, size: 16),
-                      label: 'Clear Section',
-                    ),
-                    MyAppFillButton.icon(
-                      onPressed: _saveContactInfo,
-                      icon: const Icon(Icons.save_rounded, size: 16),
-                      label: 'Save Contact Details',
-                    ),
-                  ],
-                ),
-              ],
-            )
-          else
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Icon(Icons.location_on_rounded, color: colors.heritageGold),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '1. Mandal Official Contact Information',
-                          style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
+          LayoutBuilder(
+            builder: (context, headerConstraints) {
+              final isTight = headerConstraints.maxWidth < 650;
+              final buttons = Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  MyAppOutlineButton.icon(
+                    isDanger: true,
+                    onPressed: _confirmClearContactSection,
+                    icon: const Icon(Icons.delete_sweep_rounded, size: 16),
+                    label: 'Clear Section',
                   ),
-                ),
-                const SizedBox(width: 12),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                  MyAppFillButton.icon(
+                    onPressed: _saveContactInfo,
+                    icon: const Icon(Icons.save_rounded, size: 16),
+                    label: 'Save Contact Details',
+                  ),
+                ],
+              );
+
+              if (isTight) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MyAppOutlineButton.icon(
-                      isDanger: true,
-                      onPressed: _confirmClearContactSection,
-                      icon: const Icon(Icons.delete_sweep_rounded, size: 16),
-                      label: 'Clear Section',
+                    Row(
+                      children: [
+                        Icon(Icons.location_on_rounded, color: colors.heritageGold),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '1. Mandal Official Contact Information',
+                            style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    MyAppFillButton.icon(
-                      onPressed: _saveContactInfo,
-                      icon: const Icon(Icons.save_rounded, size: 16),
-                      label: 'Save Contact Details',
-                    ),
+                    const SizedBox(height: 12),
+                    buttons,
                   ],
-                ),
-              ],
-            ),
+                );
+              }
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(Icons.location_on_rounded, color: colors.heritageGold),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '1. Mandal Official Contact Information',
+                            style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  buttons,
+                ],
+              );
+            },
+          ),
           const SizedBox(height: 6),
           Text(
             'Official venue address, helpline numbers, email address, and daily aarti timings shown on the public Contact page.',
@@ -1106,80 +1151,72 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Section Title & Action Buttons
-          if (isMobile)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.qr_code_scanner_rounded, color: colors.heritageGold),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '2. Devotional Offerings & QR Payments (Seva / Dan)',
-                        style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    MyAppOutlineButton.icon(
-                      isDanger: true,
-                      onPressed: _confirmClearPaymentSection,
-                      icon: const Icon(Icons.delete_sweep_rounded, size: 16),
-                      label: 'Clear Payment',
-                    ),
-                    MyAppFillButton.icon(
-                      onPressed: _savePaymentSettings,
-                      icon: const Icon(Icons.save_rounded, size: 16),
-                      label: 'Save Payment & Seva',
-                    ),
-                  ],
-                ),
-              ],
-            )
-          else
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Icon(Icons.qr_code_scanner_rounded, color: colors.heritageGold),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '2. Devotional Offerings & QR Payments (Seva / Dan)',
-                          style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
+          LayoutBuilder(
+            builder: (context, headerConstraints) {
+              final isTight = headerConstraints.maxWidth < 650;
+              final buttons = Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  MyAppOutlineButton.icon(
+                    isDanger: true,
+                    onPressed: _confirmClearPaymentSection,
+                    icon: const Icon(Icons.delete_sweep_rounded, size: 16),
+                    label: 'Clear Payment',
                   ),
-                ),
-                const SizedBox(width: 12),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                  MyAppFillButton.icon(
+                    onPressed: _savePaymentSettings,
+                    icon: const Icon(Icons.save_rounded, size: 16),
+                    label: 'Save Payment & Seva',
+                  ),
+                ],
+              );
+
+              if (isTight) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MyAppOutlineButton.icon(
-                      isDanger: true,
-                      onPressed: _confirmClearPaymentSection,
-                      icon: const Icon(Icons.delete_sweep_rounded, size: 16),
-                      label: 'Clear Payment',
+                    Row(
+                      children: [
+                        Icon(Icons.qr_code_scanner_rounded, color: colors.heritageGold),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '2. Devotional Offerings & QR Payments (Seva / Dan)',
+                            style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    MyAppFillButton.icon(
-                      onPressed: _savePaymentSettings,
-                      icon: const Icon(Icons.save_rounded, size: 16),
-                      label: 'Save Payment & Seva',
-                    ),
+                    const SizedBox(height: 12),
+                    buttons,
                   ],
-                ),
-              ],
-            ),
+                );
+              }
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(Icons.qr_code_scanner_rounded, color: colors.heritageGold),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '2. Devotional Offerings & QR Payments (Seva / Dan)',
+                            style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  buttons,
+                ],
+              );
+            },
+          ),
           const SizedBox(height: 6),
           Text(
             'Configure the mandal verified UPI ID and payment QR code displayed to devotees on the Contact page.',
@@ -1187,77 +1224,147 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           ),
           const SizedBox(height: 16),
 
-          // Master Toggle Card
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: colors.getSurfaceColor(context),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: _isPaymentEnabled
-                    ? colors.heritageGold.withValues(alpha: 0.6)
-                    : colors.getBorderColor(context),
-                width: 1.2,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
+          // Master Toggle Card (Fully Responsive for mobile, tablet, and desktop)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 480;
+
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: colors.getSurfaceColor(context),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
                     color: _isPaymentEnabled
-                        ? colors.deepMaroon
-                        : Colors.grey.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _isPaymentEnabled ? Icons.payments_rounded : Icons.money_off_rounded,
-                    color: _isPaymentEnabled ? colors.heritageGold : Colors.grey,
-                    size: 20,
+                        ? colors.heritageGold.withValues(alpha: 0.6)
+                        : colors.getBorderColor(context),
+                    width: 1.2,
                   ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                child: isNarrow
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
-                            child: Text(
-                              'Show QR Payment & Seva Section on Website',
-                              style: styles.cleanSans(context, size: 13.5, fontWeight: FontWeight.w700),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: _isPaymentEnabled
+                                      ? colors.deepMaroon
+                                      : Colors.grey.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  _isPaymentEnabled ? Icons.payments_rounded : Icons.money_off_rounded,
+                                  color: _isPaymentEnabled ? colors.heritageGold : Colors.grey,
+                                  size: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Show QR Payment & Seva',
+                                  style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              Switch(
+                                value: _isPaymentEnabled,
+                                activeThumbColor: colors.heritageGold,
+                                activeTrackColor: colors.deepMaroon,
+                                onChanged: (val) => setState(() => _isPaymentEnabled = val),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              HeritageBadge(
+                                label: _isPaymentEnabled ? 'ACTIVE' : 'HIDDEN',
+                                backgroundColor: _isPaymentEnabled
+                                    ? Colors.green.withValues(alpha: 0.15)
+                                    : Colors.grey.withValues(alpha: 0.15),
+                                textColor: _isPaymentEnabled ? Colors.green : Colors.grey,
+                                borderColor: _isPaymentEnabled
+                                    ? Colors.green.withValues(alpha: 0.4)
+                                    : Colors.grey.withValues(alpha: 0.4),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _isPaymentEnabled
+                                      ? 'QR code & UPI active on website.'
+                                      : 'Hidden from public visitors.',
+                                  style: styles.cleanSans(context, size: 11, color: colors.getSecondaryTextColor(context)),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: _isPaymentEnabled
+                                  ? colors.deepMaroon
+                                  : Colors.grey.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _isPaymentEnabled ? Icons.payments_rounded : Icons.money_off_rounded,
+                              color: _isPaymentEnabled ? colors.heritageGold : Colors.grey,
+                              size: 20,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          HeritageBadge(
-                            label: _isPaymentEnabled ? 'ACTIVE' : 'HIDDEN',
-                            backgroundColor: _isPaymentEnabled
-                                ? Colors.green.withValues(alpha: 0.15)
-                                : Colors.grey.withValues(alpha: 0.15),
-                            textColor: _isPaymentEnabled ? Colors.green : Colors.grey,
-                            borderColor: _isPaymentEnabled
-                                ? Colors.green.withValues(alpha: 0.4)
-                                : Colors.grey.withValues(alpha: 0.4),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Show QR Payment & Seva Section on Website',
+                                      style: styles.cleanSans(context, size: 13.5, fontWeight: FontWeight.w700),
+                                    ),
+                                    HeritageBadge(
+                                      label: _isPaymentEnabled ? 'ACTIVE' : 'HIDDEN',
+                                      backgroundColor: _isPaymentEnabled
+                                          ? Colors.green.withValues(alpha: 0.15)
+                                          : Colors.grey.withValues(alpha: 0.15),
+                                      textColor: _isPaymentEnabled ? Colors.green : Colors.grey,
+                                      borderColor: _isPaymentEnabled
+                                          ? Colors.green.withValues(alpha: 0.4)
+                                          : Colors.grey.withValues(alpha: 0.4),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'When enabled, the verified QR code and UPI details appear on the public Contact page.',
+                                  style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Switch(
+                            value: _isPaymentEnabled,
+                            activeThumbColor: colors.heritageGold,
+                            activeTrackColor: colors.deepMaroon,
+                            onChanged: (val) => setState(() => _isPaymentEnabled = val),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'When enabled, the verified QR code and UPI details appear on the public Contact page.',
-                        style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
-                      ),
-                    ],
-                  ),
-                ),
-                Switch(
-                  value: _isPaymentEnabled,
-                  activeThumbColor: colors.heritageGold,
-                  activeTrackColor: colors.deepMaroon,
-                  onChanged: (val) => setState(() => _isPaymentEnabled = val),
-                ),
-              ],
-            ),
+              );
+            },
           ),
 
           if (_isPaymentEnabled) ...[
@@ -1378,23 +1485,53 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.visibility_rounded, color: colors.heritageGold, size: 16),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  'Live Devotional Offering Preview (as seen by public visitors)',
-                  style: styles.editorialSerif(context, size: 13, fontWeight: FontWeight.w700, color: colors.lightGold),
-                ),
-              ),
-              HeritageBadge(
+          LayoutBuilder(
+            builder: (context, previewConstraints) {
+              final isTight = previewConstraints.maxWidth < 450;
+              final badge = HeritageBadge(
                 label: 'UPI VERIFIED',
                 backgroundColor: colors.heritageGold.withValues(alpha: 0.15),
                 textColor: colors.lightGold,
                 borderColor: colors.heritageGold.withValues(alpha: 0.4),
-              ),
-            ],
+              );
+
+              if (isTight) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.visibility_rounded, color: colors.heritageGold, size: 16),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Live Devotional Offering Preview',
+                            style: styles.editorialSerif(context, size: 13, fontWeight: FontWeight.w700, color: colors.lightGold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    badge,
+                  ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Icon(Icons.visibility_rounded, color: colors.heritageGold, size: 16),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Live Devotional Offering Preview (as seen by public visitors)',
+                      style: styles.editorialSerif(context, size: 13, fontWeight: FontWeight.w700, color: colors.lightGold),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  badge,
+                ],
+              );
+            },
           ),
           const Divider(height: 24, color: Colors.white24),
 
@@ -1666,11 +1803,16 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               final enq = filteredEnquiries[index];
               final isNew = enq.status == 'New';
 
-              return CulturalFrameCard(
-                padding: EdgeInsets.all(isMobile ? 12 : 16),
-                child: isMobile
-                    ? _buildMobileEnquiryCard(enq, isNew, colors, styles)
-                    : _buildDesktopEnquiryCard(enq, isNew, colors, styles),
+              return LayoutBuilder(
+                builder: (context, cardConstraints) {
+                  final isCompact = cardConstraints.maxWidth < 650;
+                  return CulturalFrameCard(
+                    padding: EdgeInsets.all(isCompact ? 12 : 16),
+                    child: isCompact
+                        ? _buildMobileEnquiryCard(enq, isNew, colors, styles)
+                        : _buildDesktopEnquiryCard(enq, isNew, colors, styles),
+                  );
+                },
               );
             },
           ),
