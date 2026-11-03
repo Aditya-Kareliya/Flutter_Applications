@@ -187,18 +187,18 @@ jobs:
             github.ref == 'refs/heads/pavanputragarbimandal'
           ))
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PAVAN_PUTRA_GARBI_MANDAL }}
         run: |
           echo "=========================================================="
           echo " Deploying Version ${{ needs.version.outputs.version_name }}+${{ needs.version.outputs.build_number }} to Firebase"
           echo " Target Project: $FIREBASE_PROJECT_ID"
           echo "=========================================================="
 
-          if [ -n "$FIREBASE_TOKEN" ]; then
-            echo "🔑 Deploying using FIREBASE_TOKEN..."
-            firebase deploy --project "$FIREBASE_PROJECT_ID" --only hosting,firestore:rules,firestore:indexes,storage --token "$FIREBASE_TOKEN" --non-interactive
+          if [ -n "FIREBASE_TOKEN_PAVAN_PUTRA_GARBI_MANDAL" ]; then
+            echo "🔑 Deploying using FIREBASE_TOKEN_PAVAN_PUTRA_GARBI_MANDAL..."
+            firebase deploy --project "$FIREBASE_PROJECT_ID" --only hosting,firestore:rules,firestore:indexes,storage --token "$FIREBASE_TOKEN_PAVAN_PUTRA_GARBI_MANDAL" --non-interactive
           else
-            echo "⚠️ Notice: FIREBASE_TOKEN secret not found in GitHub Secrets. Skipping automated deploy."
+            echo "⚠️ Notice: FIREBASE_TOKEN_PAVAN_PUTRA_GARBI_MANDAL secret not found in GitHub Secrets. Skipping automated deploy."
           fi
 
 
