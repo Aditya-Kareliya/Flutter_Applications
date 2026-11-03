@@ -1689,6 +1689,72 @@ class AdminEnquiry {
   }
 }
 
+/// Inbound admin notification email address model for contact form routing
+class AdminNotificationEmail {
+  final String id;
+  final String email;
+  final String recipientName;
+  final String department;
+  final bool isPrimary;
+  final bool isEnabled;
+  final String createdAt;
+
+  const AdminNotificationEmail({
+    required this.id,
+    required this.email,
+    required this.recipientName,
+    this.department = 'General Management',
+    this.isPrimary = false,
+    this.isEnabled = true,
+    this.createdAt = '',
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'email': email,
+      'recipientName': recipientName,
+      'department': department,
+      'isPrimary': isPrimary,
+      'isEnabled': isEnabled,
+      'createdAt': createdAt.isNotEmpty ? createdAt : DateTime.now().toIso8601String(),
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+  }
+
+  factory AdminNotificationEmail.fromMap(Map<String, dynamic> map) {
+    return AdminNotificationEmail(
+      id: map['id'] as String? ?? '',
+      email: map['email'] as String? ?? '',
+      recipientName: map['recipientName'] as String? ?? '',
+      department: map['department'] as String? ?? 'General Management',
+      isPrimary: map['isPrimary'] as bool? ?? false,
+      isEnabled: map['isEnabled'] as bool? ?? true,
+      createdAt: map['createdAt'] as String? ?? '',
+    );
+  }
+
+  AdminNotificationEmail copyWith({
+    String? id,
+    String? email,
+    String? recipientName,
+    String? department,
+    bool? isPrimary,
+    bool? isEnabled,
+    String? createdAt,
+  }) {
+    return AdminNotificationEmail(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      recipientName: recipientName ?? this.recipientName,
+      department: department ?? this.department,
+      isPrimary: isPrimary ?? this.isPrimary,
+      isEnabled: isEnabled ?? this.isEnabled,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+}
+
 class AdminSettings {
   final String mandalNameEn;
   final String mandalNameGu;
@@ -1973,6 +2039,16 @@ class AdminDataStore extends ChangeNotifier {
   final List<AdminVideo> _videos = [];
   final List<AdminBlog> _blogs = [];
   final List<AdminEnquiry> _enquiries = [];
+  final List<AdminNotificationEmail> _notificationEmails = [
+    const AdminNotificationEmail(
+      id: 'notif-default-1',
+      email: 'pavanputragarbi@gmail.com',
+      recipientName: 'Shree Pavan Putra Trust Office',
+      department: 'General Inquiries & Helpline',
+      isPrimary: true,
+      isEnabled: true,
+    ),
+  ];
   final List<AdminActivityLog> _activityLogs = [];
   final List<AdminFooterLink> _footerLinks = [];
   final List<AdminFooterSocialLink> _footerSocialLinks = [];
@@ -2040,6 +2116,8 @@ class AdminDataStore extends ChangeNotifier {
   List<AdminBlog> get blogs => List.unmodifiable(_blogs);
 
   List<AdminEnquiry> get enquiries => List.unmodifiable(_enquiries);
+
+  List<AdminNotificationEmail> get notificationEmails => List.unmodifiable(_notificationEmails);
 
   List<AdminActivityLog> get activityLogs => List.unmodifiable(_activityLogs);
 
@@ -3812,6 +3890,19 @@ class AdminDataStore extends ChangeNotifier {
         _activityLogs.add(AdminActivityLog.fromMap(doc.data()));
       }
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      // Fetch Inbound Notification Emails
+      try {
+        final notifSnap = await db.collection('notification_emails').get(getOpt);
+        if (notifSnap.docs.isNotEmpty) {
+          _notificationEmails.clear();
+          for (final doc in notifSnap.docs) {
+            _notificationEmails.add(AdminNotificationEmail.fromMap(doc.data()));
+          }
+        }
+      } catch (e) {
+        debugPrint('Notification emails fetch notice: $e');
+      }
       _isAdminDataLoaded = true;
       _listenToAdminRealtimeUpdates(db);
       notifyListeners();
@@ -3841,6 +3932,16 @@ class AdminDataStore extends ChangeNotifier {
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       notifyListeners();
     }, onError: (e) => debugPrint('Logs stream notice: $e'));
+
+    db.collection('notification_emails').snapshots().listen((snap) {
+      if (snap.docs.isNotEmpty) {
+        _notificationEmails.clear();
+        for (final doc in snap.docs) {
+          _notificationEmails.add(AdminNotificationEmail.fromMap(doc.data()));
+        }
+        notifyListeners();
+      }
+    }, onError: (e) => debugPrint('Notification emails stream notice: $e'));
   }
 
   bool _listenersAttached = false;
@@ -4000,6 +4101,16 @@ class AdminDataStore extends ChangeNotifier {
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       notifyListeners();
     }, onError: (e) => debugPrint('Logs stream notice: $e'));
+
+    db.collection('notification_emails').snapshots().listen((snap) {
+      if (snap.docs.isNotEmpty) {
+        _notificationEmails.clear();
+        for (final doc in snap.docs) {
+          _notificationEmails.add(AdminNotificationEmail.fromMap(doc.data()));
+        }
+        notifyListeners();
+      }
+    }, onError: (e) => debugPrint('Notification emails stream notice: $e'));
 
     db.collection('footer_links').snapshots().listen((snap) {
       _footerLinks.clear();
@@ -5042,6 +5153,74 @@ class AdminDataStore extends ChangeNotifier {
     _enquiries.removeWhere((e) => e.id == id);
     logActivity('DELETE', 'Enquiries', 'Deleted enquiry from ${item.name}');
     _deleteFromFirestore('enquiries', id);
+    notifyListeners();
+  }
+
+  // --- CRUD: Notification Emails ---
+  void addNotificationEmail(AdminNotificationEmail email) {
+    if (email.isPrimary) {
+      for (int i = 0; i < _notificationEmails.length; i++) {
+        if (_notificationEmails[i].isPrimary) {
+          _notificationEmails[i] = _notificationEmails[i].copyWith(isPrimary: false);
+          _writeToFirestore('notification_emails', _notificationEmails[i].id, _notificationEmails[i].toMap());
+        }
+      }
+    }
+    _notificationEmails.add(email);
+    logActivity('CREATE', 'Notification Emails', 'Added notification recipient "${email.email}"');
+    _writeToFirestore('notification_emails', email.id, email.toMap());
+    notifyListeners();
+  }
+
+  void updateNotificationEmail(AdminNotificationEmail email) {
+    final index = _notificationEmails.indexWhere((e) => e.id == email.id);
+    if (index != -1) {
+      if (email.isPrimary) {
+        for (int i = 0; i < _notificationEmails.length; i++) {
+          if (i != index && _notificationEmails[i].isPrimary) {
+            _notificationEmails[i] = _notificationEmails[i].copyWith(isPrimary: false);
+            _writeToFirestore('notification_emails', _notificationEmails[i].id, _notificationEmails[i].toMap());
+          }
+        }
+      }
+      _notificationEmails[index] = email;
+      logActivity('UPDATE', 'Notification Emails', 'Updated notification recipient "${email.email}"');
+      _writeToFirestore('notification_emails', email.id, email.toMap());
+      notifyListeners();
+    }
+  }
+
+  void deleteNotificationEmail(String id) {
+    final item = _notificationEmails.firstWhere(
+      (e) => e.id == id,
+      orElse: () => const AdminNotificationEmail(id: '', email: '', recipientName: ''),
+    );
+    _notificationEmails.removeWhere((e) => e.id == id);
+    if (item.isPrimary && _notificationEmails.isNotEmpty) {
+      _notificationEmails[0] = _notificationEmails[0].copyWith(isPrimary: true);
+      _writeToFirestore('notification_emails', _notificationEmails[0].id, _notificationEmails[0].toMap());
+    }
+    logActivity('DELETE', 'Notification Emails', 'Deleted notification recipient "${item.email}"');
+    _deleteFromFirestore('notification_emails', id);
+    notifyListeners();
+  }
+
+  void toggleNotificationEmailEnabled(String id) {
+    final index = _notificationEmails.indexWhere((e) => e.id == id);
+    if (index != -1) {
+      final current = _notificationEmails[index];
+      _notificationEmails[index] = current.copyWith(isEnabled: !current.isEnabled);
+      _writeToFirestore('notification_emails', id, _notificationEmails[index].toMap());
+      notifyListeners();
+    }
+  }
+
+  void setPrimaryNotificationEmail(String id) {
+    for (int i = 0; i < _notificationEmails.length; i++) {
+      final isTarget = _notificationEmails[i].id == id;
+      _notificationEmails[i] = _notificationEmails[i].copyWith(isPrimary: isTarget);
+      _writeToFirestore('notification_emails', _notificationEmails[i].id, _notificationEmails[i].toMap());
+    }
     notifyListeners();
   }
 

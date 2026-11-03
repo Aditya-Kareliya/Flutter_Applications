@@ -14,6 +14,7 @@ import '../../../core/widgets/heritage_badge.dart';
 import '../../../core/widgets/text_fields/my_app_text_area_field.dart';
 import '../../../core/widgets/text_fields/my_app_text_form_field.dart';
 import '../../../core/widgets/toast/my_app_toast_message.dart';
+import '../../../core/services/email_notification_service.dart';
 import '../../admin_module/dashboard/data/admin_data_store.dart';
 
 class ContactScreen extends StatefulWidget {
@@ -62,6 +63,13 @@ class _ContactScreenState extends State<ContactScreen> {
         );
 
         AdminDataStore.instance.addEnquiry(enquiry);
+
+        // Send real email notification to all configured admin recipients
+        EmailNotificationService.instance.sendEnquiryNotification(
+          enquiry: enquiry,
+          recipients: AdminDataStore.instance.notificationEmails,
+          fallbackEmail: AdminDataStore.instance.settings.contactEmail,
+        );
 
         _nameController.clear();
         _phoneController.clear();

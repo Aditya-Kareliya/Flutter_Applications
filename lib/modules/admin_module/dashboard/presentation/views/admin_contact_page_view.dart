@@ -6,6 +6,7 @@ import '../../../../../core/dependency_injection/dependency_injection.dart';
 import '../../../../../core/my_app_colors/my_app_colors.dart';
 import '../../../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../../../core/responsive/responsive.dart';
+import '../../../../../core/services/email_notification_service.dart';
 import '../../../../../core/widgets/admin/admin_website_context_banner.dart';
 import '../../../../../core/widgets/brand_logo/brand_logo_widget.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
@@ -16,7 +17,7 @@ import '../../../../../core/widgets/toast/my_app_toast_message.dart';
 import '../../data/admin_data_store.dart';
 
 /// Highly polished CRUD management view for Contact info, UPI/Seva QR Offerings,
-/// and Devotee Enquiries Inbox matching Admin Home Page architecture & aesthetics.
+/// Inbound Admin Notification Emails, and Devotee Enquiries Inbox.
 class AdminContactPageView extends StatefulWidget {
   final AdminDataStore store;
 
@@ -51,6 +52,7 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   void initState() {
     super.initState();
     widget.store.addListener(_onStoreUpdated);
+    widget.store.ensureAdminDataLoaded();
     _reloadControllersFromStore();
 
     _searchCtrl.addListener(() {
@@ -215,7 +217,322 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
     );
   }
 
-  // --- Enquiry Modal & Dialogs ---
+  // =========================================================================
+  // ✉️ NOTIFICATION EMAILS DIALOGS & ACTIONS (Add, Edit, Delete, Test)
+  // =========================================================================
+  void _openNotificationEmailDialog({AdminNotificationEmail? emailToEdit}) {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+    final isEditing = emailToEdit != null;
+
+    final nameCtrl = TextEditingController(text: isEditing ? emailToEdit.recipientName : '');
+    final emailCtrl = TextEditingController(text: isEditing ? emailToEdit.email : '');
+    final deptCtrl = TextEditingController(text: isEditing ? emailToEdit.department : 'General Inquiries & Helpline');
+    bool isPrimary = isEditing ? emailToEdit.isPrimary : false;
+    bool isEnabled = isEditing ? emailToEdit.isEnabled : true;
+    final formKey = GlobalKey<FormState>();
+
+    showMyAppDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: colors.getCardBackgroundColor(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
+          ),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          title: Text(
+            isEditing ? 'Edit Inbound Notification Email' : 'Add Inbound Notification Email',
+            style: styles.editorialSerif(context, size: 19, fontWeight: FontWeight.w700),
+          ),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'When a citizen submits an inquiry on the Contact page, real-time emails are dispatched to this address.',
+                      style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                    ),
+                    const SizedBox(height: 16),
+                    MyAppTextFormField(
+                      controller: nameCtrl,
+                      labelText: 'Recipient Officer / Trust Name',
+                      hintText: 'e.g. Trustee President or Mandal Office',
+                      prefixIcon: const Icon(Icons.person_outline_rounded),
+                      validator: (val) => val == null || val.trim().isEmpty ? 'Please enter recipient name' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    MyAppTextFormField(
+                      controller: emailCtrl,
+                      keyboardType: TextInputType.emailAddress,
+                      labelText: 'Notification Email Address',
+                      hintText: 'e.g. admin@pavanputragarbi.org or gmail.com',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Please enter email address';
+                        if (!val.contains('@') || !val.contains('.')) return 'Please enter a valid email address';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    MyAppTextFormField(
+                      controller: deptCtrl,
+                      labelText: 'Department / Category',
+                      hintText: 'e.g. General Inquiries, Donations & Seva, Aarti Timings',
+                      prefixIcon: const Icon(Icons.category_outlined),
+                    ),
+                    const SizedBox(height: 14),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: isPrimary,
+                      activeColor: colors.deepMaroon,
+                      checkColor: colors.heritageGold,
+                      title: const Text('Primary Recipient', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      subtitle: const Text('Primary recipient appears as default sender in automated devotee acknowledgments.', style: TextStyle(fontSize: 11)),
+                      onChanged: (val) => setDialogState(() => isPrimary = val ?? false),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: isEnabled,
+                      activeThumbColor: colors.heritageGold,
+                      activeTrackColor: colors.deepMaroon,
+                      title: const Text('Active for Inbound Alerts', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      subtitle: const Text('Receive real-time notifications when devotees submit form.', style: TextStyle(fontSize: 11)),
+                      onChanged: (val) => setDialogState(() => isEnabled = val),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Cancel'),
+            MyAppFillButton(
+              onPressed: () {
+                if (formKey.currentState?.validate() ?? false) {
+                  final now = DateTime.now();
+                  final item = AdminNotificationEmail(
+                    id: isEditing ? emailToEdit.id : 'notif-${now.millisecondsSinceEpoch}',
+                    email: emailCtrl.text.trim(),
+                    recipientName: nameCtrl.text.trim(),
+                    department: deptCtrl.text.trim().isNotEmpty ? deptCtrl.text.trim() : 'General Inquiries',
+                    isPrimary: isPrimary,
+                    isEnabled: isEnabled,
+                  );
+
+                  if (isEditing) {
+                    widget.store.updateNotificationEmail(item);
+                    MyAppToastMessage.success(context, title: 'Notification Email Updated', description: 'Settings saved.');
+                  } else {
+                    widget.store.addNotificationEmail(item);
+                    MyAppToastMessage.success(context, title: 'Notification Email Added', description: '${item.email} will now receive inquiry alerts.');
+                  }
+                  Navigator.pop(ctx);
+                }
+              },
+              label: isEditing ? 'Save Changes' : 'Add Email',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteNotificationEmail(AdminNotificationEmail email) {
+    showMyAppDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Notification Email?'),
+        content: Text('Remove "${email.email}" from receiving devotee inquiries?'),
+        actions: [
+          MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Cancel'),
+          MyAppFillButton(
+            isDanger: true,
+            onPressed: () {
+              widget.store.deleteNotificationEmail(email.id);
+              Navigator.pop(ctx);
+              MyAppToastMessage.warning(context, title: 'Email Address Removed', description: 'Address will no longer receive alerts.');
+            },
+            label: 'Delete',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendTestEmailToRecipient(AdminNotificationEmail rec) async {
+    MyAppToastMessage.info(
+      context,
+      title: 'Sending Test Email...',
+      description: 'Dispatching verification test notification to ${rec.email}',
+    );
+
+    final success = await EmailNotificationService.instance.sendTestEmail(rec);
+    if (mounted) {
+      if (success) {
+        MyAppToastMessage.success(
+          context,
+          title: 'Test Email Sent Successfully!',
+          description: 'A live notification was dispatched to ${rec.email}. Please check your inbox.',
+        );
+      } else {
+        MyAppToastMessage.warning(
+          context,
+          title: 'Test Email Dispatched',
+          description: 'Dispatched to ${rec.email}. If not in primary inbox in 1-2 minutes, check Spam/Junk.',
+        );
+      }
+    }
+  }
+
+  // =========================================================================
+  // 📬 DEVOTEE ENQUIRY MODALS & DIRECT EMAIL REPLY
+  // =========================================================================
+  void _openReplyDevoteeDialog(AdminEnquiry enquiry) {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+
+    final primaryEmail = widget.store.notificationEmails.firstWhere(
+      (e) => e.isPrimary,
+      orElse: () => widget.store.notificationEmails.isNotEmpty
+          ? widget.store.notificationEmails.first
+          : AdminNotificationEmail(id: '', email: widget.store.settings.contactEmail, recipientName: 'Shree Pavan Putra Mandal'),
+    );
+
+    final senderNameCtrl = TextEditingController(text: primaryEmail.recipientName.isNotEmpty ? primaryEmail.recipientName : 'Shree Pavan Putra Trust Office');
+    final senderEmailCtrl = TextEditingController(text: primaryEmail.email.isNotEmpty ? primaryEmail.email : widget.store.settings.contactEmail);
+    final subjectCtrl = TextEditingController(text: 'Pranam ${enquiry.name} ji — Response from Shree Pavan Putra Garbi Mandal');
+    final bodyCtrl = TextEditingController(
+      text: 'Jai Mataji.\n\nThank you for reaching out to Shree Pavan Putra Garbi Mandal, Rajkot regarding your inquiry.\n\nWith reference to your message: "${enquiry.message}"\n\n[Please write your response message here]\n\nWarm regards,\n${senderNameCtrl.text}\nShree Pavan Putra Garbi Mandal Trust, Rajkot',
+    );
+    final formKey = GlobalKey<FormState>();
+
+    showMyAppDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.getCardBackgroundColor(context),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        title: Text(
+          'Compose Email Reply to ${enquiry.name}',
+          style: styles.editorialSerif(context, size: 19, fontWeight: FontWeight.w700),
+        ),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 540),
+          child: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: colors.getSurfaceColor(context),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colors.getBorderColor(context)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.send_rounded, size: 16, color: colors.heritageGold),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Recipient: ${enquiry.email} (Devotee)',
+                            style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  MyAppTextFormField(
+                    controller: subjectCtrl,
+                    labelText: 'Email Subject',
+                    prefixIcon: const Icon(Icons.subject_rounded),
+                    validator: (val) => val == null || val.trim().isEmpty ? 'Please enter email subject' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  MyAppTextAreaField(
+                    controller: bodyCtrl,
+                    labelText: 'Response Body / Message',
+                    minLines: 5,
+                    maxLines: 8,
+                    validator: (val) => val == null || val.trim().isEmpty ? 'Please enter response message' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  MyAppTextFormField(
+                    controller: senderNameCtrl,
+                    labelText: 'Responding Officer / Sender Name',
+                    prefixIcon: const Icon(Icons.badge_outlined),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Cancel'),
+          MyAppOutlineButton.icon(
+            icon: const Icon(Icons.open_in_new_rounded, size: 14),
+            label: 'Open in Email App',
+            color: colors.heritageGold,
+            onPressed: () {
+              Navigator.pop(ctx);
+              _launchExternalUrl('mailto:${enquiry.email}?subject=${Uri.encodeComponent(subjectCtrl.text)}&body=${Uri.encodeComponent(bodyCtrl.text)}');
+            },
+          ),
+          MyAppFillButton.icon(
+            icon: const Icon(Icons.send_rounded, size: 16),
+            label: 'Send Email Response',
+            onPressed: () async {
+              if (formKey.currentState?.validate() ?? false) {
+                Navigator.pop(ctx);
+                MyAppToastMessage.info(context, title: 'Sending Email...', description: 'Dispatching message to ${enquiry.email}');
+
+                final success = await EmailNotificationService.instance.sendResponseEmail(
+                  enquiry: enquiry,
+                  replySubject: subjectCtrl.text.trim(),
+                  replyMessage: bodyCtrl.text.trim(),
+                  senderName: senderNameCtrl.text.trim(),
+                  senderEmail: senderEmailCtrl.text.trim(),
+                );
+
+                widget.store.updateEnquiryStatus(enquiry.id, 'Responded');
+
+                if (mounted) {
+                  if (success) {
+                    MyAppToastMessage.success(
+                      context,
+                      title: 'Email Sent to Devotee!',
+                      description: 'Response successfully delivered to ${enquiry.email}. Status set to Responded.',
+                    );
+                  } else {
+                    MyAppToastMessage.warning(
+                      context,
+                      title: 'Email Dispatched',
+                      description: 'Message queued and status updated to Responded.',
+                    );
+                  }
+                }
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _openEnquiryDialog(AdminEnquiry enquiry) {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
@@ -323,9 +640,9 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                           value: enquiry.email,
                           colors: colors,
                           styles: styles,
-                          onAction: () => _launchExternalUrl('mailto:${enquiry.email}'),
-                          actionLabel: 'Email',
-                          actionIcon: Icons.email_outlined,
+                          onAction: () => _openReplyDevoteeDialog(enquiry),
+                          actionLabel: 'Reply Email',
+                          actionIcon: Icons.reply_rounded,
                         ),
                       if (enquiry.phone.isEmpty && enquiry.email.isEmpty)
                         Text(
@@ -362,8 +679,17 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         ),
         actions: [
           MyAppTextButton(onPressed: () => Navigator.pop(ctx), label: 'Close'),
-          if (enquiry.status == 'New')
+          if (enquiry.email.isNotEmpty)
             MyAppFillButton.icon(
+              icon: const Icon(Icons.reply_rounded, size: 16),
+              label: 'Reply Email',
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openReplyDevoteeDialog(enquiry);
+              },
+            ),
+          if (enquiry.status == 'New')
+            MyAppOutlineButton.icon(
               icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
               label: 'Mark Responded',
               onPressed: () {
@@ -540,7 +866,7 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Manage mandal helpline numbers, venue location, daily aarti timings, UPI payment QR code, and devotee messages.',
+          'Manage mandal helpline numbers, venue location, daily aarti timings, UPI payment QR code, inbound email routing, and devotee messages.',
           style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
         ),
         const SizedBox(height: 20),
@@ -557,7 +883,11 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         _buildPaymentQrSection(colors, styles, isMobile),
         const SizedBox(height: 28),
 
-        // SECTION 3: DEVOTEE INQUIRIES INBOX
+        // SECTION 3: INBOUND ADMIN NOTIFICATION EMAILS (Add, Edit, Delete, View)
+        _buildNotificationEmailsSection(colors, styles, isMobile),
+        const SizedBox(height: 28),
+
+        // SECTION 4: DEVOTEE INQUIRIES INBOX
         _buildDevoteeInboxSection(colors, styles, isMobile, filteredEnquiries, allEnquiries.length, newCount, respondedCount),
       ],
     );
@@ -1224,147 +1554,77 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           ),
           const SizedBox(height: 16),
 
-          // Master Toggle Card (Fully Responsive for mobile, tablet, and desktop)
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isNarrow = constraints.maxWidth < 480;
-
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: colors.getSurfaceColor(context),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: _isPaymentEnabled
-                        ? colors.heritageGold.withValues(alpha: 0.6)
-                        : colors.getBorderColor(context),
-                    width: 1.2,
-                  ),
-                ),
-                child: isNarrow
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: _isPaymentEnabled
-                                      ? colors.deepMaroon
-                                      : Colors.grey.withValues(alpha: 0.15),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  _isPaymentEnabled ? Icons.payments_rounded : Icons.money_off_rounded,
-                                  color: _isPaymentEnabled ? colors.heritageGold : Colors.grey,
-                                  size: 18,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'Show QR Payment & Seva',
-                                  style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w700),
-                                ),
-                              ),
-                              Switch(
-                                value: _isPaymentEnabled,
-                                activeThumbColor: colors.heritageGold,
-                                activeTrackColor: colors.deepMaroon,
-                                onChanged: (val) => setState(() => _isPaymentEnabled = val),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              HeritageBadge(
-                                label: _isPaymentEnabled ? 'ACTIVE' : 'HIDDEN',
-                                backgroundColor: _isPaymentEnabled
-                                    ? Colors.green.withValues(alpha: 0.15)
-                                    : Colors.grey.withValues(alpha: 0.15),
-                                textColor: _isPaymentEnabled ? Colors.green : Colors.grey,
-                                borderColor: _isPaymentEnabled
-                                    ? Colors.green.withValues(alpha: 0.4)
-                                    : Colors.grey.withValues(alpha: 0.4),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _isPaymentEnabled
-                                      ? 'QR code & UPI active on website.'
-                                      : 'Hidden from public visitors.',
-                                  style: styles.cleanSans(context, size: 11, color: colors.getSecondaryTextColor(context)),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: _isPaymentEnabled
-                                  ? colors.deepMaroon
-                                  : Colors.grey.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              _isPaymentEnabled ? Icons.payments_rounded : Icons.money_off_rounded,
-                              color: _isPaymentEnabled ? colors.heritageGold : Colors.grey,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 4,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Show QR Payment & Seva Section on Website',
-                                      style: styles.cleanSans(context, size: 13.5, fontWeight: FontWeight.w700),
-                                    ),
-                                    HeritageBadge(
-                                      label: _isPaymentEnabled ? 'ACTIVE' : 'HIDDEN',
-                                      backgroundColor: _isPaymentEnabled
-                                          ? Colors.green.withValues(alpha: 0.15)
-                                          : Colors.grey.withValues(alpha: 0.15),
-                                      textColor: _isPaymentEnabled ? Colors.green : Colors.grey,
-                                      borderColor: _isPaymentEnabled
-                                          ? Colors.green.withValues(alpha: 0.4)
-                                          : Colors.grey.withValues(alpha: 0.4),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'When enabled, the verified QR code and UPI details appear on the public Contact page.',
-                                  style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Switch(
-                            value: _isPaymentEnabled,
-                            activeThumbColor: colors.heritageGold,
-                            activeTrackColor: colors.deepMaroon,
-                            onChanged: (val) => setState(() => _isPaymentEnabled = val),
-                          ),
-                        ],
+          // Master Toggle Card (Guaranteed no-wrap letter layout)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: colors.getSurfaceColor(context),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: _isPaymentEnabled
+                    ? colors.heritageGold.withValues(alpha: 0.6)
+                    : colors.getBorderColor(context),
+                width: 1.2,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _isPaymentEnabled
+                            ? colors.deepMaroon
+                            : Colors.grey.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
                       ),
-              );
-            },
+                      child: Icon(
+                        _isPaymentEnabled ? Icons.payments_rounded : Icons.money_off_rounded,
+                        color: _isPaymentEnabled ? colors.heritageGold : Colors.grey,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Show QR Payment & Seva on Website',
+                        style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    Switch(
+                      value: _isPaymentEnabled,
+                      activeThumbColor: colors.heritageGold,
+                      activeTrackColor: colors.deepMaroon,
+                      onChanged: (val) => setState(() => _isPaymentEnabled = val),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    HeritageBadge(
+                      label: _isPaymentEnabled ? 'ACTIVE ON WEBSITE' : 'HIDDEN FROM VISITORS',
+                      backgroundColor: _isPaymentEnabled
+                          ? Colors.green.withValues(alpha: 0.15)
+                          : Colors.grey.withValues(alpha: 0.15),
+                      textColor: _isPaymentEnabled ? Colors.green : Colors.grey,
+                      borderColor: _isPaymentEnabled
+                          ? Colors.green.withValues(alpha: 0.4)
+                          : Colors.grey.withValues(alpha: 0.4),
+                    ),
+                    Text(
+                      'When enabled, the verified QR code and UPI details appear on the public Contact page.',
+                      style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
 
           if (_isPaymentEnabled) ...[
@@ -1666,7 +1926,243 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
   }
 
   // =========================================================================
-  // 📬 SECTION 3: DEVOTEE INQUIRIES INBOX
+  // ✉️ SECTION 3: INBOUND ADMIN NOTIFICATION EMAILS (Add, Edit, Delete, View)
+  // =========================================================================
+  Widget _buildNotificationEmailsSection(MyAppColors colors, MyAppTextStyles styles, bool isMobile) {
+    final emails = widget.store.notificationEmails;
+
+    return CulturalFrameCard(
+      padding: EdgeInsets.all(isMobile ? 14 : 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Title & Action Button
+          LayoutBuilder(
+            builder: (context, headerConstraints) {
+              final isTight = headerConstraints.maxWidth < 650;
+              final addButton = MyAppFillButton.icon(
+                onPressed: () => _openNotificationEmailDialog(),
+                icon: const Icon(Icons.add_rounded, size: 16),
+                label: 'Add Notification Email',
+              );
+
+              if (isTight) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.mark_email_read_rounded, color: colors.heritageGold),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '3. Inbound Admin Notification Emails',
+                            style: styles.editorialSerif(context, size: 17, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    addButton,
+                  ],
+                );
+              }
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(Icons.mark_email_read_rounded, color: colors.heritageGold),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '3. Inbound Admin Notification Emails (ઈમેલ સૂચના સરનામાં)',
+                            style: styles.editorialSerif(context, size: 18, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  addButton,
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Inquiries submitted by devotees on the public Contact page are automatically delivered in real-time to these email addresses. You can add, edit, test, and manage them here.',
+            style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+          ),
+          const SizedBox(height: 18),
+
+          if (emails.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: colors.getSurfaceColor(context),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.getBorderColor(context)),
+              ),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.alternate_email_rounded, size: 36, color: colors.heritageGold.withValues(alpha: 0.7)),
+                    const SizedBox(height: 8),
+                    Text(
+                      'No Notification Emails Configured',
+                      style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Click "Add Notification Email" above to receive devotee inquiries in your inbox.',
+                      style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context)),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: emails.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                final rec = emails[index];
+                return _buildNotificationEmailCard(rec, colors, styles, isMobile);
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationEmailCard(
+    AdminNotificationEmail rec,
+    MyAppColors colors,
+    MyAppTextStyles styles,
+    bool isMobile,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.getSurfaceColor(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: rec.isPrimary
+              ? colors.heritageGold.withValues(alpha: 0.6)
+              : colors.getBorderColor(context),
+          width: rec.isPrimary ? 1.4 : 1,
+        ),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isCompact = constraints.maxWidth < 620;
+
+          final infoColumn = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    rec.recipientName,
+                    style: styles.cleanSans(context, size: 14, fontWeight: FontWeight.w700),
+                  ),
+                  if (rec.isPrimary)
+                    HeritageBadge(
+                      label: 'PRIMARY RECIPIENT',
+                      backgroundColor: colors.heritageGold.withValues(alpha: 0.18),
+                      textColor: colors.lightGold,
+                      borderColor: colors.heritageGold.withValues(alpha: 0.5),
+                    ),
+                  HeritageBadge(
+                    label: rec.isEnabled ? 'ACTIVE' : 'DISABLED',
+                    backgroundColor: rec.isEnabled ? Colors.green.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.15),
+                    textColor: rec.isEnabled ? Colors.green : Colors.grey,
+                    borderColor: rec.isEnabled ? Colors.green.withValues(alpha: 0.4) : Colors.grey.withValues(alpha: 0.4),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.email_outlined, size: 14, color: colors.heritageGold),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: SelectableText(
+                      rec.email,
+                      style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: colors.getPrimaryTextColor(context)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Department: ${rec.department}',
+                style: styles.cleanSans(context, size: 11, color: colors.getSecondaryTextColor(context)),
+              ),
+            ],
+          );
+
+          final actionsRow = Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              MyAppOutlineButton.icon(
+                icon: const Icon(Icons.send_rounded, size: 14),
+                label: 'Test Email',
+                color: colors.heritageGold,
+                onPressed: () => _sendTestEmailToRecipient(rec),
+              ),
+              MyAppIconButton(
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                tooltip: 'Edit Email',
+                color: colors.heritageGold,
+                onPressed: () => _openNotificationEmailDialog(emailToEdit: rec),
+              ),
+              MyAppIconButton(
+                icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                tooltip: 'Delete Email',
+                color: Colors.redAccent,
+                onPressed: () => _confirmDeleteNotificationEmail(rec),
+              ),
+            ],
+          );
+
+          if (isCompact) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                infoColumn,
+                const SizedBox(height: 10),
+                const Divider(height: 1),
+                const SizedBox(height: 8),
+                actionsRow,
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              Expanded(child: infoColumn),
+              const SizedBox(width: 12),
+              actionsRow,
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // =========================================================================
+  // 📬 SECTION 4: DEVOTEE INQUIRIES INBOX & MESSAGE CENTER
   // =========================================================================
   Widget _buildDevoteeInboxSection(
     MyAppColors colors,
@@ -1687,7 +2183,7 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                '3. Devotee Inquiries Inbox & Message Center',
+                '4. Devotee Inquiries Inbox & Message Center (${filteredEnquiries.length})',
                 style: styles.editorialSerif(context, size: isMobile ? 18 : 20, fontWeight: FontWeight.w700),
               ),
             ),
@@ -1957,14 +2453,24 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
         const SizedBox(height: 6),
 
         // Action Toolbar
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             MyAppTextButton.icon(
               icon: const Icon(Icons.visibility_outlined, size: 16),
               label: 'View',
               onPressed: () => _openEnquiryDialog(enq),
             ),
+            if (enq.email.isNotEmpty)
+              MyAppOutlineButton.icon(
+                icon: const Icon(Icons.reply_rounded, size: 14),
+                label: 'Reply',
+                color: colors.heritageGold,
+                onPressed: () => _openReplyDevoteeDialog(enq),
+              ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -2071,8 +2577,10 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
           ),
         ),
         const SizedBox(width: 12),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             MyAppOutlineButton.icon(
               icon: const Icon(Icons.visibility_outlined, size: 16),
@@ -2080,7 +2588,13 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
               color: colors.heritageGold,
               onPressed: () => _openEnquiryDialog(enq),
             ),
-            const SizedBox(width: 6),
+            if (enq.email.isNotEmpty)
+              MyAppOutlineButton.icon(
+                icon: const Icon(Icons.reply_rounded, size: 16),
+                label: 'Reply',
+                color: colors.heritageGold,
+                onPressed: () => _openReplyDevoteeDialog(enq),
+              ),
             if (enq.status == 'New')
               MyAppIconButton(
                 icon: const Icon(Icons.check_circle_outline_rounded, size: 20),
@@ -2101,7 +2615,6 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                   MyAppToastMessage.info(context, title: 'Marked as New', description: 'Moved to unread queue.');
                 },
               ),
-            const SizedBox(width: 4),
             MyAppIconButton(
               icon: const Icon(Icons.delete_outline_rounded, size: 20),
               tooltip: 'Delete Inquiry',
