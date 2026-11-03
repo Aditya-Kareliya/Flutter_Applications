@@ -1,15 +1,27 @@
-// ignore_for_file: avoid_web_libraries_in_flutter
-import 'dart:js' as js;
+import 'dart:js_interop';
 
-void updateBrowserSeo({String? title, String? description, String? canonical, String? ogImage}) {
+@JS('setPageSeo')
+external void _rawSetPageSeo(
+  JSString? title,
+  JSString? description,
+  JSString? canonical,
+  JSString? ogImage,
+);
+
+void updateBrowserSeo({
+  String? title,
+  String? description,
+  String? canonical,
+  String? ogImage,
+}) {
   try {
-    if (js.context.hasProperty('setPageSeo')) {
-      js.context.callMethod('setPageSeo', [title, description, canonical, ogImage]);
-    } else if (js.context.hasProperty('document') && title != null) {
-      js.context['document']['title'] = title;
-    }
+    _rawSetPageSeo(
+      title?.toJS,
+      description?.toJS,
+      canonical?.toJS,
+      ogImage?.toJS,
+    );
   } catch (_) {
-    // Silently ignore if JS DOM context unavailable
+    // Silently ignore if JS DOM context or function is unavailable
   }
 }
-

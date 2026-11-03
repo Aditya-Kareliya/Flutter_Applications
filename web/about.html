@@ -111,7 +111,7 @@
   </script>
 
   <script>
-    window.setPageSeo = function(title, description, canonical, ogImage) {
+    var setPageSeo = window.setPageSeo = function(title, description, canonical, ogImage) {
       if (title) {
         document.title = title;
         var ogTitle = document.querySelector('meta[property="og:title"]');
