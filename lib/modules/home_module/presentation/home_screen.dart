@@ -842,8 +842,12 @@ class _PillarsOfGarbiSection extends StatelessWidget {
     final lang = isGujarati ? 'gu' : 'en';
 
     final header = AdminDataStore.instance.homePillarsHeader;
-    final tag = header['tag_$lang']?.isNotEmpty == true ? header['tag_$lang']! : (header['tag_en']?.isNotEmpty == true ? header['tag_en']! : '');
-    final title = header['title_$lang']?.isNotEmpty == true ? header['title_$lang']! : (header['title_en']?.isNotEmpty == true ? header['title_en']! : '');
+    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true
+        ? (isGujarati ? header['tagGu']! : header['tagEn']!)
+        : (header['tagEn'] ?? '');
+    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true
+        ? (isGujarati ? header['titleGu']! : header['titleEn']!)
+        : (header['titleEn'] ?? '');
 
     final pillars = AdminDataStore.instance.pillars;
 
@@ -962,11 +966,16 @@ class _SingerBannerCarousel extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final lang = isGujarati ? 'gu' : 'en';
     final header = AdminDataStore.instance.homeSingersHeader;
-    final tag = header['tag_$lang']?.isNotEmpty == true ? header['tag_$lang']! : (header['tag_en']?.isNotEmpty == true ? header['tag_en']! : '');
-    final title = header['title_$lang']?.isNotEmpty == true ? header['title_$lang']! : (header['title_en']?.isNotEmpty == true ? header['title_en']! : '');
-    final desc = header['desc_$lang']?.isNotEmpty == true ? header['desc_$lang']! : (header['desc_en']?.isNotEmpty == true ? header['desc_en']! : '');
+    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true
+        ? (isGujarati ? header['tagGu']! : header['tagEn']!)
+        : (header['tagEn'] ?? '');
+    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true
+        ? (isGujarati ? header['titleGu']! : header['titleEn']!)
+        : (header['titleEn'] ?? '');
+    final desc = (isGujarati ? header['descGu'] : header['descEn'])?.isNotEmpty == true
+        ? (isGujarati ? header['descGu']! : header['descEn']!)
+        : (header['descEn'] ?? '');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1206,8 +1215,12 @@ class _EldersBlessingsSection extends StatelessWidget {
     final lang = isGujarati ? 'gu' : 'en';
 
     final header = AdminDataStore.instance.homeBlessingsHeader;
-    final tag = header['tag_$lang']?.isNotEmpty == true ? header['tag_$lang']! : (header['tag_en']?.isNotEmpty == true ? header['tag_en']! : '');
-    final title = header['title_$lang']?.isNotEmpty == true ? header['title_$lang']! : (header['title_en']?.isNotEmpty == true ? header['title_en']! : '');
+    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true
+        ? (isGujarati ? header['tagGu']! : header['tagEn']!)
+        : (header['tagEn'] ?? '');
+    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true
+        ? (isGujarati ? header['titleGu']! : header['titleEn']!)
+        : (header['titleEn'] ?? '');
 
     final blessings = AdminDataStore.instance.blessings;
 

@@ -51,12 +51,10 @@ class AdminContentField {
       'key': key,
       'label': label,
       'section': section,
-      'value_en': valueEn,
-      'value_gu': valueGu,
       'valueEn': valueEn,
       'valueGu': valueGu,
-      'is_multiline': isMultiline,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isMultiline': isMultiline,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -65,9 +63,9 @@ class AdminContentField {
       key: map['key'] as String? ?? '',
       label: map['label'] as String? ?? '',
       section: map['section'] as String? ?? 'General',
-      valueEn: map['value_en'] as String? ?? map['valueEn'] as String? ?? '',
-      valueGu: map['value_gu'] as String? ?? map['valueGu'] as String? ?? '',
-      isMultiline: map['is_multiline'] as bool? ?? map['isMultiline'] as bool? ?? false,
+      valueEn: map['valueEn'] as String? ?? map['value_en'] as String? ?? '',
+      valueGu: map['valueGu'] as String? ?? map['value_gu'] as String? ?? '',
+      isMultiline: map['isMultiline'] as bool? ?? map['is_multiline'] as bool? ?? false,
     );
   }
 
@@ -103,29 +101,29 @@ class AdminCommitteeMember {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name_en': nameEn,
-      'name_gu': nameGu,
-      'designation_en': designationEn,
-      'designation_gu': designationGu,
+      'nameEn': nameEn,
+      'nameGu': nameGu,
+      'designationEn': designationEn,
+      'designationGu': designationGu,
       'phone': phone,
-      'photo_url': photoUrl,
+      'photoUrl': photoUrl,
       'order': order,
-      'is_active': isActive,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isActive': isActive,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminCommitteeMember.fromMap(Map<String, dynamic> map) {
     return AdminCommitteeMember(
       id: map['id'] as String? ?? '',
-      nameEn: map['name_en'] as String? ?? map['nameEn'] as String? ?? '',
-      nameGu: map['name_gu'] as String? ?? map['nameGu'] as String? ?? '',
-      designationEn: map['designation_en'] as String? ?? map['designationEn'] as String? ?? '',
-      designationGu: map['designation_gu'] as String? ?? map['designationGu'] as String? ?? '',
+      nameEn: map['nameEn'] as String? ?? map['name_en'] as String? ?? '',
+      nameGu: map['nameGu'] as String? ?? map['name_gu'] as String? ?? '',
+      designationEn: map['designationEn'] as String? ?? map['designation_en'] as String? ?? '',
+      designationGu: map['designationGu'] as String? ?? map['designation_gu'] as String? ?? '',
       phone: map['phone'] as String? ?? '',
-      photoUrl: map['photo_url'] as String? ?? map['photoUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      photoUrl: map['photoUrl'] as String? ?? map['photo_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
+      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
     );
   }
 
@@ -188,17 +186,17 @@ class AdminHistoryMilestone {
     return {
       'id': id,
       'year': year,
-      'badge_en': badgeEn,
-      'badge_gu': badgeGu,
-      'title_en': titleEn,
-      'title_gu': titleGu,
-      'desc_en': descEn,
-      'desc_gu': descGu,
-      'icon_name': iconName,
-      'image_url': imageUrl,
+      'badgeEn': badgeEn,
+      'badgeGu': badgeGu,
+      'titleEn': titleEn,
+      'titleGu': titleGu,
+      'descEn': descEn,
+      'descGu': descGu,
+      'iconName': iconName,
+      'imageUrl': imageUrl,
       'order': order,
-      'is_active': isActive,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isActive': isActive,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -206,16 +204,16 @@ class AdminHistoryMilestone {
     return AdminHistoryMilestone(
       id: map['id'] as String? ?? '',
       year: map['year'] as String? ?? '',
-      badgeEn: map['badge_en'] as String? ?? map['badgeEn'] as String? ?? 'MILESTONE',
-      badgeGu: map['badge_gu'] as String? ?? map['badgeGu'] as String? ?? 'માઇલસ્ટોન',
-      titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
-      descEn: map['desc_en'] as String? ?? map['descEn'] as String? ?? '',
-      descGu: map['desc_gu'] as String? ?? map['descGu'] as String? ?? '',
-      iconName: map['icon_name'] as String? ?? map['iconName'] as String? ?? 'local_fire_department_rounded',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      badgeEn: map['badgeEn'] as String? ?? map['badge_en'] as String? ?? 'MILESTONE',
+      badgeGu: map['badgeGu'] as String? ?? map['badge_gu'] as String? ?? 'માઇલસ્ટોન',
+      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
+      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
+      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
+      iconName: map['iconName'] as String? ?? map['icon_name'] as String? ?? 'local_fire_department_rounded',
+      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
+      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
     );
   }
 
@@ -277,28 +275,28 @@ class AdminHomeSinger {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name_en': nameEn,
-      'name_gu': nameGu,
-      'role_en': roleEn,
-      'role_gu': roleGu,
-      'desc_en': descEn,
-      'desc_gu': descGu,
-      'image_url': imageUrl,
+      'nameEn': nameEn,
+      'nameGu': nameGu,
+      'roleEn': roleEn,
+      'roleGu': roleGu,
+      'descEn': descEn,
+      'descGu': descGu,
+      'imageUrl': imageUrl,
       'order': order,
-      'updated_at': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminHomeSinger.fromMap(Map<String, dynamic> map) {
     return AdminHomeSinger(
       id: map['id'] as String? ?? '',
-      nameEn: map['name_en'] as String? ?? map['nameEn'] as String? ?? '',
-      nameGu: map['name_gu'] as String? ?? map['nameGu'] as String? ?? '',
-      roleEn: map['role_en'] as String? ?? map['roleEn'] as String? ?? '',
-      roleGu: map['role_gu'] as String? ?? map['roleGu'] as String? ?? '',
-      descEn: map['desc_en'] as String? ?? map['descEn'] as String? ?? '',
-      descGu: map['desc_gu'] as String? ?? map['descGu'] as String? ?? '',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      nameEn: map['nameEn'] as String? ?? map['name_en'] as String? ?? '',
+      nameGu: map['nameGu'] as String? ?? map['name_gu'] as String? ?? '',
+      roleEn: map['roleEn'] as String? ?? map['role_en'] as String? ?? '',
+      roleGu: map['roleGu'] as String? ?? map['role_gu'] as String? ?? '',
+      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
+      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
+      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
     );
   }
@@ -572,24 +570,24 @@ class AdminAboutCard {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'title_en': titleEn,
-      'title_gu': titleGu,
-      'desc_en': descEn,
-      'desc_gu': descGu,
-      'icon_key': iconKey,
+      'titleEn': titleEn,
+      'titleGu': titleGu,
+      'descEn': descEn,
+      'descGu': descGu,
+      'iconKey': iconKey,
       'order': order,
-      'updated_at': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminAboutCard.fromMap(Map<String, dynamic> map) {
     return AdminAboutCard(
       id: map['id'] as String? ?? 'card-${DateTime.now().millisecondsSinceEpoch}',
-      titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
-      descEn: map['desc_en'] as String? ?? map['descEn'] as String? ?? '',
-      descGu: map['desc_gu'] as String? ?? map['descGu'] as String? ?? '',
-      iconKey: map['icon_key'] as String? ?? map['iconKey'] as String? ?? 'shield',
+      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
+      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
+      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
+      iconKey: map['iconKey'] as String? ?? map['icon_key'] as String? ?? 'shield',
       order: (map['order'] as num?)?.toInt() ?? 0,
     );
   }
@@ -707,14 +705,14 @@ class AdminAboutPrinciple {
     return {
       'id': id,
       'number': number,
-      'title_en': titleEn,
-      'title_gu': titleGu,
-      'desc_en': descEn,
-      'desc_gu': descGu,
-      'icon_key': iconKey,
+      'titleEn': titleEn,
+      'titleGu': titleGu,
+      'descEn': descEn,
+      'descGu': descGu,
+      'iconKey': iconKey,
       'order': order,
-      'is_active': isActive,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isActive': isActive,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -722,13 +720,13 @@ class AdminAboutPrinciple {
     return AdminAboutPrinciple(
       id: map['id'] as String? ?? 'principle-${DateTime.now().millisecondsSinceEpoch}',
       number: map['number'] as String? ?? '૦૧',
-      titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
-      descEn: map['desc_en'] as String? ?? map['descEn'] as String? ?? '',
-      descGu: map['desc_gu'] as String? ?? map['descGu'] as String? ?? '',
-      iconKey: map['icon_key'] as String? ?? map['iconKey'] as String? ?? 'verified',
+      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
+      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
+      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
+      iconKey: map['iconKey'] as String? ?? map['icon_key'] as String? ?? 'verified',
       order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
+      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
     );
   }
 
@@ -904,37 +902,37 @@ class AdminHomeBanner {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'badge_en': badgeEn,
-      'badge_gu': badgeGu,
-      'title_en': titleEn,
-      'title_gu': titleGu,
-      'subtitle_en': subtitleEn,
-      'subtitle_gu': subtitleGu,
-      'image_url': imageUrl,
-      'cta_text_en': ctaTextEn,
-      'cta_text_gu': ctaTextGu,
-      'cta_route': ctaRoute,
+      'badgeEn': badgeEn,
+      'badgeGu': badgeGu,
+      'titleEn': titleEn,
+      'titleGu': titleGu,
+      'subtitleEn': subtitleEn,
+      'subtitleGu': subtitleGu,
+      'imageUrl': imageUrl,
+      'ctaTextEn': ctaTextEn,
+      'ctaTextGu': ctaTextGu,
+      'ctaRoute': ctaRoute,
       'order': order,
-      'is_active': isActive,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isActive': isActive,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminHomeBanner.fromMap(Map<String, dynamic> map) {
     return AdminHomeBanner(
       id: map['id'] as String? ?? '',
-      badgeEn: map['badge_en'] as String? ?? map['badgeEn'] as String? ?? 'HERITAGE',
-      badgeGu: map['badge_gu'] as String? ?? map['badgeGu'] as String? ?? 'વારસો',
-      titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
-      subtitleEn: map['subtitle_en'] as String? ?? map['subtitleEn'] as String? ?? '',
-      subtitleGu: map['subtitle_gu'] as String? ?? map['subtitleGu'] as String? ?? '',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      ctaTextEn: map['cta_text_en'] as String? ?? map['ctaTextEn'] as String? ?? 'EXPLORE',
-      ctaTextGu: map['cta_text_gu'] as String? ?? map['ctaTextGu'] as String? ?? 'જુઓ',
-      ctaRoute: map['cta_route'] as String? ?? map['ctaRoute'] as String? ?? '/archive',
+      badgeEn: map['badgeEn'] as String? ?? map['badge_en'] as String? ?? 'HERITAGE',
+      badgeGu: map['badgeGu'] as String? ?? map['badge_gu'] as String? ?? 'વારસો',
+      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
+      subtitleEn: map['subtitleEn'] as String? ?? map['subtitle_en'] as String? ?? '',
+      subtitleGu: map['subtitleGu'] as String? ?? map['subtitle_gu'] as String? ?? '',
+      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      ctaTextEn: map['ctaTextEn'] as String? ?? map['cta_text_en'] as String? ?? 'EXPLORE',
+      ctaTextGu: map['ctaTextGu'] as String? ?? map['cta_text_gu'] as String? ?? 'જુઓ',
+      ctaRoute: map['ctaRoute'] as String? ?? map['cta_route'] as String? ?? '/archive',
       order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
+      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
     );
   }
 
@@ -1031,14 +1029,14 @@ class AdminHomePillar {
     return {
       'id': id,
       'number': number,
-      'title_en': titleEn,
-      'title_gu': titleGu,
-      'desc_en': descEn,
-      'desc_gu': descGu,
-      'icon_key': iconKey,
+      'titleEn': titleEn,
+      'titleGu': titleGu,
+      'descEn': descEn,
+      'descGu': descGu,
+      'iconKey': iconKey,
       'order': order,
-      'is_active': isActive,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isActive': isActive,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -1046,13 +1044,13 @@ class AdminHomePillar {
     return AdminHomePillar(
       id: map['id'] as String? ?? 'pillar-${DateTime.now().millisecondsSinceEpoch}',
       number: map['number'] as String? ?? '૦૧',
-      titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
-      descEn: map['desc_en'] as String? ?? map['descEn'] as String? ?? '',
-      descGu: map['desc_gu'] as String? ?? map['descGu'] as String? ?? '',
-      iconKey: map['icon_key'] as String? ?? map['iconKey'] as String? ?? 'group',
+      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
+      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
+      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
+      iconKey: map['iconKey'] as String? ?? map['icon_key'] as String? ?? 'group',
       order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
+      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
     );
   }
 
@@ -1113,31 +1111,31 @@ class AdminHomeBlessing {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'quote_en': quoteEn,
-      'quote_gu': quoteGu,
-      'author_en': authorEn,
-      'author_gu': authorGu,
-      'designation_en': designationEn,
-      'designation_gu': designationGu,
-      'photo_url': photoUrl,
+      'quoteEn': quoteEn,
+      'quoteGu': quoteGu,
+      'authorEn': authorEn,
+      'authorGu': authorGu,
+      'designationEn': designationEn,
+      'designationGu': designationGu,
+      'photoUrl': photoUrl,
       'order': order,
-      'is_active': isActive,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isActive': isActive,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminHomeBlessing.fromMap(Map<String, dynamic> map) {
     return AdminHomeBlessing(
       id: map['id'] as String? ?? 'blessing-${DateTime.now().millisecondsSinceEpoch}',
-      quoteEn: map['quote_en'] as String? ?? map['quoteEn'] as String? ?? '',
-      quoteGu: map['quote_gu'] as String? ?? map['quoteGu'] as String? ?? '',
-      authorEn: map['author_en'] as String? ?? map['authorEn'] as String? ?? '',
-      authorGu: map['author_gu'] as String? ?? map['authorGu'] as String? ?? '',
-      designationEn: map['designation_en'] as String? ?? map['designationEn'] as String? ?? '',
-      designationGu: map['designation_gu'] as String? ?? map['designationGu'] as String? ?? '',
-      photoUrl: map['photo_url'] as String? ?? map['photoUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      quoteEn: map['quoteEn'] as String? ?? map['quote_en'] as String? ?? '',
+      quoteGu: map['quoteGu'] as String? ?? map['quote_gu'] as String? ?? '',
+      authorEn: map['authorEn'] as String? ?? map['author_en'] as String? ?? '',
+      authorGu: map['authorGu'] as String? ?? map['author_gu'] as String? ?? '',
+      designationEn: map['designationEn'] as String? ?? map['designation_en'] as String? ?? '',
+      designationGu: map['designationGu'] as String? ?? map['designation_gu'] as String? ?? '',
+      photoUrl: map['photoUrl'] as String? ?? map['photo_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
       order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['is_active'] as bool? ?? map['isActive'] as bool? ?? true,
+      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
     );
   }
 
@@ -1221,16 +1219,12 @@ class AdminGarbiYear {
     return {
       'id': id,
       'year': year,
-      'title_en': titleEn,
-      'title_gu': titleGu,
       'titleEn': titleEn,
       'titleGu': titleGu,
       'description': description,
-      'is_published': isPublished,
       'isPublished': isPublished,
-      'album_count': albumCount,
       'albumCount': albumCount,
-      'updated_at': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -1238,11 +1232,11 @@ class AdminGarbiYear {
     return AdminGarbiYear(
       id: map['id'] as String? ?? '',
       year: (map['year'] as num?)?.toInt() ?? 2025,
-      titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
+      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
       description: map['description'] as String? ?? '',
-      isPublished: map['is_published'] as bool? ?? map['isPublished'] as bool? ?? true,
-      albumCount: (map['album_count'] as num?)?.toInt() ?? (map['albumCount'] as num?)?.toInt() ?? 0,
+      isPublished: map['isPublished'] as bool? ?? map['is_published'] as bool? ?? true,
+      albumCount: (map['albumCount'] as num?)?.toInt() ?? (map['album_count'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -1283,13 +1277,11 @@ class AdminAlbum {
       'id': id,
       'year': year,
       'name': name,
-      'day_tag': dayTag,
       'dayTag': dayTag,
       'description': description,
-      'cover_image_url': coverImageUrl,
-      'photo_count': photoCount,
+      'coverImageUrl': coverImageUrl,
       'photoCount': photoCount,
-      'updated_at': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -1298,10 +1290,10 @@ class AdminAlbum {
       id: map['id'] as String? ?? '',
       year: map['year'] as String? ?? '2025',
       name: map['name'] as String? ?? '',
-      dayTag: map['day_tag'] as String? ?? map['dayTag'] as String? ?? 'Day 1',
+      dayTag: map['dayTag'] as String? ?? map['day_tag'] as String? ?? 'Day 1',
       description: map['description'] as String? ?? '',
-      coverImageUrl: map['cover_image_url'] as String? ?? map['coverImageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      photoCount: (map['photo_count'] as num?)?.toInt() ?? (map['photoCount'] as num?)?.toInt() ?? 0,
+      coverImageUrl: map['coverImageUrl'] as String? ?? map['cover_image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      photoCount: (map['photoCount'] as num?)?.toInt() ?? (map['photo_count'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -1345,18 +1337,14 @@ class AdminPhoto {
     return {
       'id': id,
       'year': year,
-      'album_id': albumId,
       'albumId': albumId,
       'day': day,
-      'title_en': titleEn,
-      'title_gu': titleGu,
       'titleEn': titleEn,
       'titleGu': titleGu,
-      'image_url': imageUrl,
       'imageUrl': imageUrl,
       'caption': caption,
-      'is_featured': isFeatured,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isFeatured': isFeatured,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -1364,13 +1352,13 @@ class AdminPhoto {
     return AdminPhoto(
       id: map['id'] as String? ?? '',
       year: map['year'] as String? ?? '2025',
-      albumId: map['album_id'] as String? ?? map['albumId'] as String? ?? '',
+      albumId: map['albumId'] as String? ?? map['album_id'] as String? ?? '',
       day: map['day'] as String? ?? 'Day 1',
-      titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
+      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
       caption: map['caption'] as String? ?? '',
-      isFeatured: map['is_featured'] as bool? ?? map['isFeatured'] as bool? ?? true,
+      isFeatured: map['isFeatured'] as bool? ?? map['is_featured'] as bool? ?? true,
     );
   }
 
@@ -1429,47 +1417,39 @@ class AdminVideo {
 
     return {
       'id': id,
-      'youtube_video_id': canonId,
       'youtubeVideoId': canonId,
       'title': title,
-      'title_en': title,
-      'title_gu': titleGu,
+      'titleGu': titleGu,
       'tag': tag,
-      'category': tag,
       'duration': duration,
-      'youtube_url': youtubeUrl,
       'youtubeUrl': youtubeUrl,
       'year': year,
-      'thumbnail_url': thumb,
       'thumbnailUrl': thumb,
-      'is_featured': isFeatured,
       'isFeatured': isFeatured,
-      'is_published': isPublished,
       'isPublished': isPublished,
-      'source_channel': sourceChannel,
       'sourceChannel': sourceChannel,
-      'updated_at': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminVideo.fromMap(Map<String, dynamic> map) {
-    final rawUrl = map['youtube_url'] as String? ?? map['youtubeUrl'] as String? ?? '';
-    final extractedId = map['youtube_video_id'] as String? ?? map['youtubeVideoId'] as String? ?? YoutubeUrlHelper.extractVideoId(rawUrl) ?? '';
-    final thumb = map['thumbnail_url'] as String? ?? map['thumbnailUrl'] as String? ?? (extractedId.isNotEmpty ? YoutubeUrlHelper.buildThumbnailUrl(extractedId) : '');
+    final rawUrl = map['youtubeUrl'] as String? ?? map['youtube_url'] as String? ?? '';
+    final extractedId = map['youtubeVideoId'] as String? ?? map['youtube_video_id'] as String? ?? YoutubeUrlHelper.extractVideoId(rawUrl) ?? '';
+    final thumb = map['thumbnailUrl'] as String? ?? map['thumbnail_url'] as String? ?? (extractedId.isNotEmpty ? YoutubeUrlHelper.buildThumbnailUrl(extractedId) : '');
 
     return AdminVideo(
       id: map['id'] as String? ?? '',
       youtubeVideoId: extractedId,
-      title: map['title'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? '',
+      title: map['title'] as String? ?? map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
       tag: map['tag'] as String? ?? map['category'] as String? ?? 'Garbi',
       duration: map['duration'] as String? ?? '',
       youtubeUrl: rawUrl,
       year: map['year'] as String? ?? '2024',
       thumbnailUrl: thumb,
-      isFeatured: map['is_featured'] as bool? ?? map['isFeatured'] as bool? ?? true,
-      isPublished: map['is_published'] as bool? ?? map['isPublished'] as bool? ?? true,
-      sourceChannel: map['source_channel'] as String? ?? map['sourceChannel'] as String? ?? 'Ratnadeep Sound',
+      isFeatured: map['isFeatured'] as bool? ?? map['is_featured'] as bool? ?? true,
+      isPublished: map['isPublished'] as bool? ?? map['is_published'] as bool? ?? true,
+      sourceChannel: map['sourceChannel'] as String? ?? map['source_channel'] as String? ?? 'Ratnadeep Sound',
     );
   }
 
@@ -1515,25 +1495,22 @@ class AdminLiveStreamSettings {
 
   Map<String, dynamic> toMap() {
     return {
-      'is_live': isLive,
       'isLive': isLive,
       'title': title,
-      'stream_url': streamUrl,
       'streamUrl': streamUrl,
       'announcement': announcement,
-      'schedule_time': scheduleTime,
       'scheduleTime': scheduleTime,
-      'updated_at': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminLiveStreamSettings.fromMap(Map<String, dynamic> map) {
     return AdminLiveStreamSettings(
-      isLive: map['is_live'] as bool? ?? map['isLive'] as bool? ?? false,
+      isLive: map['isLive'] as bool? ?? map['is_live'] as bool? ?? false,
       title: map['title'] as String? ?? '',
-      streamUrl: map['stream_url'] as String? ?? map['streamUrl'] as String? ?? '',
+      streamUrl: map['streamUrl'] as String? ?? map['stream_url'] as String? ?? '',
       announcement: map['announcement'] as String? ?? '',
-      scheduleTime: map['schedule_time'] as String? ?? map['scheduleTime'] as String? ?? '',
+      scheduleTime: map['scheduleTime'] as String? ?? map['schedule_time'] as String? ?? '',
     );
   }
 
@@ -1586,18 +1563,16 @@ class AdminBlog {
       'id': id,
       'slug': slug,
       'title': title,
-      'title_en': title,
-      'title_gu': titleGu,
+      'titleGu': titleGu,
       'category': category,
       'date': date,
-      'read_time': readTime,
+      'readTime': readTime,
       'snippet': snippet,
-      'snippet_en': snippet,
-      'snippet_gu': snippetGu,
+      'snippetGu': snippetGu,
       'content': content,
-      'image_url': imageUrl,
-      'is_published': isPublished,
-      'updated_at': DateTime.now().toIso8601String(),
+      'imageUrl': imageUrl,
+      'isPublished': isPublished,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -1605,16 +1580,16 @@ class AdminBlog {
     return AdminBlog(
       id: map['id'] as String? ?? '',
       slug: map['slug'] as String? ?? '',
-      title: map['title'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? '',
+      title: map['title'] as String? ?? map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
       category: map['category'] as String? ?? 'Heritage',
       date: map['date'] as String? ?? '',
-      readTime: map['read_time'] as String? ?? map['readTime'] as String? ?? '5 min',
-      snippet: map['snippet'] as String? ?? map['snippet_en'] as String? ?? '',
-      snippetGu: map['snippet_gu'] as String? ?? '',
+      readTime: map['readTime'] as String? ?? map['read_time'] as String? ?? '5 min',
+      snippet: map['snippet'] as String? ?? map['snippetEn'] as String? ?? map['snippet_en'] as String? ?? '',
+      snippetGu: map['snippetGu'] as String? ?? map['snippet_gu'] as String? ?? '',
       content: map['content'] as String? ?? '',
-      imageUrl: map['image_url'] as String? ?? map['imageUrl'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      isPublished: map['is_published'] as bool? ?? map['isPublished'] as bool? ?? true,
+      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
+      isPublished: map['isPublished'] as bool? ?? map['is_published'] as bool? ?? true,
     );
   }
 
@@ -1661,7 +1636,7 @@ class AdminEnquiry {
   AdminEnquiry({required this.id, required this.name, required this.phone, required this.email, required this.message, required this.date, this.status = 'New'});
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'name': name, 'phone': phone, 'email': email, 'message': message, 'date': date, 'status': status, 'updated_at': DateTime.now().toIso8601String()};
+    return {'id': id, 'name': name, 'phone': phone, 'email': email, 'message': message, 'date': date, 'status': status, 'updatedAt': DateTime.now().toIso8601String()};
   }
 
   factory AdminEnquiry.fromMap(Map<String, dynamic> map) {
@@ -1718,7 +1693,7 @@ class AdminNotificationEmail {
       'isPrimary': isPrimary,
       'isEnabled': isEnabled,
       'createdAt': createdAt.isNotEmpty ? createdAt : DateTime.now().toIso8601String(),
-      'updated_at': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -1803,64 +1778,55 @@ class AdminSettings {
 
   Map<String, dynamic> toMap() {
     return {
-      'mandal_name_en': mandalNameEn,
-      'mandal_name_gu': mandalNameGu,
       'mandalNameEn': mandalNameEn,
       'mandalNameGu': mandalNameGu,
-      'contact_phone': contactPhone,
       'contactPhone': contactPhone,
-      'contact_email': contactEmail,
       'contactEmail': contactEmail,
       'address': address,
-      'address_gu': addressGu,
       'addressGu': addressGu,
-      'daily_aarti_time': dailyAartiTime,
-      'daily_aarti_time_gu': dailyAartiTimeGu,
       'dailyAartiTime': dailyAartiTime,
       'dailyAartiTimeGu': dailyAartiTimeGu,
-      'youtube_channel': youtubeChannel,
       'youtubeChannel': youtubeChannel,
-      'instagram_handle': instagramHandle,
       'instagramHandle': instagramHandle,
-      'facebook_url': facebookUrl,
-      'whatsapp_number': whatsappNumber,
-      'logo_image_url': logoImageUrl,
-      'payment_qr_image_url': paymentQrImageUrl,
-      'payment_upi_id': paymentUpiId,
-      'payment_recipient_name': paymentRecipientName,
-      'payment_recipient_name_gu': paymentRecipientNameGu,
-      'payment_notes': paymentNotes,
-      'payment_notes_gu': paymentNotesGu,
-      'is_payment_enabled': isPaymentEnabled,
-      'updated_at': DateTime.now().toIso8601String(),
+      'facebookUrl': facebookUrl,
+      'whatsappNumber': whatsappNumber,
+      'logoImageUrl': logoImageUrl,
+      'paymentQrImageUrl': paymentQrImageUrl,
+      'paymentUpiId': paymentUpiId,
+      'paymentRecipientName': paymentRecipientName,
+      'paymentRecipientNameGu': paymentRecipientNameGu,
+      'paymentNotes': paymentNotes,
+      'paymentNotesGu': paymentNotesGu,
+      'isPaymentEnabled': isPaymentEnabled,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminSettings.fromMap(Map<String, dynamic> map) {
     return AdminSettings(
-      mandalNameEn: map['mandal_name_en'] as String? ?? map['mandalNameEn'] as String? ?? 'Pavan Putra Garbi Mandal',
-      mandalNameGu: map['mandal_name_gu'] as String? ?? map['mandalNameGu'] as String? ?? 'શ્રી પવનપુત્ર ગરબી મંડળ',
-      contactPhone: map['contact_phone'] as String? ?? map['contactPhone'] as String? ?? '',
-      contactEmail: map['contact_email'] as String? ?? map['contactEmail'] as String? ?? '',
+      mandalNameEn: map['mandalNameEn'] as String? ?? map['mandal_name_en'] as String? ?? 'Pavan Putra Garbi Mandal',
+      mandalNameGu: map['mandalNameGu'] as String? ?? map['mandal_name_gu'] as String? ?? 'શ્રી પવનપુત્ર ગરબી મંડળ',
+      contactPhone: map['contactPhone'] as String? ?? map['contact_phone'] as String? ?? '',
+      contactEmail: map['contactEmail'] as String? ?? map['contact_email'] as String? ?? '',
       address: map['address'] as String? ?? '',
-      addressGu: map['address_gu'] as String? ?? map['addressGu'] as String? ?? '',
-      dailyAartiTime: map['daily_aarti_time'] as String? ?? map['dailyAartiTime'] as String? ?? '',
-      dailyAartiTimeGu: map['daily_aarti_time_gu'] as String? ?? map['dailyAartiTimeGu'] as String? ?? '',
-      youtubeChannel: map['youtube_channel'] as String? ?? map['youtubeChannel'] as String? ?? '',
-      instagramHandle: map['instagram_handle'] as String? ?? map['instagramHandle'] as String? ?? '',
-      facebookUrl: map['facebook_url'] as String? ?? map['facebookUrl'] as String? ?? 'https://facebook.com/PavanPutraGarbiRajkot',
-      whatsappNumber: map['whatsapp_number'] as String? ?? map['whatsappNumber'] as String? ?? '+919876543210',
+      addressGu: map['addressGu'] as String? ?? map['address_gu'] as String? ?? '',
+      dailyAartiTime: map['dailyAartiTime'] as String? ?? map['daily_aarti_time'] as String? ?? '',
+      dailyAartiTimeGu: map['dailyAartiTimeGu'] as String? ?? map['daily_aarti_time_gu'] as String? ?? '',
+      youtubeChannel: map['youtubeChannel'] as String? ?? map['youtube_channel'] as String? ?? '',
+      instagramHandle: map['instagramHandle'] as String? ?? map['instagram_handle'] as String? ?? '',
+      facebookUrl: map['facebookUrl'] as String? ?? map['facebook_url'] as String? ?? 'https://facebook.com/PavanPutraGarbiRajkot',
+      whatsappNumber: map['whatsappNumber'] as String? ?? map['whatsapp_number'] as String? ?? '+919876543210',
       logoImageUrl: () {
-        final raw = (map['logo_image_url'] as String? ?? map['logoImageUrl'] as String? ?? '').trim();
+        final raw = (map['logoImageUrl'] as String? ?? map['logo_image_url'] as String? ?? '').trim();
         return raw.isNotEmpty ? raw : 'assets/images/pavan_putra_logo.png';
       }(),
-      paymentQrImageUrl: map['payment_qr_image_url'] as String? ?? map['paymentQrImageUrl'] as String? ?? '',
-      paymentUpiId: map['payment_upi_id'] as String? ?? map['paymentUpiId'] as String? ?? '',
-      paymentRecipientName: map['payment_recipient_name'] as String? ?? map['paymentRecipientName'] as String? ?? '',
-      paymentRecipientNameGu: map['payment_recipient_name_gu'] as String? ?? map['paymentRecipientNameGu'] as String? ?? '',
-      paymentNotes: map['payment_notes'] as String? ?? map['paymentNotes'] as String? ?? '',
-      paymentNotesGu: map['payment_notes_gu'] as String? ?? map['paymentNotesGu'] as String? ?? '',
-      isPaymentEnabled: map['is_payment_enabled'] as bool? ?? map['isPaymentEnabled'] as bool? ?? false,
+      paymentQrImageUrl: map['paymentQrImageUrl'] as String? ?? map['payment_qr_image_url'] as String? ?? '',
+      paymentUpiId: map['paymentUpiId'] as String? ?? map['payment_upi_id'] as String? ?? '',
+      paymentRecipientName: map['paymentRecipientName'] as String? ?? map['payment_recipient_name'] as String? ?? '',
+      paymentRecipientNameGu: map['paymentRecipientNameGu'] as String? ?? map['payment_recipient_name_gu'] as String? ?? '',
+      paymentNotes: map['paymentNotes'] as String? ?? map['payment_notes'] as String? ?? '',
+      paymentNotesGu: map['paymentNotesGu'] as String? ?? map['payment_notes_gu'] as String? ?? '',
+      isPaymentEnabled: map['isPaymentEnabled'] as bool? ?? map['is_payment_enabled'] as bool? ?? false,
     );
   }
 
@@ -1936,27 +1902,27 @@ class AdminFooterLink {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'title_en': titleEn,
-      'title_gu': titleGu,
+      'titleEn': titleEn,
+      'titleGu': titleGu,
       'url': url,
       'column': column,
       'order': order,
-      'is_enabled': isEnabled,
-      'is_external': isExternal,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isEnabled': isEnabled,
+      'isExternal': isExternal,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
   factory AdminFooterLink.fromMap(Map<String, dynamic> map) {
     return AdminFooterLink(
       id: map['id'] as String? ?? 'flink-${DateTime.now().millisecondsSinceEpoch}',
-      titleEn: map['title_en'] as String? ?? map['titleEn'] as String? ?? '',
-      titleGu: map['title_gu'] as String? ?? map['titleGu'] as String? ?? '',
+      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
+      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
       url: map['url'] as String? ?? '/',
       column: map['column'] as String? ?? 'col1',
       order: (map['order'] as num?)?.toInt() ?? 1,
-      isEnabled: map['is_enabled'] as bool? ?? map['isEnabled'] as bool? ?? true,
-      isExternal: map['is_external'] as bool? ?? map['isExternal'] as bool? ?? false,
+      isEnabled: map['isEnabled'] as bool? ?? map['is_enabled'] as bool? ?? true,
+      isExternal: map['isExternal'] as bool? ?? map['is_external'] as bool? ?? false,
     );
   }
 
@@ -2006,10 +1972,10 @@ class AdminFooterSocialLink {
       'id': id,
       'platform': platform,
       'url': url,
-      'icon_key': iconKey,
+      'iconKey': iconKey,
       'order': order,
-      'is_enabled': isEnabled,
-      'updated_at': DateTime.now().toIso8601String(),
+      'isEnabled': isEnabled,
+      'updatedAt': DateTime.now().toIso8601String(),
     };
   }
 
@@ -2018,9 +1984,9 @@ class AdminFooterSocialLink {
       id: map['id'] as String? ?? 'fsoc-${DateTime.now().millisecondsSinceEpoch}',
       platform: map['platform'] as String? ?? 'Social',
       url: map['url'] as String? ?? '',
-      iconKey: map['icon_key'] as String? ?? map['iconKey'] as String? ?? 'link',
+      iconKey: map['iconKey'] as String? ?? map['icon_key'] as String? ?? 'link',
       order: (map['order'] as num?)?.toInt() ?? 1,
-      isEnabled: map['is_enabled'] as bool? ?? map['isEnabled'] as bool? ?? true,
+      isEnabled: map['isEnabled'] as bool? ?? map['is_enabled'] as bool? ?? true,
     );
   }
 
@@ -2046,9 +2012,7 @@ class AdminFooterSocialLink {
 class AdminDataStore extends ChangeNotifier {
   static final AdminDataStore instance = AdminDataStore._internal();
 
-  AdminDataStore._internal() {
-    _populatePreloadedDefaults();
-  }
+  AdminDataStore._internal();
 
   final List<AdminCommitteeMember> _committeeMembers = [];
   final List<AdminAboutPrinciple> _aboutPrinciples = [];
@@ -2065,16 +2029,7 @@ class AdminDataStore extends ChangeNotifier {
   final List<AdminVideo> _videos = [];
   final List<AdminBlog> _blogs = [];
   final List<AdminEnquiry> _enquiries = [];
-  final List<AdminNotificationEmail> _notificationEmails = [
-    const AdminNotificationEmail(
-      id: 'notif-default-1',
-      email: 'pavanputragarbi@gmail.com',
-      recipientName: 'Shree Pavan Putra Trust Office',
-      department: 'General Inquiries & Helpline',
-      isPrimary: true,
-      isEnabled: true,
-    ),
-  ];
+  final List<AdminNotificationEmail> _notificationEmails = [];
   final List<AdminActivityLog> _activityLogs = [];
   final List<AdminFooterLink> _footerLinks = [];
   final List<AdminFooterSocialLink> _footerSocialLinks = [];
@@ -2400,446 +2355,7 @@ class AdminDataStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Populates all data structures with preloaded code fallbacks immediately upon instantiating
-  void _populatePreloadedDefaults() {
-    _settings = const AdminSettings(
-      mandalNameEn: 'Pavan Putra Garbi Mandal',
-      mandalNameGu: 'શ્રી પવનપુત્ર ગરબી મંડળ',
-      contactPhone: '+91 98765 43210 / +91 94280 12345',
-      contactEmail: 'contact@pavanputragarbi.org',
-      address: 'પવનપુત્ર ચોક, ભક્તિનગર, રાજકોટ - ૩૬૦૦૦૨, ગુજરાત',
-      dailyAartiTime: 'રાત્રે ૮:૩૦ કલાકે / 8:30 PM Daily',
-      youtubeChannel: 'https://youtube.com/@PavanPutraGarbiRajkot',
-      instagramHandle: '@pavanputra_garbi_rajkot',
-      facebookUrl: 'https://facebook.com/PavanPutraGarbiRajkot',
-      whatsappNumber: '+919876543210',
-      logoImageUrl: 'assets/images/pavan_putra_logo.png',
-    );
 
-    final officialSiteContent = [
-      AdminContentField(
-        key: 'hero_tag',
-        label: 'Hero Eyebrow Tag',
-        section: 'Home Hero Section',
-        valueEn: 'RAJKOT / SAURASHTRA / FOLK HERITAGE',
-        valueGu: 'રાજકોટ / સૌરાષ્ટ્ર / લોક સંસ્કૃતિ',
-      ),
-      AdminContentField(
-        key: 'hero_title',
-        label: 'Hero Main Headline',
-        section: 'Home Hero Section',
-        valueEn: 'The Living Legacy of\nPrachin Garbi.',
-        valueGu: 'પ્રાચીન ગરબીનો અમર વારસો,\nભક્તિ અને સૂરની સાધના.',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'hero_gujarati_motto',
-        label: 'Hero Devotional Motto',
-        section: 'Home Hero Section',
-        valueEn: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-        valueGu: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-      ),
-      AdminContentField(
-        key: 'hero_description',
-        label: 'Hero Introduction Paragraph',
-        section: 'Home Hero Section',
-        valueEn:
-            'Since 1977 in Rajkot, Pavan Putra Garbi Mandal has preserved the pure, sacred spirit of authentic Gujarati Garbi — celebrating the divine feminine power of Maa Ambe through acoustic folk rhythm, classical poetry, and community devotion.',
-        valueGu:
-            'ઈ.સ. ૧૯૭૭ થી રાજકોટમાં મા અંબેની અખંડ ભક્તિ સાથે ધબકતું શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ — પ્રાચીન રાસ, જીવંત વાદ્ય-સંગીત, છંદ અને પરંપરાગત સંસ્કૃતિનું પવિત્ર મંચ.',
-        isMultiline: true,
-      ),
-      AdminContentField(key: 'hero_cta_archive', label: 'Hero Primary CTA Button Label', section: 'Home Hero Section', valueEn: 'EXPLORE ARCHIVE', valueGu: 'વાર્ષિક સંગ્રહ જુઓ'),
-      AdminContentField(key: 'hero_cta_archive_route', label: 'Hero Primary CTA Destination Route', section: 'Home Hero Section', valueEn: '/archive', valueGu: '/archive'),
-      AdminContentField(key: 'hero_cta_about', label: 'Hero Secondary CTA Button Label', section: 'Home Hero Section', valueEn: 'OUR HERITAGE', valueGu: 'મંડળ વિશે જાણો'),
-      AdminContentField(key: 'hero_cta_about_route', label: 'Hero Secondary CTA Destination Route', section: 'Home Hero Section', valueEn: '/about', valueGu: '/about'),
-      AdminContentField(
-        key: 'hero_official_badge',
-        label: 'Hero Official Archival Badge',
-        section: 'Home Hero Section',
-        valueEn: 'OFFICIAL CULTURAL HERITAGE ARCHIVE',
-        valueGu: 'સત્તાવાર સાંસ્કૃતિક સંગ્રહ',
-      ),
-      AdminContentField(
-        key: 'hero_image_url',
-        label: 'Hero Emblem Graphic URL',
-        section: 'Home Hero Section',
-        valueEn: 'assets/images/pavan_putra_logo.png',
-        valueGu: 'assets/images/pavan_putra_logo.png',
-      ),
-      AdminContentField(key: 'stat_years_title', label: 'Stat 1: Heritage Years Title', section: 'Heritage Highlights', valueEn: '45+ Years', valueGu: '૪૫+ વર્ષ'),
-      AdminContentField(key: 'stat_years_desc', label: 'Stat 1: Heritage Years Description', section: 'Heritage Highlights', valueEn: 'Continuous heritage in Rajkot', valueGu: 'રાજકોટમાં અખંડ પરંપરા'),
-      AdminContentField(key: 'stat_music_title', label: 'Stat 2: Music Heritage Title', section: 'Heritage Highlights', valueEn: '100% Prachin', valueGu: '૧૦૦% પ્રાચીન'),
-      AdminContentField(key: 'stat_music_desc', label: 'Stat 2: Music Heritage Description', section: 'Heritage Highlights', valueEn: 'Acoustic live folk instruments', valueGu: 'જીવંત સૂર અને લોકવાદ્યો'),
-      AdminContentField(key: 'stat_devotion_title', label: 'Stat 3: Devotion Title', section: 'Heritage Highlights', valueEn: 'Maa Jagti Jogmaya', valueGu: 'જગતી જોગમાયા'),
-      AdminContentField(key: 'stat_devotion_desc', label: 'Stat 3: Devotion Description', section: 'Heritage Highlights', valueEn: 'Sacred deepam & daily Maha Aarti', valueGu: 'અખંડ દીપ અને મહા આરતી'),
-      AdminContentField(key: 'stat_archive_title', label: 'Stat 4: Archive Title', section: 'Heritage Highlights', valueEn: 'Digital Archive', valueGu: 'ડિજિટલ સંગ્રહ'),
-      AdminContentField(key: 'stat_archive_desc', label: 'Stat 4: Archive Description', section: 'Heritage Highlights', valueEn: 'Decades of photos & recordings', valueGu: 'દાયકાઓની દુર્લભ સ્મૃતિઓ'),
-      AdminContentField(key: 'sec_01_tag', label: 'About Section Eyebrow Tag', section: 'About The Mandal', valueEn: '01 / THE MANDAL', valueGu: '૦૧ / ગરબી મંડળ પરિચય'),
-      AdminContentField(key: 'sec_01_title', label: 'About Section Headline', section: 'About The Mandal', valueEn: 'Preserving the Pure Essence\nof Traditional Garbi.', valueGu: 'આધુનિકતા વચ્ચે સચવાયેલ\nશુદ્ધ પ્રાચીન ગરબીની ધરોહર.', isMultiline: true),
-      AdminContentField(key: 'sec_01_desc', label: 'About Section Description', section: 'About The Mandal', valueEn: 'In an era of commercial sound systems and modernized music, Pavan Putra Garbi Mandal stands resolute in safeguarding the authenticity of Prachin Garbi. Every step, rhythm, and verse echoes the timeless devotion of Saurashtra.', valueGu: 'કોઈપણ વ્યાવસાયિક સંગીત કે ડીજે વિના, મા અંબેના સાન્નિધ્યમાં પ્રાચીન ગરબા, છંદ, દુહા અને સ્તુતિના પવિત્ર સૂર રેલાવીને રાજકોટમાં સંસ્કૃતિનું જતન કરતું અગ્રણી મંડળ.', isMultiline: true),
-      AdminContentField(key: 'daily_aarti_announcement', label: 'Daily Maha Aarti Announcement', section: 'Aarti & Schedule', valueEn: 'Daily Maha Aarti at 8:30 PM with 108 Sacred Oil Lamps', valueGu: 'દરરોજ રાત્રે ૮:૩૦ કલાકે ૧૦૮ દીવડાઓ સાથે ભવ્ય મહા આરતી'),
-      AdminContentField(
-        key: 'contact_address',
-        label: 'Venue Address',
-        section: 'Venue & Contacts',
-        valueEn: 'Pavan Putra Chowk, Bhaktinagar, Rajkot - 360002, Gujarat',
-        valueGu: 'પવનપુત્ર ચોક, ભક્તિનગર, રાજકોટ - ૩૬૦૦૦૨, ગુજરાત',
-      ),
-      AdminContentField(
-        key: 'contact_phone',
-        label: 'Contact Phone Numbers',
-        section: 'Venue & Contacts',
-        valueEn: '+91 98765 43210 / +91 94280 12345',
-        valueGu: '+91 98765 43210 / +91 94280 12345',
-      ),
-      AdminContentField(
-        key: 'contact_email',
-        label: 'Contact Email Address',
-        section: 'Venue & Contacts',
-        valueEn: 'contact@pavanputragarbi.org',
-        valueGu: 'contact@pavanputragarbi.org',
-      ),
-      AdminContentField(key: 'contact_aarti_time', label: 'Daily Aarti Schedule', section: 'Venue & Contacts', valueEn: '8:30 PM Daily', valueGu: 'રાત્રે ૮:૩૦ કલાકે'),
-      AdminContentField(
-        key: 'footer_tagline',
-        label: 'Footer Tagline',
-        section: 'Branding & Header',
-        valueEn: 'Preserving authentic Gujarati folk music, poetry, and cultural traditions in Rajkot since 1977.',
-        valueGu: 'રાજકોટમાં ૧૯૭૭થી પરંપરાગત ગુજરાતી લોકસંગીત, પ્રાચીન કાવ્ય અને ભક્તિમય સંસ્કૃતિનું અવિરત જતન.',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'footer_motto',
-        label: 'Footer Devotional Motto',
-        section: 'Branding & Header',
-        valueEn: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-        valueGu: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-      ),
-      AdminContentField(
-        key: 'sec_pillars_tag',
-        label: 'Pillars Section Eyebrow Tag',
-        section: 'Sacred Foundations',
-        valueEn: '02 / SACRED FOUNDATIONS',
-        valueGu: '૦૨ / પ્રાચીન ગરબીના આધારસ્તંભ',
-      ),
-      AdminContentField(
-        key: 'sec_pillars_title',
-        label: 'Pillars Section Headline',
-        section: 'Sacred Foundations',
-        valueEn: 'Poetry, Rhythm & Divine Grace',
-        valueGu: 'સૂર, સાહિત્ય અને સાધનાનો ત્રિવેણી સંગમ',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'sec_singers_tag',
-        label: 'Singers Section Eyebrow Tag',
-        section: 'Folk Artists Troupe',
-        valueEn: '03 / SOULS OF THE MUSIC',
-        valueGu: '૦૩ / સૂર સાધકો અને વાદ્ય વૃંદ',
-      ),
-      AdminContentField(
-        key: 'sec_singers_title',
-        label: 'Singers Section Headline',
-        section: 'Folk Artists Troupe',
-        valueEn: 'Revered Folk Vocalists & Musicians',
-        valueGu: 'જેમના કંઠેથી ગૂંજે છે ભક્તિના અમર બોલ',
-      ),
-      AdminContentField(
-        key: 'sec_singers_desc',
-        label: 'Singers Section Subtitle',
-        section: 'Folk Artists Troupe',
-        valueEn: 'The soulful identity of Prachin Garbi lives in its live musicians. Without synthesizers or recorded tracks, their voices invoke deep spiritual emotion across all nine sacred nights.',
-        valueGu: 'પ્રાચીન ગરબીનો આત્મા તેના જીવંત ગાયકો અને વાદકોમાં વસે છે. કોઈપણ કૃત્રિમ સંગીત વિના શુદ્ધ સૂર-તાલથી શ્રોતાઓને ભાવવિભોર કરે છે.',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'sec_opinions_tag',
-        label: 'Blessings Section Eyebrow Tag',
-        section: 'Elders Blessings',
-        valueEn: '04 / WORDS OF RESPECT & GUIDANCE',
-        valueGu: '૦૪ / વડીલો અને મહાનુભાવોના વિચાર',
-      ),
-      AdminContentField(
-        key: 'sec_opinions_title',
-        label: 'Blessings Section Headline',
-        section: 'Elders Blessings',
-        valueEn: 'Reflections from Elders & Cultural Guardians',
-        valueGu: 'પ્રાચીન ગરબીના સંવર્ધન વિશે મહાનુભાવોનું મંતવ્ય',
-      ),
-      AdminContentField(
-        key: 'sec_blog_tag',
-        label: 'Articles Section Eyebrow Tag',
-        section: 'Cultural Stories & Articles',
-        valueEn: '07 / CULTURAL STORIES & ARTICLES',
-        valueGu: '૦૭ / લેખો અને સાંસ્કૃતિક વાતો',
-      ),
-      AdminContentField(
-        key: 'sec_blog_title',
-        label: 'Articles Section Headline',
-        section: 'Cultural Stories & Articles',
-        valueEn: 'Heritage, Meaning & Reflections',
-        valueGu: 'ગરબીનો ઇતિહાસ અને સાંસ્કૃતિક મહત્વ',
-      ),
-      AdminContentField(
-        key: 'home_cta_invocation',
-        label: 'CTA Top Sacred Chant',
-        section: 'Call To Action Banner',
-        valueEn: '|| Jagti Jogmaya ||',
-        valueGu: '|| જાગતી જોગમાયા ||',
-      ),
-      AdminContentField(
-        key: 'home_cta_motto',
-        label: 'CTA Motto Headline',
-        section: 'Call To Action Banner',
-        valueEn: 'Connect with our sacred tradition and feel the divine presence of Maa Ambe.',
-        valueGu: 'આપણી પ્રાચીન સંસ્કૃતિ, પરંપરા અને ભક્તિ સાથે જોડાઓ અને માં અંબાના આશીર્વાદ પ્રાપ્ત કરો.',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'home_cta_btn_text',
-        label: 'CTA Action Button Label',
-        section: 'Call To Action Banner',
-        valueEn: 'Connect With Us',
-        valueGu: 'સંપર્ક કરો / સહભાગી બનો',
-      ),
-      AdminContentField(key: 'home_cta_btn_route', label: 'CTA Action Button Route', section: 'Call To Action Banner', valueEn: '/contact', valueGu: '/contact'),
-      AdminContentField(key: 'about_tag', label: 'Header Eyebrow Badge Tag', section: 'About Page', valueEn: 'ABOUT THE MANDAL', valueGu: 'મંડળ પરિચય'),
-      AdminContentField(
-        key: 'about_title',
-        label: 'Main Page Headline',
-        section: 'About Page',
-        valueEn: 'Shree Pavan Putra Prachin Garbi Mandal',
-        valueGu: 'શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'about_desc',
-        label: 'Introduction Paragraph',
-        section: 'About Page',
-        valueEn: 'A devoted cultural institution in Rajkot, Gujarat, steadfastly committed to the preservation and authentic celebration of Prachin Garbi since 1977.',
-        valueGu: 'રાજકોટમાં ઈ.સ. ૧૯૭૭ થી કાર્યરત, પ્રાચીન ગરબી અને મા અંબેની આરાધનાને સમર્પિત એક બિન-વ્યાવસાયિક સાંસ્કૃતિક સંસ્થા.',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'about_history_title',
-        label: 'Foundation Card Headline',
-        section: 'About Page',
-        valueEn: 'Preserving Sacred Traditions since 1977',
-        valueGu: '૧૯૭૭ થી અવિરત ધબકતી ગરબી પરંપરા',
-      ),
-      AdminContentField(
-        key: 'about_history_desc',
-        label: 'Foundation Sacred History Body',
-        section: 'About Page',
-        valueEn:
-            'Founded by devoted community elders in Rajkot, the Mandal was born out of a profound commitment: to worship Maa Jagti Jogmaya through classical Saurashtra Garbi, retaining natural live instrumentation, spiritual lyricism, and communal harmony without commercial compromises.',
-        valueGu: 'રાજકોટના શ્રદ્ધાળુ વડીલો દ્વારા સ્થાપિત આ મંડળનો મુખ્ય ઉદ્દેશ્ય માતાજીની ઉપાસનાને શુદ્ધ લોકઢાળ, જીવંત સંગીત અને સામુદાયિક ભાવના સાથે ઉજવવાનો છે.',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'about_foundation_motto',
-        label: 'Foundation Devotional Motto',
-        section: 'About Page',
-        valueEn: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-        valueGu: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-      ),
-      AdminContentField(
-        key: 'about_foundation_image',
-        label: 'Foundation Historical Emblem / Photo',
-        section: 'About Page',
-        valueEn: 'assets/images/pavan_putra_logo.png',
-        valueGu: 'assets/images/pavan_putra_logo.png',
-      ),
-      AdminContentField(key: 'about_values_tag', label: 'Principles Eyebrow Badge', section: 'About Page', valueEn: 'CORE PILLARS', valueGu: 'પાયાના આધારસ્તંભ'),
-      AdminContentField(
-        key: 'about_values_title',
-        label: 'Principles Section Title',
-        section: 'About Page',
-        valueEn: 'Core Principles of the Mandal',
-        valueGu: 'મંડળના પાયાના સિદ્ધાંતો',
-      ),
-      AdminContentField(
-        key: 'about_committee_badge',
-        label: 'Committee Eyebrow Badge',
-        section: 'About Page',
-        valueEn: 'TRUSTEES & ORGANIZING COMMITTEE',
-        valueGu: 'ટ્રસ્ટી મંડળ અને સમિતિ',
-      ),
-      AdminContentField(
-        key: 'about_committee_title',
-        label: 'Committee Section Title',
-        section: 'About Page',
-        valueEn: 'Devoted Trustees & Committee Leadership',
-        valueGu: 'સેવાભાવી ટ્રસ્ટી અને સમિતિ સભ્યો',
-      ),
-      AdminContentField(
-        key: 'about_committee_desc',
-        label: 'Committee Section Description',
-        section: 'About Page',
-        valueEn: 'Dedicated guardians upholding the sacred Gujarati acoustic traditions and community seva in Rajkot.',
-        valueGu: 'રાજકોટમાં પ્રાચીન ગરબીની ભવ્ય પરંપરા અને સંસ્કૃતિને જીવંત રાખતા મા અંબેના અનન્ય સેવકો.',
-        isMultiline: true,
-      ),
-      AdminContentField(
-        key: 'about_cta_title',
-        label: 'History Callout Headline',
-        section: 'About Page',
-        valueEn: 'A History of Devotion & Cultural Fortitude',
-        valueGu: 'ભક્તિ અને સાંસ્કૃતિક ગૌરવનો ભવ્ય ઇતિહાસ',
-      ),
-      AdminContentField(
-        key: 'about_cta_desc',
-        label: 'History Callout Subtitle',
-        section: 'About Page',
-        valueEn: 'Discover four decades of unwavering dedication to Maa Ambe in Rajkot.',
-        valueGu: 'રાજકોટમાં સાડા ત્રણ દાયકાથી અવિરત ચાલી રહેલી પવિત્ર યાત્રાનો સંપૂર્ણ ઇતિહાસ જાણો.',
-      ),
-      AdminContentField(key: 'about_cta_btn_text', label: 'History Callout Button Label', section: 'About Page', valueEn: 'EXPLORE HISTORY', valueGu: 'ઇતિહાસ જુઓ'),
-      AdminContentField(key: 'about_cta_route', label: 'History Callout Destination Route', section: 'About Page', valueEn: '/history', valueGu: '/history'),
-    ];
-
-    for (final f in officialSiteContent) {
-      _siteContentMap[f.key] = f;
-    }
-
-    _aboutCards.addAll([
-      const AdminAboutCard(
-        id: 'card-1',
-        titleEn: 'Pure Cultural Sanity',
-        titleGu: 'સાંસ્કૃતિક શુદ્ધતા',
-        descEn: 'Strictly traditional Raas, Be-Taali, Tran-Taali, and Hinch performed in reverence.',
-        descGu: 'માત્ર શુદ્ધ પ્રાચીન રાસ, બે તાલી, ત્રણ તાલી અને પરંપરાગત સૌરાષ્ટ્ર હીંચ.',
-        iconKey: 'shield',
-        order: 1,
-      ),
-      const AdminAboutCard(
-        id: 'card-2',
-        titleEn: 'Acoustic Folk Orchestra',
-        titleGu: 'જીવંત વાદ્ય સંગીત',
-        descEn: 'Harmonium, Tabla, Pakhawaj, Dholak, and Brass Cymbals played live by masters.',
-        descGu: 'હાર્મોનિયમ, તબલા, પખવાજ, ઢોલક અને ઝાંઝના મૂળભૂત પ્રાચીન સૂર.',
-        iconKey: 'music',
-        order: 2,
-      ),
-      const AdminAboutCard(
-        id: 'card-3',
-        titleEn: 'Sacred Reverence',
-        titleGu: 'સાત્વિક ઉપાસના',
-        descEn: 'Centered around the sacred clay Garbo with an eternal oil flame honoring Mataji.',
-        descGu: 'માટીના કુંભમાં અખંડ જ્યોત સાક્ષી રાખીને માતાજીની શ્રદ્ધાપૂર્વક આરાધના.',
-        iconKey: 'fire',
-        order: 3,
-      ),
-    ]);
-
-    _pillars.addAll([
-      const AdminHomePillar(
-        id: 'pillar-1',
-        titleEn: 'Prachin Raas & Footsteps',
-        titleGu: 'પ્રાચીન રાસ અને કલા',
-        descEn: 'Graceful, disciplined synchronized footsteps by devoted participants in authentic traditional Gujarati attire.',
-        descGu: 'ગુજરાતના પરંપરાગત વસ્ત્રોમાં શિસ્તબદ્ધ અને લયબદ્ધ પગલાં સાથે માતાજીની પરિક્રમા કરતો રાસ.',
-        iconKey: 'sparkles',
-        order: 1,
-      ),
-      const AdminHomePillar(
-        id: 'pillar-2',
-        titleEn: 'Chhand, Duha & Saint-Poets',
-        titleGu: 'છંદ, દુહા અને કવિઓની રચનાઓ',
-        descEn: 'Soulful vocal renditions of devotional verses composed by medieval Gujarati masters like Dayaram, Premanand, and Vallabh Mevada.',
-        descGu: 'ભક્તકવિ દયારામ, પ્રેમાનંદ અને વલ્લભ મેવાડાના અમર ભક્તિપદોનું ભાવપૂર્વક ગાન.',
-        iconKey: 'book',
-        order: 2,
-      ),
-      const AdminHomePillar(
-        id: 'pillar-3',
-        titleEn: 'Maha Aarti & Deepotsav',
-        titleGu: 'મહા આરતી અને દીપોત્સવ',
-        descEn: 'Grand daily night Aarti with hundreds of burning oil lamps, creating an unmatched atmosphere of divinity and peace.',
-        descGu: 'દરરોજ રાત્રે થતી અલૌકિક મહા આરતી, જ્યાં સેંકડો દીવડાઓથી માતાજીનું પ્રાંગણ ઝળહળી ઊઠે છે.',
-        iconKey: 'flame',
-        order: 3,
-      ),
-    ]);
-
-    _blessings.addAll([
-      const AdminHomeBlessing(
-        id: 'blessing-1',
-        quoteEn: '“In an era where original folk forms are often diluted, Pavan Putra Garbi Mandal has guarded our sacred heritage with unwavering reverence. It is a pride for Rajkot.”',
-        quoteGu: '“આજના ફાસ્ટ યુગમાં પણ પવનપુત્ર ગરબી મંડળે પ્રાચીન પરંપરાને અખંડ રાખીને આપણી સાચી ધરોહર સાચવી રાખી છે. રાજકોટ માટે આ ગૌરવની વાત છે.”',
-        authorEn: 'Shree Dahyabhai (Mandal Elder & Trustee)',
-        authorGu: 'શ્રી ડાહ્યાભાઈ (વડીલ માર્ગદર્શક અને ટ્રસ્ટી)',
-        order: 1,
-      ),
-      const AdminHomeBlessing(
-        id: 'blessing-2',
-        quoteEn: '“The devotion and purity with which ancient Chhands and Raas are sung here reminds every Gujarati of our sacred roots. This is where tradition truly breathes.”',
-        quoteGu: '“મા અંબેના પ્રાચીન છંદ અને રાસ જે શુદ્ધ ભાવ સાથે અહીં ગવાય છે તે સમગ્ર સૌરાષ્ટ્રની સાંસ્કૃતિક ગરિમા વધારે છે.”',
-        authorEn: 'Pandit Jigneshbhai (Folk Music Scholar)',
-        authorGu: 'પંડિત જીગ્નેશભાઈ (લોકસંગીત સંશોધક)',
-        order: 2,
-      ),
-      const AdminHomeBlessing(
-        id: 'blessing-3',
-        quoteEn: '“The discipline of the participants, the warmth of the community, and the sanctity of the Mataji Aarti make this an exemplary cultural institution.”',
-        quoteGu: '“ખેલૈયાઓની શિસ્ત, મંડળનું સમર્પણ અને માતાજીની આરતીનું પાવન દ્રશ્ય અહી આવીને જ અનુભવી શકાય છે.”',
-        authorEn: 'Community Patron & Heritage Advocate',
-        authorGu: 'શુભેચ્છક અને સાંસ્કૃતિક પ્રેમી',
-        order: 3,
-      ),
-    ]);
-
-    _homeSingers.addAll([
-      AdminHomeSinger(
-        id: 'singer-1',
-        nameEn: 'Devotional Vocalists',
-        nameGu: 'ભક્તિમય ગાયક વૃંદ',
-        roleEn: 'Traditional Folk Chorus & Lead Chhand',
-        roleGu: 'મુખ્ય છંદ અને પ્રાચીન ગરબી ગાયન',
-        descEn: 'Rendering ancient stutis, duhas, and devotional Garbis passed down through generations.',
-        descGu: 'પેઢી દર પેઢી ઉતરી આવેલી પ્રાચીન સ્તુતિઓ અને માતાજીના છંદોનું જીવંત ગાન.',
-        order: 1,
-      ),
-      AdminHomeSinger(
-        id: 'singer-2',
-        nameEn: 'Tabla & Pakhawaj Masters',
-        nameGu: 'તબલા અને પખવાજ વાદક',
-        roleEn: 'Rhythm & Taal Harmony',
-        roleGu: 'તાલ અને લય સાધના',
-        descEn: 'Guiding the pace from slow, graceful two-taali to high-energy Saurashtra hinch.',
-        descGu: 'ધીમી બે તાલીથી લઈને જોમવંતી સૌરાષ્ટ્ર હીંચ સુધી તાલની અવિરત સરવાણી.',
-        order: 2,
-      ),
-      AdminHomeSinger(
-        id: 'singer-3',
-        nameEn: 'Harmonium & Jhanj Players',
-        nameGu: 'હાર્મોનિયમ અને ઝાંઝ વાદક',
-        roleEn: 'Acoustic Melody & Tempo',
-        roleGu: 'મધુર સૂર અને ગતિ નિયંત્રણ',
-        descEn: 'Weaving the musical tapestry that anchors every traditional Garbi night.',
-        descGu: 'પરંપરાગત વાદ્યોના સમન્વયથી ગરબીના વાતાવરણને દિવ્ય બનાવતા કલાકારો.',
-        order: 3,
-      ),
-    ]);
-
-    _footerLinks.addAll(const [
-      AdminFooterLink(id: 'fl-1', titleEn: 'Home', titleGu: 'હોમ', url: '/', column: 'col1', order: 1),
-      AdminFooterLink(id: 'fl-2', titleEn: 'About Us', titleGu: 'પરિચય', url: '/about', column: 'col1', order: 2),
-      AdminFooterLink(id: 'fl-3', titleEn: 'History', titleGu: 'ઇતિહાસ', url: '/history', column: 'col1', order: 3),
-      AdminFooterLink(id: 'fl-4', titleEn: 'Year Archive', titleGu: 'સંગ્રહ', url: '/archive', column: 'col1', order: 4),
-      AdminFooterLink(id: 'fl-5', titleEn: 'Gallery', titleGu: 'ગેલેરી', url: '/gallery', column: 'col2', order: 1),
-      AdminFooterLink(id: 'fl-6', titleEn: 'Videos & Live', titleGu: 'વિડિઓઝ', url: '/videos', column: 'col2', order: 2),
-      AdminFooterLink(id: 'fl-7', titleEn: 'Cultural Stories', titleGu: 'લેખો', url: '/blog', column: 'col2', order: 3),
-      AdminFooterLink(id: 'fl-8', titleEn: 'Contact Mandal', titleGu: 'સંપર્ક', url: '/contact', column: 'col2', order: 4),
-    ]);
-
-    _footerSocialLinks.addAll(const [
-      AdminFooterSocialLink(id: 'fsl-yt', platform: 'YouTube', url: 'https://youtube.com/@PavanputraGarbiRajkot', iconKey: 'youtube', isEnabled: true),
-      AdminFooterSocialLink(id: 'fsl-ig', platform: 'Instagram', url: 'https://www.instagram.com/pavanputragarbimandal/', iconKey: 'instagram', isEnabled: true),
-      AdminFooterSocialLink(id: 'fsl-fb', platform: 'Facebook', url: 'https://facebook.com/PavanPutraGarbiRajkot', iconKey: 'facebook', isEnabled: true),
-    ]);
-  }
 
   // --- Cloud Firestore Integration ---
 
@@ -2848,26 +2364,13 @@ class AdminDataStore extends ChangeNotifier {
       final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
       final settingsDoc = await db.collection('settings').doc('mandal_settings').get(getOpt);
       if (settingsDoc.exists && settingsDoc.data() != null && settingsDoc.data()!.isNotEmpty) {
-        _settings = AdminSettings.fromMap(settingsDoc.data()!);
-      }
-      if (_settings.mandalNameEn.isEmpty) {
-        const officialSettings = AdminSettings(
-          mandalNameEn: 'Pavan Putra Garbi Mandal',
-          mandalNameGu: 'શ્રી પવનપુત્ર ગરબી મંડળ',
-          contactPhone: '+91 98765 43210 / +91 94280 12345',
-          contactEmail: 'contact@pavanputragarbi.org',
-          address: 'પવનપુત્ર ચોક, ભક્તિનગર, રાજકોટ - ૩૬૦૦૦૨, ગુજરાત',
-          dailyAartiTime: 'રાત્રે ૮:૩૦ કલાકે / 8:30 PM Daily',
-          youtubeChannel: 'https://youtube.com/@PavanPutraGarbiRajkot',
-          instagramHandle: '@pavanputra_garbi_rajkot',
-          facebookUrl: 'https://facebook.com/PavanPutraGarbiRajkot',
-          whatsappNumber: '+919876543210',
-          logoImageUrl: 'assets/images/pavan_putra_logo.png',
-        );
-        _settings = officialSettings;
+        final data = settingsDoc.data()!;
+        if (data['is_deleted'] != true && data['isDeleted'] != true) {
+          _settings = AdminSettings.fromMap(data);
+        }
       }
     } catch (e) {
-      debugPrint('Settings fetch notice: $e');
+      debugPrint('Settings fetch notice: ');
     }
   }
 
@@ -2876,299 +2379,13 @@ class AdminDataStore extends ChangeNotifier {
       final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
       final contentSnap = await db.collection('site_content').get(getOpt);
       for (final doc in contentSnap.docs) {
-        final f = AdminContentField.fromMap(doc.data());
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        final f = AdminContentField.fromMap(data);
         _siteContentMap[f.key] = f;
       }
-      final officialSiteContent = [
-        AdminContentField(
-          key: 'hero_tag',
-          label: 'Hero Eyebrow Tag',
-          section: 'Home Hero Section',
-          valueEn: 'RAJKOT / SAURASHTRA / FOLK HERITAGE',
-          valueGu: 'રાજકોટ / સૌરાષ્ટ્ર / લોક વારસો',
-        ),
-        AdminContentField(
-          key: 'hero_title',
-          label: 'Hero Main Headline',
-          section: 'Home Hero Section',
-          valueEn: 'The Living Legacy of\nPrachin Garbi.',
-          valueGu: 'પ્રાચીન ગરબીની\nજીવંત પરંપરા.',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'hero_gujarati_motto',
-          label: 'Hero Devotional Motto',
-          section: 'Home Hero Section',
-          valueEn: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-          valueGu: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-        ),
-        AdminContentField(
-          key: 'hero_description',
-          label: 'Hero Introduction Paragraph',
-          section: 'Home Hero Section',
-          valueEn:
-              'Since 1989 in Rajkot, Shree Pavan Putra Prachin Garbi Mandal has preserved the pure, sacred spirit of authentic Gujarati Garbi — celebrating the divine feminine power of Maa Mogal through acoustic folk rhythm, classical poetry, and community devotion.',
-          valueGu:
-              '૧૯૮૯થી રાજકોટમાં, શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ દ્વારા અસલ ગુજરાતી ગરબીની પવિત્ર અને શુદ્ધ પરંપરાને જીવંત રાખવામાં આવી છે. આ મંડળ પ્રાચીન લોક સંગીતના સૂર, શાસ્ત્રીય કવિતાઓ અને સામૂહિક ભક્તિભાવના માધ્યમથી મા મોગલની દિવ્ય શક્તિની આરાધના કરે છે.',
-          isMultiline: true,
-        ),
-        AdminContentField(key: 'hero_cta_archive', label: 'Hero Primary CTA Button Label', section: 'Home Hero Section', valueEn: 'EXPLORE ARCHIVE', valueGu: 'આર્કાઇવ જુઓ'),
-        AdminContentField(key: 'hero_cta_archive_route', label: 'Hero Primary CTA Destination Route', section: 'Home Hero Section', valueEn: '/archive', valueGu: '/archive'),
-        AdminContentField(key: 'hero_cta_about', label: 'Hero Secondary CTA Button Label', section: 'Home Hero Section', valueEn: 'OUR HERITAGE', valueGu: 'અમારો વારસો'),
-        AdminContentField(key: 'hero_cta_about_route', label: 'Hero Secondary CTA Destination Route', section: 'Home Hero Section', valueEn: '/about', valueGu: '/about'),
-        AdminContentField(
-          key: 'hero_official_badge',
-          label: 'Hero Official Archival Badge',
-          section: 'Home Hero Section',
-          valueEn: 'OFFICIAL CULTURAL HERITAGE ARCHIVE',
-          valueGu: 'સત્તાવાર સાંસ્કૃતિક વારસો આર્કાઇવ',
-        ),
-        AdminContentField(
-          key: 'hero_image_url',
-          label: 'Hero Emblem Graphic URL',
-          section: 'Home Hero Section',
-          valueEn: 'assets/images/pavan_putra_logo.png',
-          valueGu: 'assets/images/pavan_putra_logo.png',
-        ),
-        AdminContentField(key: 'stat_years_title', label: 'Stat 1: Heritage Years Title', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'stat_years_desc', label: 'Stat 1: Heritage Years Description', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'stat_music_title', label: 'Stat 2: Music Heritage Title', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'stat_music_desc', label: 'Stat 2: Music Heritage Description', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'stat_devotion_title', label: 'Stat 3: Devotion Title', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'stat_devotion_desc', label: 'Stat 3: Devotion Description', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'stat_archive_title', label: 'Stat 4: Archive Title', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'stat_archive_desc', label: 'Stat 4: Archive Description', section: 'Heritage Highlights', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'sec_01_tag', label: 'About Section Eyebrow Tag', section: 'About The Mandal', valueEn: '', valueGu: ''),
-        AdminContentField(key: 'sec_01_title', label: 'About Section Headline', section: 'About The Mandal', valueEn: '', valueGu: '', isMultiline: true),
-        AdminContentField(key: 'sec_01_desc', label: 'About Section Description', section: 'About The Mandal', valueEn: '', valueGu: '', isMultiline: true),
-        AdminContentField(key: 'daily_aarti_announcement', label: 'Daily Maha Aarti Announcement', section: 'Aarti & Schedule', valueEn: '', valueGu: ''),
-        AdminContentField(
-          key: 'contact_address',
-          label: 'Venue Address',
-          section: 'Venue & Contacts',
-          valueEn: 'Pavan Putra Chowk, Bhaktinagar, Rajkot - 360002, Gujarat',
-          valueGu: 'પવનપુત્ર ચોક, ભક્તિનગર, રાજકોટ - ૩૬૦૦૦૨, ગુજરાત',
-        ),
-        AdminContentField(
-          key: 'contact_phone',
-          label: 'Contact Phone Numbers',
-          section: 'Venue & Contacts',
-          valueEn: '+91 98765 43210 / +91 94280 12345',
-          valueGu: '+91 98765 43210 / +91 94280 12345',
-        ),
-        AdminContentField(
-          key: 'contact_email',
-          label: 'Contact Email Address',
-          section: 'Venue & Contacts',
-          valueEn: 'contact@pavanputragarbi.org',
-          valueGu: 'contact@pavanputragarbi.org',
-        ),
-        AdminContentField(key: 'contact_aarti_time', label: 'Daily Aarti Schedule', section: 'Venue & Contacts', valueEn: '8:30 PM Daily', valueGu: 'રાત્રે ૮:૩૦ કલાકે'),
-        AdminContentField(
-          key: 'footer_tagline',
-          label: 'Footer Tagline',
-          section: 'Branding & Header',
-          valueEn: 'Preserving authentic Gujarati folk music, poetry, and cultural traditions in Rajkot since 1977.',
-          valueGu: 'રાજકોટમાં ૧૯૭૭થી પરંપરાગત ગુજરાતી લોકસંગીત, પ્રાચીન કાવ્ય અને ભક્તિમય સંસ્કૃતિનું અવિરત જતન.',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'footer_motto',
-          label: 'Footer Devotional Motto',
-          section: 'Branding & Header',
-          valueEn: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-          valueGu: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-        ),
-        AdminContentField(
-          key: 'sec_pillars_tag',
-          label: 'Pillars Section Eyebrow Tag',
-          section: 'Sacred Foundations',
-          valueEn: '02 / SACRED FOUNDATIONS',
-          valueGu: '૦૨ / પવિત્ર સ્તંભો',
-        ),
-        AdminContentField(
-          key: 'sec_pillars_title',
-          label: 'Pillars Section Headline',
-          section: 'Sacred Foundations',
-          valueEn: 'Poetry, Rhythm & Divine Grace',
-          valueGu: 'કાવ્ય, લય અને દિવ્ય કૃપા',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'sec_singers_tag',
-          label: 'Singers Section Eyebrow Tag',
-          section: 'Folk Artists Troupe',
-          valueEn: 'LIVE ORCHESTRA & FOLK VOCALISTS',
-          valueGu: 'જીવંત વાદ્યવૃંદ અને લોકગાયકો',
-        ),
-        AdminContentField(
-          key: 'sec_singers_title',
-          label: 'Singers Section Headline',
-          section: 'Folk Artists Troupe',
-          valueEn: 'Soulful Devotional Melodies',
-          valueGu: 'ભાવપૂર્ણ ભક્તિના સૂર',
-        ),
-        AdminContentField(
-          key: 'sec_singers_desc',
-          label: 'Singers Section Subtitle',
-          section: 'Folk Artists Troupe',
-          valueEn: 'Accompanied by traditional acoustic instruments like Dhol, Tabla, Shehnai, and Harmonium without modern synthetic tracks.',
-          valueGu: 'ઢોલ, તબલા, શરણાઈ અને હાર્મોનિયમ જેવા પ્રાચીન વાદ્યોના જીવંત સંગાથે પવિત્ર ગરબીઓનું ગાન.',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'sec_opinions_tag',
-          label: 'Blessings Section Eyebrow Tag',
-          section: 'Elders Blessings',
-          valueEn: 'WORDS OF BLESSINGS & GRACE',
-          valueGu: 'આશીર્વાદ અને શુભકામનાઓ',
-        ),
-        AdminContentField(
-          key: 'sec_opinions_title',
-          label: 'Blessings Section Headline',
-          section: 'Elders Blessings',
-          valueEn: 'Elders & Dignitaries Reflections',
-          valueGu: 'વડીલો અને સંત-મહાનુભાવોના અભિપ્રાય',
-        ),
-        AdminContentField(
-          key: 'sec_blog_tag',
-          label: 'Articles Section Eyebrow Tag',
-          section: 'Cultural Stories & Articles',
-          valueEn: '07 / CULTURAL STORIES & ARTICLES',
-          valueGu: '૦૭ / સાંસ્કૃતિક વાતો અને લેખો',
-        ),
-        AdminContentField(
-          key: 'sec_blog_title',
-          label: 'Articles Section Headline',
-          section: 'Cultural Stories & Articles',
-          valueEn: 'Heritage, Meaning & Reflections',
-          valueGu: 'વારસો, ગૌરવ અને આધ્યાત્મિક ચિંતન',
-        ),
-        AdminContentField(
-          key: 'home_cta_invocation',
-          label: 'CTA Top Sacred Chant',
-          section: 'Call To Action Banner',
-          valueEn: '|| Jagti Jogmaya ||',
-          valueGu: '|| જાગતી જોગમાયા ||',
-        ),
-        AdminContentField(
-          key: 'home_cta_motto',
-          label: 'CTA Motto Headline',
-          section: 'Call To Action Banner',
-          valueEn: 'Connect with our sacred tradition and feel the divine presence of Maa Ambe.',
-          valueGu: 'આપણી પ્રાચીન સંસ્કૃતિ, પરંપરા અને ભક્તિ સાથે જોડાઓ અને માં અંબાના આશીર્વાદ પ્રાપ્ત કરો.',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'home_cta_btn_text',
-          label: 'CTA Action Button Label',
-          section: 'Call To Action Banner',
-          valueEn: 'Connect With Us',
-          valueGu: 'સંપર્ક કરો / સહભાગી બનો',
-        ),
-        AdminContentField(key: 'home_cta_btn_route', label: 'CTA Action Button Route', section: 'Call To Action Banner', valueEn: '/contact', valueGu: '/contact'),
-        // About Us Page Fields
-        AdminContentField(key: 'about_tag', label: 'Header Eyebrow Badge Tag', section: 'About Page', valueEn: 'ABOUT THE MANDAL', valueGu: 'મંડળ પરિચય'),
-        AdminContentField(
-          key: 'about_title',
-          label: 'Main Page Headline',
-          section: 'About Page',
-          valueEn: 'Shree Pavan Putra Prachin Garbi Mandal',
-          valueGu: 'શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'about_desc',
-          label: 'Introduction Paragraph',
-          section: 'About Page',
-          valueEn: 'A devoted cultural institution in Rajkot, Gujarat, steadfastly committed to the preservation and authentic celebration of Prachin Garbi since 1989.',
-          valueGu: '૧૯૮૯થી રાજકોટમાં અસલ ગુજરાતી પ્રાચીન ગરબીની પવિત્ર અને શુદ્ધ પરંપરાને જીવંત રાખતું ભાવિક સાંસ્કૃતિક મંડળ.',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'about_history_title',
-          label: 'Foundation Card Headline',
-          section: 'About Page',
-          valueEn: 'Preserving Sacred Traditions since 1989',
-          valueGu: '૧૯૮૯થી અવિરત ધબકતી પવિત્ર ગરબી પરંપરા',
-        ),
-        AdminContentField(
-          key: 'about_history_desc',
-          label: 'Foundation Sacred History Body',
-          section: 'About Page',
-          valueEn:
-              'Founded by devoted community elders in Rajkot, the Mandal was born out of a profound commitment: to worship Maa Jagti Jogmaya through classical Saurashtra Garbi, retaining natural live instrumentation, spiritual lyricism, and communal harmony without commercial compromises.',
-          valueGu: 'રાજકોટના ભક્તિનગર ચોકમાં મા અંબા અને મા મોગલની અખંડ જ્યોત સામે, કોઈપણ કૃત્રિમ સાઉન્ડ વગર કેવળ પરંપરાગત સૂર અને સાધનાભાવથી આ ગરબીની સ્થાપના કરવામાં આવી હતી.',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'about_foundation_motto',
-          label: 'Foundation Devotional Motto',
-          section: 'About Page',
-          valueEn: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-          valueGu: '|| જાગતી જોગમાયા|| પરંપરા • ભક્તિ • સૂર',
-        ),
-        AdminContentField(
-          key: 'about_foundation_image',
-          label: 'Foundation Historical Emblem / Photo',
-          section: 'About Page',
-          valueEn: 'assets/images/pavan_putra_logo.png',
-          valueGu: 'assets/images/pavan_putra_logo.png',
-        ),
-        AdminContentField(key: 'about_values_tag', label: 'Principles Eyebrow Badge', section: 'About Page', valueEn: 'CORE PILLARS', valueGu: 'પાયાના આધારસ્તંભ'),
-        AdminContentField(
-          key: 'about_values_title',
-          label: 'Principles Section Title',
-          section: 'About Page',
-          valueEn: 'Core Principles of the Mandal',
-          valueGu: 'મંડળના પાયાના સિદ્ધાંતો',
-        ),
-        AdminContentField(
-          key: 'about_committee_badge',
-          label: 'Committee Eyebrow Badge',
-          section: 'About Page',
-          valueEn: 'TRUSTEES & ORGANIZING COMMITTEE',
-          valueGu: 'ટ્રસ્ટી મંડળ અને સમિતિ',
-        ),
-        AdminContentField(
-          key: 'about_committee_title',
-          label: 'Committee Section Title',
-          section: 'About Page',
-          valueEn: 'Devoted Trustees & Committee Leadership',
-          valueGu: 'સેવાભાવી ટ્રસ્ટી અને સમિતિ સભ્યો',
-        ),
-        AdminContentField(
-          key: 'about_committee_desc',
-          label: 'Committee Section Description',
-          section: 'About Page',
-          valueEn: 'Dedicated guardians upholding the sacred Gujarati acoustic traditions and community seva in Rajkot.',
-          valueGu: 'રાજકોટમાં પ્રાચીન ગરબીની ભવ્ય પરંપરા અને સંસ્કૃતિને જીવંત રાખતા મા અંબેના અનન્ય સેવકો.',
-          isMultiline: true,
-        ),
-        AdminContentField(
-          key: 'about_cta_title',
-          label: 'History Callout Headline',
-          section: 'About Page',
-          valueEn: 'A History of Devotion & Cultural Fortitude',
-          valueGu: 'ભક્તિ અને સાંસ્કૃતિક ગૌરવનો ભવ્ય ઇતિહાસ',
-        ),
-        AdminContentField(
-          key: 'about_cta_desc',
-          label: 'History Callout Subtitle',
-          section: 'About Page',
-          valueEn: 'Discover four decades of unwavering dedication to Maa Ambe in Rajkot.',
-          valueGu: 'રાજકોટમાં સાડા ત્રણ દાયકાથી અવિરત ચાલી રહેલી પવિત્ર યાત્રાનો સંપૂર્ણ ઇતિહાસ જાણો.',
-        ),
-        AdminContentField(key: 'about_cta_btn_text', label: 'History Callout Button Label', section: 'About Page', valueEn: 'EXPLORE HISTORY', valueGu: 'ઇતિહાસ જુઓ'),
-        AdminContentField(key: 'about_cta_route', label: 'History Callout Destination Route', section: 'About Page', valueEn: '/history', valueGu: '/history'),
-      ];
-      for (final f in officialSiteContent) {
-        if (!_siteContentMap.containsKey(f.key)) {
-          _siteContentMap[f.key] = f;
-        }
-      }
     } catch (e) {
-      debugPrint('Site content fetch notice: $e');
+      debugPrint('Site content fetch notice: ');
     }
   }
 
@@ -3179,7 +2396,9 @@ class AdminDataStore extends ChangeNotifier {
       if (hbSnap.docs.isNotEmpty) {
         _homeBanners.clear();
         for (final doc in hbSnap.docs) {
-          _homeBanners.add(AdminHomeBanner.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _homeBanners.add(AdminHomeBanner.fromMap(data));
         }
         _homeBanners.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3195,7 +2414,9 @@ class AdminDataStore extends ChangeNotifier {
       if (acSnap.docs.isNotEmpty) {
         _aboutCards.clear();
         for (final doc in acSnap.docs) {
-          _aboutCards.add(AdminAboutCard.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _aboutCards.add(AdminAboutCard.fromMap(data));
         }
         _aboutCards.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3211,7 +2432,9 @@ class AdminDataStore extends ChangeNotifier {
       if (pillarsSnap.docs.isNotEmpty) {
         _pillars.clear();
         for (final doc in pillarsSnap.docs) {
-          _pillars.add(AdminHomePillar.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _pillars.add(AdminHomePillar.fromMap(data));
         }
         _pillars.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3227,7 +2450,9 @@ class AdminDataStore extends ChangeNotifier {
       if (hsSnap.docs.isNotEmpty) {
         _homeSingers.clear();
         for (final doc in hsSnap.docs) {
-          _homeSingers.add(AdminHomeSinger.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _homeSingers.add(AdminHomeSinger.fromMap(data));
         }
         _homeSingers.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3243,7 +2468,9 @@ class AdminDataStore extends ChangeNotifier {
       if (blessingsSnap.docs.isNotEmpty) {
         _blessings.clear();
         for (final doc in blessingsSnap.docs) {
-          _blessings.add(AdminHomeBlessing.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _blessings.add(AdminHomeBlessing.fromMap(data));
         }
         _blessings.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3263,7 +2490,9 @@ class AdminDataStore extends ChangeNotifier {
       if (fLinksSnap.docs.isNotEmpty) {
         _footerLinks.clear();
         for (final doc in fLinksSnap.docs) {
-          _footerLinks.add(AdminFooterLink.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _footerLinks.add(AdminFooterLink.fromMap(data));
         }
         _footerLinks.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3271,7 +2500,9 @@ class AdminDataStore extends ChangeNotifier {
       if (fSocSnap.docs.isNotEmpty) {
         _footerSocialLinks.clear();
         for (final doc in fSocSnap.docs) {
-          _footerSocialLinks.add(AdminFooterSocialLink.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _footerSocialLinks.add(AdminFooterSocialLink.fromMap(data));
         }
         _footerSocialLinks.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3285,7 +2516,10 @@ class AdminDataStore extends ChangeNotifier {
       final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
       final liveDoc = await db.collection('live_stream').doc('current').get(getOpt);
       if (liveDoc.exists && liveDoc.data() != null && liveDoc.data()!.isNotEmpty) {
-        _liveStreamSettings = AdminLiveStreamSettings.fromMap(liveDoc.data()!);
+        final data = liveDoc.data()!;
+        if (data['is_deleted'] != true && data['isDeleted'] != true) {
+          _liveStreamSettings = AdminLiveStreamSettings.fromMap(data);
+        }
       }
     } catch (e) {
       debugPrint('Live stream fetch notice: $e');
@@ -3299,7 +2533,9 @@ class AdminDataStore extends ChangeNotifier {
       if (yearsSnap.docs.isNotEmpty) {
         _years.clear();
         for (final doc in yearsSnap.docs) {
-          _years.add(AdminGarbiYear.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _years.add(AdminGarbiYear.fromMap(data));
         }
         _years.sort((a, b) => b.year.compareTo(a.year));
       }
@@ -3315,7 +2551,9 @@ class AdminDataStore extends ChangeNotifier {
       if (albumsSnap.docs.isNotEmpty) {
         _albums.clear();
         for (final doc in albumsSnap.docs) {
-          _albums.add(AdminAlbum.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _albums.add(AdminAlbum.fromMap(data));
         }
       }
     } catch (e) {
@@ -3331,7 +2569,9 @@ class AdminDataStore extends ChangeNotifier {
       if (videosSnap.docs.isNotEmpty) {
         _videos.clear();
         for (final doc in videosSnap.docs) {
-          _videos.add(AdminVideo.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _videos.add(AdminVideo.fromMap(data));
         }
       }
     } catch (e) {
@@ -3347,7 +2587,9 @@ class AdminDataStore extends ChangeNotifier {
       if (blogsSnap.docs.isNotEmpty) {
         _blogs.clear();
         for (final doc in blogsSnap.docs) {
-          _blogs.add(AdminBlog.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _blogs.add(AdminBlog.fromMap(data));
         }
       }
     } catch (e) {
@@ -3785,7 +3027,9 @@ class AdminDataStore extends ChangeNotifier {
       if (snap.docs.isNotEmpty) {
         _photos.clear();
         for (final doc in snap.docs) {
-          _photos.add(AdminPhoto.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _photos.add(AdminPhoto.fromMap(data));
         }
         _isGalleryLoaded = true;
         notifyListeners();
@@ -3809,7 +3053,9 @@ class AdminDataStore extends ChangeNotifier {
       if (cmSnap.docs.isNotEmpty) {
         _committeeMembers.clear();
         for (final doc in cmSnap.docs) {
-          _committeeMembers.add(AdminCommitteeMember.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _committeeMembers.add(AdminCommitteeMember.fromMap(data));
         }
         _committeeMembers.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3818,7 +3064,9 @@ class AdminDataStore extends ChangeNotifier {
       if (prSnap.docs.isNotEmpty) {
         _aboutPrinciples.clear();
         for (final doc in prSnap.docs) {
-          _aboutPrinciples.add(AdminAboutPrinciple.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _aboutPrinciples.add(AdminAboutPrinciple.fromMap(data));
         }
         _aboutPrinciples.sort((a, b) => a.order.compareTo(b.order));
       }
@@ -3839,7 +3087,9 @@ class AdminDataStore extends ChangeNotifier {
       if (hmSnap.docs.isNotEmpty) {
         _historyMilestones.clear();
         for (final doc in hmSnap.docs) {
-          _historyMilestones.add(AdminHistoryMilestone.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _historyMilestones.add(AdminHistoryMilestone.fromMap(data));
         }
         _historyMilestones.sort((a, b) => a.order.compareTo(b.order));
         _isHistoryLoaded = true;
@@ -3860,7 +3110,9 @@ class AdminDataStore extends ChangeNotifier {
       if (snap.docs.isNotEmpty) {
         _videos.clear();
         for (final doc in snap.docs) {
-          _videos.add(AdminVideo.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _videos.add(AdminVideo.fromMap(data));
         }
         _isFullVideosLoaded = true;
         notifyListeners();
@@ -3880,7 +3132,9 @@ class AdminDataStore extends ChangeNotifier {
       if (snap.docs.isNotEmpty) {
         _blogs.clear();
         for (final doc in snap.docs) {
-          _blogs.add(AdminBlog.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _blogs.add(AdminBlog.fromMap(data));
         }
         _isFullBlogsLoaded = true;
         notifyListeners();
@@ -3908,12 +3162,16 @@ class AdminDataStore extends ChangeNotifier {
       final enqSnap = results[0] as QuerySnapshot<Map<String, dynamic>>;
       _enquiries.clear();
       for (final doc in enqSnap.docs) {
-        _enquiries.add(AdminEnquiry.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _enquiries.add(AdminEnquiry.fromMap(data));
       }
       final logsSnap = results[1] as QuerySnapshot<Map<String, dynamic>>;
       _activityLogs.clear();
       for (final doc in logsSnap.docs) {
-        _activityLogs.add(AdminActivityLog.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _activityLogs.add(AdminActivityLog.fromMap(data));
       }
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
@@ -3923,7 +3181,9 @@ class AdminDataStore extends ChangeNotifier {
         if (notifSnap.docs.isNotEmpty) {
           _notificationEmails.clear();
           for (final doc in notifSnap.docs) {
-            _notificationEmails.add(AdminNotificationEmail.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _notificationEmails.add(AdminNotificationEmail.fromMap(data));
           }
         }
       } catch (e) {
@@ -3945,7 +3205,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('enquiries').snapshots().listen((snap) {
       _enquiries.clear();
       for (final doc in snap.docs) {
-        _enquiries.add(AdminEnquiry.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _enquiries.add(AdminEnquiry.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Enquiries stream notice: $e'));
@@ -3953,7 +3215,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('activity_logs').snapshots().listen((snap) {
       _activityLogs.clear();
       for (final doc in snap.docs) {
-        _activityLogs.add(AdminActivityLog.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _activityLogs.add(AdminActivityLog.fromMap(data));
       }
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       notifyListeners();
@@ -3963,7 +3227,9 @@ class AdminDataStore extends ChangeNotifier {
       if (snap.docs.isNotEmpty) {
         _notificationEmails.clear();
         for (final doc in snap.docs) {
-          _notificationEmails.add(AdminNotificationEmail.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _notificationEmails.add(AdminNotificationEmail.fromMap(data));
         }
         notifyListeners();
       }
@@ -3977,7 +3243,7 @@ class AdminDataStore extends ChangeNotifier {
     _listenersAttached = true;
 
     db.collection('settings').doc('mandal_settings').snapshots().listen((doc) {
-      if (doc.exists && doc.data() != null) {
+      if (doc.exists && doc.data() != null && doc.data()!['is_deleted'] != true && doc.data()!['isDeleted'] != true) {
         _settings = AdminSettings.fromMap(doc.data()!);
         notifyListeners();
       }
@@ -3986,7 +3252,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('committee_members').snapshots().listen((snap) {
       _committeeMembers.clear();
       for (final doc in snap.docs) {
-        _committeeMembers.add(AdminCommitteeMember.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _committeeMembers.add(AdminCommitteeMember.fromMap(data));
       }
       _committeeMembers.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3995,7 +3263,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('about_principles').snapshots().listen((snap) {
       _aboutPrinciples.clear();
       for (final doc in snap.docs) {
-        _aboutPrinciples.add(AdminAboutPrinciple.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _aboutPrinciples.add(AdminAboutPrinciple.fromMap(data));
       }
       _aboutPrinciples.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -4004,7 +3274,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('history_milestones').snapshots().listen((snap) {
       _historyMilestones.clear();
       for (final doc in snap.docs) {
-        _historyMilestones.add(AdminHistoryMilestone.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _historyMilestones.add(AdminHistoryMilestone.fromMap(data));
       }
       _historyMilestones.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -4013,7 +3285,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_singers').snapshots().listen((snap) {
       _homeSingers.clear();
       for (final doc in snap.docs) {
-        _homeSingers.add(AdminHomeSinger.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _homeSingers.add(AdminHomeSinger.fromMap(data));
       }
       _homeSingers.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -4022,7 +3296,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_banners').snapshots().listen((snap) {
       _homeBanners.clear();
       for (final doc in snap.docs) {
-        _homeBanners.add(AdminHomeBanner.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _homeBanners.add(AdminHomeBanner.fromMap(data));
       }
       _homeBanners.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -4030,7 +3306,12 @@ class AdminDataStore extends ChangeNotifier {
 
     db.collection('site_content').snapshots().listen((snap) {
       for (final doc in snap.docs) {
-        final f = AdminContentField.fromMap(doc.data());
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) {
+          _siteContentMap.remove(doc.id);
+          continue;
+        }
+        final f = AdminContentField.fromMap(data);
         _siteContentMap[f.key] = f;
       }
       notifyListeners();
@@ -4039,7 +3320,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_about_cards').snapshots().listen((snap) {
       _aboutCards.clear();
       for (final doc in snap.docs) {
-        _aboutCards.add(AdminAboutCard.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _aboutCards.add(AdminAboutCard.fromMap(data));
       }
       _aboutCards.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -4048,7 +3331,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_pillars').snapshots().listen((snap) {
       _pillars.clear();
       for (final doc in snap.docs) {
-        _pillars.add(AdminHomePillar.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _pillars.add(AdminHomePillar.fromMap(data));
       }
       _pillars.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -4057,7 +3342,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_blessings').snapshots().listen((snap) {
       _blessings.clear();
       for (final doc in snap.docs) {
-        _blessings.add(AdminHomeBlessing.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _blessings.add(AdminHomeBlessing.fromMap(data));
       }
       _blessings.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -4066,7 +3353,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('garbi_years').snapshots().listen((snap) {
       _years.clear();
       for (final doc in snap.docs) {
-        _years.add(AdminGarbiYear.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _years.add(AdminGarbiYear.fromMap(data));
       }
       _years.sort((a, b) => b.year.compareTo(a.year));
       notifyListeners();
@@ -4075,7 +3364,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('albums').snapshots().listen((snap) {
       _albums.clear();
       for (final doc in snap.docs) {
-        _albums.add(AdminAlbum.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _albums.add(AdminAlbum.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Albums stream notice: $e'));
@@ -4083,7 +3374,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('photos').snapshots().listen((snap) {
       _photos.clear();
       for (final doc in snap.docs) {
-        _photos.add(AdminPhoto.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _photos.add(AdminPhoto.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Photos stream notice: $e'));
@@ -4091,13 +3384,15 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('videos').snapshots().listen((snap) {
       _videos.clear();
       for (final doc in snap.docs) {
-        _videos.add(AdminVideo.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _videos.add(AdminVideo.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Videos stream notice: $e'));
 
     db.collection('live_stream').doc('current').snapshots().listen((doc) {
-      if (doc.exists && doc.data() != null) {
+      if (doc.exists && doc.data() != null && doc.data()!['is_deleted'] != true && doc.data()!['isDeleted'] != true) {
         _liveStreamSettings = AdminLiveStreamSettings.fromMap(doc.data()!);
         notifyListeners();
       }
@@ -4106,7 +3401,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('blogs').snapshots().listen((snap) {
       _blogs.clear();
       for (final doc in snap.docs) {
-        _blogs.add(AdminBlog.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _blogs.add(AdminBlog.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Blogs stream notice: $e'));
@@ -4114,7 +3411,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('enquiries').snapshots().listen((snap) {
       _enquiries.clear();
       for (final doc in snap.docs) {
-        _enquiries.add(AdminEnquiry.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _enquiries.add(AdminEnquiry.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Enquiries stream notice: $e'));
@@ -4122,7 +3421,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('activity_logs').snapshots().listen((snap) {
       _activityLogs.clear();
       for (final doc in snap.docs) {
-        _activityLogs.add(AdminActivityLog.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _activityLogs.add(AdminActivityLog.fromMap(data));
       }
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       notifyListeners();
@@ -4132,7 +3433,9 @@ class AdminDataStore extends ChangeNotifier {
       if (snap.docs.isNotEmpty) {
         _notificationEmails.clear();
         for (final doc in snap.docs) {
-          _notificationEmails.add(AdminNotificationEmail.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _notificationEmails.add(AdminNotificationEmail.fromMap(data));
         }
         notifyListeners();
       }
@@ -4141,7 +3444,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('footer_links').snapshots().listen((snap) {
       _footerLinks.clear();
       for (final doc in snap.docs) {
-        _footerLinks.add(AdminFooterLink.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _footerLinks.add(AdminFooterLink.fromMap(data));
       }
       _footerLinks.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -4150,20 +3455,29 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('footer_social_links').snapshots().listen((snap) {
       _footerSocialLinks.clear();
       for (final doc in snap.docs) {
-        _footerSocialLinks.add(AdminFooterSocialLink.fromMap(doc.data()));
+          final data = doc.data();
+          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+          _footerSocialLinks.add(AdminFooterSocialLink.fromMap(data));
       }
       _footerSocialLinks.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
     }, onError: (e) => debugPrint('Footer social links stream notice: $e'));
   }
 
-  Future<void> _touchSyncMetadata(FirebaseFirestore db) async {
+  Future<void> _touchSyncMetadata(FirebaseFirestore db, [String? collectionName]) async {
     try {
       final now = DateTime.now().toIso8601String();
       _lastLocalUpdatedAt = now;
-      await db.collection('settings').doc('sync_metadata').set({
-        'last_updated_at': now,
-      }, SetOptions(merge: true));
+      final updateData = <String, dynamic>{
+        'lastUpdatedAt': now,
+        'updatedAt': now,
+        'isDeleted': false,
+      };
+      if (collectionName != null && collectionName.isNotEmpty) {
+        updateData['collections.$collectionName.version'] = FieldValue.increment(1);
+        updateData['collections.$collectionName.updatedAt'] = now;
+      }
+      await db.collection('settings').doc('sync_metadata').set(updateData, SetOptions(merge: true));
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kSyncMetadataKey, now);
     } catch (_) {}
@@ -4173,10 +3487,17 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await db.collection(collection).doc(docId).set(data, SetOptions(merge: true));
+      final payload = Map<String, dynamic>.from(data);
+      payload['isDeleted'] = false;
+      payload['updatedAt'] = DateTime.now().toIso8601String();
+      payload.remove('is_deleted');
+      payload.remove('updated_at');
+      payload.remove('created_at');
+      payload.remove('deleted_at');
+      await db.collection(collection).doc(docId).set(payload, SetOptions(merge: true));
       _isFirestoreConnected = true;
       if (collection != 'activity_logs' && docId != 'sync_metadata') {
-        unawaited(_touchSyncMetadata(db));
+        unawaited(_touchSyncMetadata(db, collection));
       }
     } catch (e) {
       debugPrint('Firestore write notice ($collection/$docId): $e');
@@ -4187,8 +3508,13 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await db.collection(collection).doc(docId).delete();
-      unawaited(_touchSyncMetadata(db));
+      final now = DateTime.now().toIso8601String();
+      await db.collection(collection).doc(docId).set({
+        'isDeleted': true,
+        'deletedAt': now,
+        'updatedAt': now,
+      }, SetOptions(merge: true));
+      unawaited(_touchSyncMetadata(db, collection));
     } catch (e) {
       debugPrint('Firestore delete notice ($collection/$docId): $e');
     }
@@ -4267,20 +3593,12 @@ class AdminDataStore extends ChangeNotifier {
 
 
   Future<void> restoreDatabaseDefaults() async {
-    _committeeMembers.clear();
-    _aboutPrinciples.clear();
-    _historyMilestones.clear();
-    _homeSingers.clear();
-    _homeBanners.clear();
-    _years.clear();
-    _albums.clear();
-    _photos.clear();
-    _videos.clear();
-    _blogs.clear();
-    _siteContentMap.clear();
-
-    await syncAllToFirestore();
-    logActivity('CONFIG', 'Default Content Restored', 'Restored default mandal website content and settings');
+    final db = _firestore;
+    if (db == null) return;
+    await initializeEssentialFirstViewport(forceRefresh: true);
+    await startGentleBackgroundLoading(forceRefresh: true);
+    await ensureAdminDataLoaded(forceRefresh: true);
+    logActivity('CONFIG', 'Database Refreshed', 'Refreshed all website content directly from Firestore');
     notifyListeners();
   }
 

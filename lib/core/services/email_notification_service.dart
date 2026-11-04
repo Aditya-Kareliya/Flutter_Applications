@@ -106,7 +106,7 @@ class EmailNotificationService {
                 recipientName: recipientName,
               ),
             },
-            'created_at': FieldValue.serverTimestamp(),
+            'createdAt': FieldValue.serverTimestamp(),
           });
         }
       } catch (e) {
@@ -147,7 +147,7 @@ class EmailNotificationService {
             'subject': '[pavanputragarbi mandal] Admin Notification System Active',
             'html': _buildTestHtml(recipient: recipient, timestamp: timestampStr),
           },
-          'created_at': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
         });
       } catch (_) {}
 
@@ -191,7 +191,7 @@ class EmailNotificationService {
             'subject': '[pavanputragarbi mandal] Forgot Password Recovery',
             'html': _buildForgotPasswordHtml(email: cleanEmail, resetLink: link),
           },
-          'created_at': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
         });
       } catch (_) {}
 
@@ -247,7 +247,7 @@ class EmailNotificationService {
               senderEmail: senderEmail,
             ),
           },
-          'created_at': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
         });
       } catch (_) {}
 

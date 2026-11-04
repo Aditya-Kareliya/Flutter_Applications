@@ -15,8 +15,11 @@ abstract final class FirebaseBootstrap {
       try {
         FirebaseFirestore.instance.settings = const Settings(
           persistenceEnabled: true,
+          cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
         );
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Firestore settings notice: $e');
+      }
       _isConfigured = true;
       debugPrint('Firebase successfully initialized for project: ${DefaultFirebaseOptions.web.projectId}');
     } catch (e) {
