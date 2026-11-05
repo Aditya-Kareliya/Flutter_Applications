@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,6 +10,7 @@ import '../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../core/widgets/cultural_frame_card.dart';
 import '../../../core/widgets/heritage_badge.dart';
 import '../../../core/widgets/heritage_divider.dart';
+import '../../../core/widgets/image/app_cached_image.dart';
 import '../../../utils/navigation_manager.dart';
 import '../../admin_module/dashboard/data/admin_data_store.dart';
 
@@ -29,29 +29,12 @@ class _AboutScreenState extends State<AboutScreen> {
   }
 
   static Widget _buildEmblemImage(String url, MyAppColors colors) {
-    final baseAsset = Image.asset(
-      'assets/images/pavan_putra_logo.png',
+    return AppCachedImage(
+      imageUrl: url,
       fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-    );
-
-    if (url.isEmpty || url.startsWith('assets/')) {
-      return Image.asset(url.isEmpty ? 'assets/images/pavan_putra_logo.png' : url, fit: BoxFit.cover, errorBuilder: (_, _, _) => baseAsset);
-    }
-    return Stack(
-      fit: StackFit.passthrough,
-      alignment: Alignment.center,
-      children: [
-        baseAsset,
-        CachedNetworkImage(
-          imageUrl: url,
-          fit: BoxFit.cover,
-          fadeInDuration: const Duration(milliseconds: 300),
-          fadeOutDuration: const Duration(milliseconds: 200),
-          placeholder: (_, _) => const SizedBox.shrink(),
-          errorWidget: (_, _, _) => const SizedBox.shrink(),
-        ),
-      ],
+      memCacheWidth: 400,
+      memCacheHeight: 400,
+      fallbackAsset: 'assets/images/pavan_putra_logo.png',
     );
   }
 
@@ -547,30 +530,12 @@ class _CommitteeMemberCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
               child: SizedBox(
                 height: 160,
-                child: member.photoUrl.isNotEmpty && !member.photoUrl.startsWith('assets/')
-                    ? Stack(
-                        fit: StackFit.passthrough,
-                        children: [
-                          Image.asset(
-                            'assets/images/pavan_putra_logo.png',
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                          ),
-                          CachedNetworkImage(
-                            imageUrl: member.photoUrl,
-                            fit: BoxFit.cover,
-                            fadeInDuration: const Duration(milliseconds: 300),
-                            fadeOutDuration: const Duration(milliseconds: 200),
-                            placeholder: (_, _) => const SizedBox.shrink(),
-                            errorWidget: (_, _, _) => const SizedBox.shrink(),
-                          ),
-                        ],
-                      )
-                    : Image.asset(
-                        member.photoUrl.isNotEmpty ? member.photoUrl : 'assets/images/pavan_putra_logo.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                      ),
+                child: AppCachedImage(
+                  imageUrl: member.photoUrl,
+                  fit: BoxFit.cover,
+                  memCacheWidth: 400,
+                  memCacheHeight: 400,
+                ),
               ),
             ),
             Padding(

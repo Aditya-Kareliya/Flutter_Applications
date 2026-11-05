@@ -8,6 +8,7 @@ import '../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../core/widgets/brand_logo/brand_logo_widget.dart';
 import '../../../core/widgets/cultural_frame_card.dart';
 import '../../../core/widgets/heritage_badge.dart';
+import '../../../core/widgets/image/app_cached_image.dart';
 import '../../../core/widgets/my_app_ui_components.dart';
 import '../../admin_module/dashboard/data/admin_data_store.dart';
 
@@ -61,9 +62,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
           (a) => a.id == widget.album || a.name.toLowerCase().contains(widget.album.toLowerCase()),
           orElse: () => AdminAlbum(id: '', year: widget.year, name: '', dayTag: '', description: ''),
         );
-        final albumTitleText = matchingAlbum.name.isNotEmpty
-            ? (langCode == 'gu' ? context.trDynamic(matchingAlbum.name) : matchingAlbum.name)
-            : widget.album.replaceAll('-', ' ').toUpperCase();
+        final albumTitleText = matchingAlbum.getName(langCode).isNotEmpty
+            ? matchingAlbum.getName(langCode)
+            : (matchingAlbum.name.isNotEmpty
+                ? (langCode == 'gu' ? context.trDynamic(matchingAlbum.name) : matchingAlbum.name)
+                : widget.album.replaceAll('-', ' ').toUpperCase());
 
         final allPhotosList = s.photos;
         final yearFiltered = widget.year.toLowerCase() == 'all'
@@ -318,21 +321,13 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: imageUrl.startsWith('http')
-                        ? Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                _buildEmblemFallback(colors, styles, dialogContext),
-                          )
-                        : imageUrl.startsWith('assets/')
-                            ? Image.asset(
-                                imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildEmblemFallback(colors, styles, dialogContext),
-                              )
-                            : _buildEmblemFallback(colors, styles, dialogContext),
+                    child: AppCachedImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 1200,
+                      memCacheHeight: 800,
+                      fallbackWidget: _buildEmblemFallback(colors, styles, dialogContext),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -432,28 +427,16 @@ class _PhotoCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (imageUrl.startsWith('http'))
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            _buildCardEmblem(colors),
-                      ),
-                    )
-                  else if (imageUrl.startsWith('assets/'))
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                      child: Image.asset(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            _buildCardEmblem(colors),
-                      ),
-                    )
-                  else
-                    _buildCardEmblem(colors),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: AppCachedImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 600,
+                      memCacheHeight: 400,
+                      fallbackWidget: _buildCardEmblem(colors),
+                    ),
+                  ),
                   Positioned(
                     top: 12,
                     left: 12,

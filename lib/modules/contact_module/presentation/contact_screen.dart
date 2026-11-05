@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,6 +12,7 @@ import '../../../core/widgets/buttons/my_app_buttons.dart';
 import '../../../core/widgets/cultural_frame_card.dart';
 import '../../../core/widgets/dialogs/my_app_dialog.dart';
 import '../../../core/widgets/heritage_badge.dart';
+import '../../../core/widgets/image/app_cached_image.dart';
 import '../../../core/widgets/text_fields/my_app_text_area_field.dart';
 import '../../../core/widgets/text_fields/my_app_text_form_field.dart';
 import '../../../core/widgets/toast/my_app_toast_message.dart';
@@ -501,18 +501,13 @@ class _ContactScreenState extends State<ContactScreen> {
               if (hasQrImage)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: CachedNetworkImage(
+                  child: AppCachedImage(
                     imageUrl: settings.paymentQrImageUrl,
                     width: imageSize,
                     height: imageSize,
                     fit: BoxFit.contain,
-                    placeholder: (_, _) => SizedBox(
-                      width: imageSize,
-                      height: imageSize,
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    ),
+                    memCacheWidth: (imageSize * 2).toInt(),
+                    memCacheHeight: (imageSize * 2).toInt(),
                     errorWidget: (_, _, _) => Container(
                       width: imageSize,
                       height: imageSize,
@@ -675,16 +670,13 @@ class _ContactScreenState extends State<ContactScreen> {
                       color: colors.heritageGold.withValues(alpha: 0.4),
                     ),
                   ),
-                  child: CachedNetworkImage(
+                  child: AppCachedImage(
                     imageUrl: settings.paymentQrImageUrl,
                     width: isMobile ? 240 : 280,
                     height: isMobile ? 240 : 280,
                     fit: BoxFit.contain,
-                    placeholder: (_, _) => SizedBox(
-                      width: isMobile ? 240 : 280,
-                      height: isMobile ? 240 : 280,
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
+                    memCacheWidth: 600,
+                    memCacheHeight: 600,
                     errorWidget: (_, _, _) => SizedBox(
                       width: isMobile ? 240 : 280,
                       height: isMobile ? 240 : 280,

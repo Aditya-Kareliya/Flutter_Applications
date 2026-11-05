@@ -10,6 +10,7 @@ import '../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../core/utils/youtube_url_helper.dart';
 import '../../../core/widgets/cultural_frame_card.dart';
 import '../../../core/widgets/heritage_badge.dart';
+import '../../../core/widgets/image/app_cached_image.dart';
 import '../../../core/widgets/my_app_ui_components.dart';
 import '../../admin_module/dashboard/data/admin_data_store.dart';
 
@@ -357,9 +358,9 @@ class _VideosScreenState extends State<VideosScreen> {
                                       }
                                     },
                                     icon: const Icon(Icons.play_circle_fill_rounded, size: 20),
-                                    label: const Text(
-                                      'Watch Live Now',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    label: Text(
+                                      context.tr('watch_live_now'),
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ],
@@ -848,10 +849,12 @@ class _VideoItemCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    thumb,
+                  AppCachedImage(
+                    imageUrl: thumb,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
+                    memCacheWidth: 640,
+                    memCacheHeight: 360,
+                    fallbackWidget: Container(
                       color: colors.deepMaroon,
                       child: Center(
                         child: Icon(Icons.videocam_rounded, size: 48, color: colors.lightGold),

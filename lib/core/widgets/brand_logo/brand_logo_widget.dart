@@ -1,11 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../modules/admin_module/dashboard/data/admin_data_store.dart';
+import '../image/app_cached_image.dart';
 
 /// Clean, robust Brand Logo Widget
-/// Loads from local assets immediately on frame 0.
-/// When a cloud API logo URL is available, seamlessly displays it.
+/// Always displays the preloaded local heritage logo on Frame 0 immediately.
+/// When an updated cloud logo URL is retrieved from Firebase, seamlessly overlays and updates it.
 class BrandLogoWidget extends StatelessWidget {
   final double? width;
   final double? height;
@@ -30,8 +30,8 @@ class BrandLogoWidget extends StatelessWidget {
     this.fallbackWidget,
   });
 
-  static const String defaultAssetPng = 'assets/images/pavan_putra_logo.png';
-  static const String defaultAssetJpg = 'assets/images/pavan_putra_logo.jpg';
+  static const String defaultAssetPng = AppCachedImage.defaultLogoAssetPng;
+  static const String defaultAssetJpg = AppCachedImage.defaultLogoAssetJpg;
 
   @override
   Widget build(BuildContext context) {
@@ -55,34 +55,30 @@ class BrandLogoWidget extends StatelessWidget {
       listenable: AdminDataStore.instance,
       builder: (context, _) {
         final logoUrl = AdminDataStore.instance.settings.logoImageUrl.trim();
+        final isCustomRemote = logoUrl.isNotEmpty &&
+            logoUrl != defaultAssetPng &&
+            logoUrl != defaultAssetJpg;
 
         Widget content;
-        if (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) {
+        if (isCustomRemote) {
           content = Stack(
             fit: StackFit.passthrough,
             alignment: Alignment.center,
             children: [
+              // 1. Instant local asset on frame 0 (never flashes empty)
               fallbackWidget ?? defaultAssetWidget,
-              CachedNetworkImage(
+              // 2. Updated cloud logo seamlessly overlays once loaded from Firebase
+              AppCachedImage(
                 imageUrl: logoUrl,
                 width: effectiveWidth,
                 height: effectiveHeight,
                 fit: fit,
                 placeholder: (_, _) => const SizedBox.shrink(),
-                errorWidget: (_, _, _) => const SizedBox.shrink(),
+                fallbackWidget: const SizedBox.shrink(),
+                memCacheWidth: effectiveWidth != null ? (effectiveWidth * 2).toInt() : 400,
+                memCacheHeight: effectiveHeight != null ? (effectiveHeight * 2).toInt() : 400,
               ),
             ],
-          );
-        } else if (logoUrl.isNotEmpty &&
-            logoUrl.startsWith('assets/') &&
-            logoUrl != defaultAssetPng &&
-            logoUrl != defaultAssetJpg) {
-          content = Image.asset(
-            logoUrl,
-            width: effectiveWidth,
-            height: effectiveHeight,
-            fit: fit,
-            errorBuilder: (_, _, _) => fallbackWidget ?? defaultAssetWidget,
           );
         } else {
           content = fallbackWidget ?? defaultAssetWidget;
@@ -111,11 +107,7 @@ class BrandLogoWidget extends StatelessWidget {
           );
         }
 
-        return SizedBox(
-          width: effectiveWidth,
-          height: effectiveHeight,
-          child: clipped,
-        );
+        return clipped;
       },
     );
   }

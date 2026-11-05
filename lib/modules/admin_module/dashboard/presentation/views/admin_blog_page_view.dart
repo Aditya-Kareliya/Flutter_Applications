@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/dependency_injection/dependency_injection.dart';
@@ -8,6 +7,7 @@ import '../../../../../core/responsive/responsive.dart';
 import '../../../../../core/widgets/admin/admin_website_context_banner.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../../core/widgets/heritage_badge.dart';
+import '../../../../../core/widgets/image/app_cached_image.dart';
 import '../../../../../core/widgets/image_picker/my_app_image_picker.dart';
 import '../../../../../core/widgets/my_app_ui_components.dart';
 import '../../../../../core/widgets/toast/my_app_toast_message.dart';
@@ -259,6 +259,7 @@ class _AdminBlogPageViewState extends State<AdminBlogPageView> {
     final snippetCtrl = TextEditingController(text: blog?.snippet ?? '');
     final snippetGuCtrl = TextEditingController(text: blog?.snippetGu ?? '');
     final contentCtrl = TextEditingController(text: blog?.content ?? '');
+    final contentGuCtrl = TextEditingController(text: blog?.contentGu ?? '');
     String imgUrl = blog?.imageUrl ?? 'assets/images/pavan_putra_logo.jpg';
     bool isPublished = blog?.isPublished ?? true;
 
@@ -450,9 +451,20 @@ class _AdminBlogPageViewState extends State<AdminBlogPageView> {
                   // Full Content
                   MyAppTextAreaField(
                     controller: contentCtrl,
-                    labelText: 'Full Article Content (Markdown or Text) *',
+                    labelText: 'Full Article Content (English) *',
                     hintText:
                         'Write the complete article content, cultural analysis, hymns, and narrative here...',
+                    showTranslateIcon: true,
+                    targetLanguageController: contentGuCtrl,
+                    minLines: 5,
+                    maxLines: 12,
+                  ),
+                  const SizedBox(height: 12),
+                  MyAppTextAreaField(
+                    controller: contentGuCtrl,
+                    labelText: 'Full Article Content (Gujarati - optional)',
+                    hintText:
+                        'સંપૂર્ણ લેખ, આધ્યાત્મિક વિશ્લેષણ અને ગરબીની સ્તુતિઓ અહીં લખો...',
                     minLines: 5,
                     maxLines: 12,
                   ),
@@ -557,6 +569,7 @@ class _AdminBlogPageViewState extends State<AdminBlogPageView> {
                       snippet: snippetCtrl.text.trim(),
                       snippetGu: snippetGuCtrl.text.trim(),
                       content: contentCtrl.text.trim(),
+                      contentGu: contentGuCtrl.text.trim(),
                       imageUrl: imgUrl,
                       isPublished: isPublished,
                     ),
@@ -577,6 +590,7 @@ class _AdminBlogPageViewState extends State<AdminBlogPageView> {
                       snippet: snippetCtrl.text.trim(),
                       snippetGu: snippetGuCtrl.text.trim(),
                       content: contentCtrl.text.trim(),
+                      contentGu: contentGuCtrl.text.trim(),
                       imageUrl: imgUrl,
                       isPublished: isPublished,
                     ),
@@ -635,33 +649,20 @@ class _AdminBlogPageViewState extends State<AdminBlogPageView> {
                       ),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: blog.imageUrl.startsWith('http')
-                            ? CachedNetworkImage(
-                                imageUrl: blog.imageUrl,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, _, _) => Container(
-                                  color: colors.deepMaroon,
-                                  child: const Icon(
-                                    Icons.auto_stories_rounded,
-                                    color: Colors.white,
-                                    size: 48,
-                                  ),
-                                ),
-                              )
-                            : Image.asset(
-                                blog.imageUrl.isNotEmpty
-                                    ? blog.imageUrl
-                                    : 'assets/images/pavan_putra_logo.jpg',
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Container(
-                                  color: colors.deepMaroon,
-                                  child: const Icon(
-                                    Icons.auto_stories_rounded,
-                                    color: Colors.white,
-                                    size: 48,
-                                  ),
-                                ),
-                              ),
+                        child: AppCachedImage(
+                          imageUrl: blog.imageUrl,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 800,
+                          memCacheHeight: 450,
+                          fallbackWidget: Container(
+                            color: colors.deepMaroon,
+                            child: const Icon(
+                              Icons.auto_stories_rounded,
+                              color: Colors.white,
+                              size: 48,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     Positioned(
@@ -1705,38 +1706,12 @@ class _AdminBlogPageViewState extends State<AdminBlogPageView> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius - 1),
-        child: imageUrl.startsWith('http')
-            ? CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                errorWidget: (_, _, _) => Image.asset(
-                  'assets/images/pavan_putra_logo.jpg',
-                  fit: BoxFit.cover,
-                ),
-                placeholder: (_, _) => Container(
-                  color: colors.deepMaroon,
-                  child: const Center(
-                    child: SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.amber,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            : Image.asset(
-                imageUrl.isNotEmpty
-                    ? imageUrl
-                    : 'assets/images/pavan_putra_logo.jpg',
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Image.asset(
-                  'assets/images/pavan_putra_logo.jpg',
-                  fit: BoxFit.cover,
-                ),
-              ),
+        child: AppCachedImage(
+          imageUrl: imageUrl,
+          fit: BoxFit.cover,
+          memCacheWidth: 200,
+          memCacheHeight: 200,
+        ),
       ),
     );
   }

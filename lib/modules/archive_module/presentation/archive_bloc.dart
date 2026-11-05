@@ -17,11 +17,13 @@ final class ArchiveLoading extends ArchiveState {
 
 final class ArchiveLoaded extends ArchiveState {
   const ArchiveLoaded(this.years);
+
   final List<GarbiYearModel> years;
 }
 
 final class ArchiveFailure extends ArchiveState {
   const ArchiveFailure(this.message);
+
   final String message;
 }
 

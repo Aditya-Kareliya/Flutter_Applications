@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../localization/google_translation_service.dart';
 import '../my_app_text_style/my_app_text_styles.dart';
+import '../services/app_image_cache_service.dart';
 import '../../modules/admin_module/dashboard/data/admin_data_store.dart';
 import 'my_app_event.dart';
 import 'my_app_state.dart';
@@ -11,30 +12,58 @@ import 'my_app_state.dart';
 class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
   MyAppBloc() : super(const MyAppState()) {
     on<MyAppInitEvent>((event, emit) async {
-      unawaited(MyAppTextStyles.preloadAllFonts());
+      // 1. Rapidly check if all essential home data is already cached in local storage (<5ms)
+      final localResults = await Future.wait([
+        AdminDataStore.instance.loadFromLocalStorage(),
+        GoogleTranslationService.instance.loadFromLocalStorage(),
+      ]);
+      final hasLocalCache = localResults[0] == true;
+      final hasEssentialData = AdminDataStore.instance.hasEssentialHomeData;
 
-      // Render website immediately from frame 0 with preloaded local defaults & assets.
-      // Never wait for network images or database queries during initial load.
-      emit(state.copyWith(isInitialized: true, isBlurredLoading: false));
+      if (hasLocalCache && hasEssentialData) {
+        // Fast path: Returning user with complete local cache.
+        // Render website immediately without network delay.
+        emit(state.copyWith(isInitialized: true, isBlurredLoading: false));
 
-      // Asynchronously restore local cache and sync cloud data in background (unawaited)
-      unawaited(() async {
+        AppImageCacheService.precacheEssentialDatabaseImages(AdminDataStore.instance);
+
+        // Check for incremental remote updates in the background
+        unawaited(() async {
+          try {
+            await Future.wait([
+              AdminDataStore.instance.initializeEssentialFirstViewport(forceRefresh: false),
+              GoogleTranslationService.instance.initFromFirestore(),
+            ]);
+            await AdminDataStore.instance.startGentleBackgroundLoading(forceRefresh: false);
+          } catch (e) {
+            debugPrint('Background sync notice: $e');
+          }
+        }());
+      } else {
+        // Cold start / First-time visit:
+        // Immediately start the loader so the user never sees empty cards or unpopulated sections
+        emit(state.copyWith(
+          isInitialized: true,
+          isBlurredLoading: true,
+          loadingMessage: 'શ્રી પવનપુત્ર ગરબી મંડળ\nમાહિતી લોડ થઈ રહી છે...',
+        ));
+
         try {
-          final localResults = await Future.wait([
-            AdminDataStore.instance.loadFromLocalStorage(),
-            GoogleTranslationService.instance.loadFromLocalStorage(),
-          ]);
-          final hasLocalCache = localResults[0] == true;
-
           await Future.wait([
-            AdminDataStore.instance.initializeEssentialFirstViewport(forceRefresh: !hasLocalCache),
+            AdminDataStore.instance.initializeEssentialFirstViewport(forceRefresh: true),
             GoogleTranslationService.instance.initFromFirestore(),
           ]);
-          await AdminDataStore.instance.startGentleBackgroundLoading(forceRefresh: !hasLocalCache);
+
+          AppImageCacheService.precacheEssentialDatabaseImages(AdminDataStore.instance);
+
+          await AdminDataStore.instance.startGentleBackgroundLoading(forceRefresh: true);
         } catch (e) {
-          debugPrint('Background init notice: $e');
+          debugPrint('Essential cold-start fetch error: $e');
+        } finally {
+          // All Firestore collections loaded and saved into local cache. Dismiss loader cleanly.
+          emit(state.copyWith(isBlurredLoading: false));
         }
-      }());
+      }
     });
 
     on<MyAppChangeThemeModeEvent>((event, emit) {
@@ -53,7 +82,7 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
       );
       final stopwatch = Stopwatch()..start();
       try {
-        unawaited(MyAppTextStyles.preloadAllFonts());
+        await MyAppTextStyles.preloadAllFonts();
         if (isGu) {
           await GoogleTranslationService.instance.prewarmAll();
         }

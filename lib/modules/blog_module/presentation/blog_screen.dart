@@ -35,16 +35,17 @@ class _BlogScreenState extends State<BlogScreen> {
         final screenWidth = MediaQuery.sizeOf(context).width;
         final isMobile = screenWidth < 768;
         final isGujarati = Localizations.maybeLocaleOf(context)?.languageCode == 'gu';
+        final lang = isGujarati ? 'gu' : 'en';
 
         final storeBlogs = AdminDataStore.instance.blogs;
         final articles = storeBlogs.map((b) => _BlogArticle(
           slug: b.slug,
-          title: b.title,
-          snippet: b.snippet,
+          title: b.getTitle(lang),
+          snippet: b.getSnippet(lang),
           category: b.category,
           date: b.date,
           readTime: b.readTime,
-          content: b.content,
+          content: b.getContent(lang),
         )).toList();
 
     return MyAppScaffold(

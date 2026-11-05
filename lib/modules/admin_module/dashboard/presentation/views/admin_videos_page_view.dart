@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,6 +8,7 @@ import '../../../../../core/utils/youtube_url_helper.dart';
 import '../../../../../core/widgets/admin/admin_website_context_banner.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../../core/widgets/heritage_badge.dart';
+import '../../../../../core/widgets/image/app_cached_image.dart';
 import '../../../../../core/widgets/toast/my_app_toast_message.dart';
 import '../../../../../core/widgets/my_app_ui_components.dart';
 import '../../data/admin_data_store.dart';
@@ -423,10 +423,12 @@ class _AdminVideosPageViewState extends State<AdminVideosPageView> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              Image.network(
-                                previewThumb!,
+                              AppCachedImage(
+                                imageUrl: previewThumb,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Container(
+                                memCacheWidth: 640,
+                                memCacheHeight: 360,
+                                fallbackWidget: Container(
                                   color: colors.heritageMaroon,
                                   child: const Icon(
                                     Icons.video_camera_back,
@@ -911,10 +913,12 @@ class _AdminVideosPageViewState extends State<AdminVideosPageView> {
                       ),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: CachedNetworkImage(
+                        child: AppCachedImage(
                           imageUrl: video.thumbnailUrl,
                           fit: BoxFit.cover,
-                          errorWidget: (_, _, _) => Container(
+                          memCacheWidth: 640,
+                          memCacheHeight: 360,
+                          fallbackWidget: Container(
                             color: colors.deepMaroon,
                             child: const Icon(
                               Icons.video_camera_back_rounded,
@@ -2563,13 +2567,12 @@ class _AdminVideosPageViewState extends State<AdminVideosPageView> {
                               top: Radius.circular(13),
                             ),
                             child: hasThumb
-                                ? CachedNetworkImage(
+                                ? AppCachedImage(
                                     imageUrl: latestVideo.thumbnailUrl.trim(),
                                     fit: BoxFit.cover,
-                                    placeholder: (_, _) =>
-                                        _buildDefaultYearCover(year, colors, styles),
-                                    errorWidget: (_, _, _) =>
-                                        _buildDefaultYearCover(year, colors, styles),
+                                    memCacheWidth: 640,
+                                    memCacheHeight: 360,
+                                    fallbackWidget: _buildDefaultYearCover(year, colors, styles),
                                   )
                                 : _buildDefaultYearCover(year, colors, styles),
                           ),
@@ -2974,19 +2977,12 @@ class _AdminVideosPageViewState extends State<AdminVideosPageView> {
                             top: Radius.circular(13),
                           ),
                           child: hasValidThumb
-                              ? CachedNetworkImage(
+                              ? AppCachedImage(
                                   imageUrl: thumbUrl,
                                   fit: BoxFit.cover,
-                                  placeholder: (_, _) => Container(
-                                    color: colors.deepMaroon,
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 1.5,
-                                      ),
-                                    ),
-                                  ),
-                                  errorWidget: (_, _, _) =>
-                                      _buildDefaultVideoThumbnail(
+                                  memCacheWidth: 640,
+                                  memCacheHeight: 360,
+                                  fallbackWidget: _buildDefaultVideoThumbnail(
                                     video,
                                     colors,
                                     styles,

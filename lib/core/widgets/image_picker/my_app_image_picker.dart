@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +8,7 @@ import '../../my_app_colors/my_app_colors.dart';
 import '../../my_app_text_style/my_app_text_styles.dart';
 import '../toast/my_app_toast_message.dart';
 import '../dialogs/my_app_dialog.dart';
+import '../image/app_cached_image.dart';
 
 /// Cultural Heritage Image Picker & CRUD Widget.
 /// Supports cross-platform picking via `image_picker: ^1.2.4`, direct URL entry,
@@ -236,65 +236,12 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
   }
 
   Widget _buildImageWidget({BoxFit fit = BoxFit.cover}) {
-    if (_currentUrl.isEmpty) {
-      return Image.asset(
-        widget.defaultFallbackAsset,
-        fit: fit,
-        errorBuilder: (_, _, _) => const Icon(Icons.image_outlined, size: 48),
-      );
-    }
-
-    if (_currentUrl.startsWith('assets/')) {
-      return Image.asset(
-        _currentUrl,
-        fit: fit,
-        errorBuilder: (_, _, _) => Image.asset(widget.defaultFallbackAsset, fit: fit),
-      );
-    }
-
-    if (_currentUrl.startsWith('data:image')) {
-      try {
-        final commaIdx = _currentUrl.indexOf(',');
-        final base64Data = commaIdx != -1 ? _currentUrl.substring(commaIdx + 1) : _currentUrl;
-        return Image.memory(
-          base64Decode(base64Data),
-          fit: fit,
-          errorBuilder: (_, _, _) => Image.asset(widget.defaultFallbackAsset, fit: fit),
-        );
-      } catch (_) {
-        return Image.asset(widget.defaultFallbackAsset, fit: fit);
-      }
-    }
-
-    return CachedNetworkImage(
+    return AppCachedImage(
       imageUrl: _currentUrl,
       fit: fit,
-      placeholder: (_, _) => Container(
-        color: Colors.black12,
-        child: const Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      ),
-      errorWidget: (_, _, _) => Container(
-        color: Colors.black26,
-        padding: const EdgeInsets.all(12),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.broken_image_outlined, color: Colors.amber, size: 32),
-            SizedBox(height: 6),
-            Text(
-              'Could not load preview',
-              style: TextStyle(fontSize: 11, color: Colors.white70),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+      fallbackAsset: widget.defaultFallbackAsset,
+      memCacheWidth: 600,
+      memCacheHeight: 600,
     );
   }
 

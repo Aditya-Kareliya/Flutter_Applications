@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,6 +10,7 @@ import '../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../core/widgets/cultural_frame_card.dart';
 import '../../../core/widgets/heritage_badge.dart';
 import '../../../core/widgets/heritage_divider.dart';
+import '../../../core/widgets/image/app_cached_image.dart';
 import '../../../utils/navigation_manager.dart';
 import '../../admin_module/dashboard/data/admin_data_store.dart';
 import '../data/repositories/garbi_year_repository.dart';
@@ -18,12 +18,15 @@ import 'archive_bloc.dart';
 
 class ArchiveScreen extends StatelessWidget {
   const ArchiveScreen({super.key, this.year});
+
   final String? year;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ArchiveCubit(const FirestoreGarbiYearRepository())..load(),
+      create: (_) =>
+      ArchiveCubit(const FirestoreGarbiYearRepository())
+        ..load(),
       child: Builder(
         builder: (context) {
           return ListenableBuilder(
@@ -53,6 +56,7 @@ class ArchiveScreen extends StatelessWidget {
 
 class _ArchiveBody extends StatelessWidget {
   const _ArchiveBody({this.year, required this.state});
+
   final String? year;
   final ArchiveState state;
 
@@ -60,7 +64,9 @@ class _ArchiveBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
-    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenWidth = MediaQuery
+        .sizeOf(context)
+        .width;
     final isMobile = screenWidth < 768;
     final isTablet = screenWidth >= 768 && screenWidth < 1040;
 
@@ -131,52 +137,39 @@ class _ArchiveBody extends StatelessWidget {
             final selectedYear = int.tryParse(year ?? '') ?? (years.isNotEmpty ? years.first.year : 2026);
 
             final allAlbums = AdminDataStore.instance.albums;
-            final isGu = Localizations.maybeLocaleOf(context)?.languageCode == 'gu';
+            final isGu = Localizations
+                .maybeLocaleOf(context)
+                ?.languageCode == 'gu';
+            final langCode = isGu ? 'gu' : 'en';
             final yearAlbums = allAlbums.where((a) => a.year == selectedYear.toString()).toList();
-            final albums = yearAlbums.isNotEmpty
-                ? yearAlbums.map((a) => (
-                    isGu ? context.trDynamic(a.name) : a.name,
-                    a.id,
-                    Icons.photo_library_rounded,
-                    a.description.isNotEmpty
-                        ? (isGu ? context.trDynamic(a.description) : a.description)
-                        : (isGu ? '${a.photoCount} તસવીરો' : '${a.photoCount} Photos'),
-                    a.coverImageUrl,
-                    a.dayTag,
-                    a.photoCount,
-                  )).toList()
-                : [
-                    (
-                      context.tr('album_main_garbi'),
-                      'main-garbi',
-                      Icons.temple_hindu_rounded,
-                      'Full Night Garbi, Chhand, Stuti & Stage Photos',
-                      '',
-                      'Day 1',
-                      0,
-                    ),
-                    (
-                      context.tr('album_ras'),
-                      'raas-dandiya',
-                      Icons.music_note_rounded,
-                      '2-Taali, 3-Taali & Traditional Saurashtra Hinch',
-                      '',
-                      'Day 3',
-                      0,
-                    ),
-                    (
-                      context.tr('album_special'),
-                      'maha-aarti',
-                      Icons.local_fire_department_rounded,
-                      'Grand Aarti, Deepotsav & Sacred Offerings',
-                      '',
-                      'Day 9',
-                      0,
-                    ),
-                  ];
+            final albums = yearAlbums.map((a) {
+              final title = a
+                  .getName(langCode)
+                  .isNotEmpty
+                  ? a.getName(langCode)
+                  : (isGu ? context.trDynamic(a.name) : a.name);
+              final desc = a
+                  .getDescription(langCode)
+                  .isNotEmpty
+                  ? a.getDescription(langCode)
+                  : (a.description.isNotEmpty
+                  ? (isGu ? context.trDynamic(a.description) : a.description)
+                  : (isGu ? '${a.photoCount} તસવીરો' : '${a.photoCount} Photos'));
+              final day = a
+                  .getDayTag(langCode)
+                  .isNotEmpty ? a.getDayTag(langCode) : a.dayTag;
+              return (
+              title,
+              a.id,
+              Icons.photo_library_rounded,
+              desc,
+              a.coverImageUrl,
+              day,
+              a.photoCount,
+              );
+            }).toList();
 
             final s = AdminDataStore.instance;
-            final langCode = isGu ? 'gu' : 'en';
 
             final archiveTag = s.getTextOverride(langCode, 'archive_tag') ?? context.tr('archive_tag');
             final archiveTitle = s.getTextOverride(langCode, 'archive_title') ?? context.tr('archive_title');
@@ -300,64 +293,64 @@ class _ArchiveBody extends StatelessWidget {
                 // Album Cards Grid
                 albums.isEmpty
                     ? CulturalFrameCard(
-                        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.collections_bookmark_outlined,
-                                size: 44,
-                                color: colors.heritageGold,
-                              ),
-                              const SizedBox(height: 14),
-                              Text(
-                                context.tr('archive_empty_title'),
-                                style: styles.editorialSerif(
-                                  context,
-                                  size: 18,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                context.tr('archive_empty_desc'),
-                                textAlign: TextAlign.center,
-                                style: styles.cleanSans(
-                                  context,
-                                  size: 13,
-                                  color: colors.getSecondaryTextColor(context),
-                                ),
-                              ),
-                            ],
+                  padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.collections_bookmark_outlined,
+                          size: 44,
+                          color: colors.heritageGold,
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          context.tr('archive_empty_title'),
+                          style: styles.editorialSerif(
+                            context,
+                            size: 18,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      )
-                    : GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: albums.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 20,
-                          childAspectRatio: isMobile ? 1.55 : 1.35,
+                        const SizedBox(height: 6),
+                        Text(
+                          context.tr('archive_empty_desc'),
+                          textAlign: TextAlign.center,
+                          style: styles.cleanSans(
+                            context,
+                            size: 13,
+                            color: colors.getSecondaryTextColor(context),
+                          ),
                         ),
-                        itemBuilder: (context, index) {
-                          final album = albums[index];
-                          return _AlbumCard(
-                            year: selectedYear,
-                            index: index,
-                            title: album.$1,
-                            slug: album.$2,
-                            icon: album.$3,
-                            subtitle: album.$4,
-                            coverImageUrl: album.$5,
-                            dayTag: album.$6,
-                            photoCount: album.$7,
-                          );
-                        },
-                      ),
+                      ],
+                    ),
+                  ),
+                )
+                    : GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: albums.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    childAspectRatio: isMobile ? 1.55 : 1.35,
+                  ),
+                  itemBuilder: (context, index) {
+                    final album = albums[index];
+                    return _AlbumCard(
+                      year: selectedYear,
+                      index: index,
+                      title: album.$1,
+                      slug: album.$2,
+                      icon: album.$3,
+                      subtitle: album.$4,
+                      coverImageUrl: album.$5,
+                      dayTag: album.$6,
+                      photoCount: album.$7,
+                    );
+                  },
+                ),
               ],
             );
           }(),
@@ -399,11 +392,12 @@ class _AlbumCard extends StatelessWidget {
         coverImageUrl != 'assets/images/pavan_putra_logo.png';
 
     return CulturalFrameCard(
-      onTap: () => serviceLocator<NavigationManager>().goToGalleryAlbum(
-        context,
-        year: year.toString(),
-        album: slug,
-      ),
+      onTap: () =>
+          serviceLocator<NavigationManager>().goToGalleryAlbum(
+            context,
+            year: year.toString(),
+            album: slug,
+          ),
       padding: EdgeInsets.zero,
       backgroundColor: index == 0 ? colors.deepMaroon : colors.heritageMaroon,
       borderColor: colors.heritageGold.withValues(alpha: 0.4),
@@ -426,13 +420,13 @@ class _AlbumCard extends StatelessWidget {
                     ).createShader(rect);
                   },
                   blendMode: BlendMode.srcOver,
-                  child: coverImageUrl.startsWith('assets/')
-                      ? Image.asset(coverImageUrl, fit: BoxFit.cover)
-                      : CachedNetworkImage(
-                          imageUrl: coverImageUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, _, _) => const SizedBox(),
-                        ),
+                  child: AppCachedImage(
+                    imageUrl: coverImageUrl,
+                    fit: BoxFit.cover,
+                    memCacheWidth: 800,
+                    memCacheHeight: 600,
+                    errorWidget: (_, _, _) => const SizedBox(),
+                  ),
                 ),
               ),
             ),

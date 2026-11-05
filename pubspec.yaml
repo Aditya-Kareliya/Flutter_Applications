@@ -1,7 +1,7 @@
 name: pavan_putra_garbi
 publish_to: none
 description: "Official heritage web portal and administrative management platform for Pavan Putra Garbi Mandal, Rajkot. Features bilingual Gujarati-English cultural showcase, real-time live preview CMS, multi-year archive, devotional offerings & UPI integration, and secure Firebase Cloud backend."
-version: 1.0.1+1
+version: 1.0.2+1
 
 environment:
   sdk: ">=3.12.0 <4.0.0"

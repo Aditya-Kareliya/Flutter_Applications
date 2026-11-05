@@ -30,8 +30,12 @@ class MyAppTextStyles {
   static final TextStyle _baseNotoSansGujarati = GoogleFonts.notoSansGujarati(textStyle: const TextStyle(fontFamilyFallback: gujaratiFallback));
   static final TextStyle _baseInter = GoogleFonts.inter(textStyle: const TextStyle(fontFamilyFallback: gujaratiFallback));
 
+  static bool _fontsLoaded = false;
+  static bool get areFontsLoaded => _fontsLoaded;
+
   /// Preload all Gujarati & English fonts into Flutter's FontLoader to eliminate tofu glyph boxes
   static Future<void> preloadAllFonts() async {
+    if (_fontsLoaded) return;
     try {
       await GoogleFonts.pendingFonts([
         GoogleFonts.notoSansGujarati(fontWeight: FontWeight.w400),
@@ -49,7 +53,8 @@ class MyAppTextStyles {
         GoogleFonts.inter(fontWeight: FontWeight.w500),
         GoogleFonts.inter(fontWeight: FontWeight.w600),
         GoogleFonts.inter(fontWeight: FontWeight.w700),
-      ]);
+      ]).timeout(const Duration(seconds: 3));
+      _fontsLoaded = true;
     } catch (e) {
       debugPrint('Font preload notice: $e');
     }

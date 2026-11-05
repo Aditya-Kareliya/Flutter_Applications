@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/dependency_injection/dependency_injection.dart';
@@ -7,6 +6,7 @@ import '../../../../../core/my_app_text_style/my_app_text_styles.dart';
 import '../../../../../core/widgets/admin/admin_website_context_banner.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../../core/widgets/heritage_badge.dart';
+import '../../../../../core/widgets/image/app_cached_image.dart';
 import '../../../../../core/widgets/image_picker/my_app_image_picker.dart';
 import '../../../../../core/widgets/my_app_ui_components.dart';
 import '../../../../../core/widgets/toast/my_app_toast_message.dart';
@@ -271,9 +271,12 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
     final isMobile = MediaQuery.sizeOf(context).width < 650;
 
     final nameCtrl = TextEditingController(text: album?.name ?? '');
+    final nameGuCtrl = TextEditingController(text: album?.nameGu ?? '');
     final yearCtrl = TextEditingController(text: album?.year ?? '2026');
     final dayCtrl = TextEditingController(text: album?.dayTag ?? 'Day 1');
+    final dayGuCtrl = TextEditingController(text: album?.dayTagGu ?? '');
     final descCtrl = TextEditingController(text: album?.description ?? '');
+    final descGuCtrl = TextEditingController(text: album?.descriptionGu ?? '');
     String coverUrl =
         album?.coverImageUrl ?? 'assets/images/pavan_putra_logo.jpg';
 
@@ -327,8 +330,16 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                   const SizedBox(height: 14),
                   MyAppTextFormField(
                     controller: nameCtrl,
-                    labelText: 'Album Title (e.g. Maha Aarti Deepotsav)',
+                    labelText: 'Album Title (English, e.g. Maha Aarti Deepotsav)',
                     prefixIcon: const Icon(Icons.title_rounded),
+                    showClearIcon: true,
+                  ),
+                  const SizedBox(height: 12),
+                  MyAppTextFormField(
+                    controller: nameGuCtrl,
+                    labelText: 'Album Title (Gujarati - optional, auto-translates)',
+                    hintText: 'e.g. મહા આરતી દીપોત્સવ',
+                    prefixIcon: const Icon(Icons.translate_rounded),
                     showClearIcon: true,
                   ),
                   const SizedBox(height: 12),
@@ -343,8 +354,16 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                     const SizedBox(height: 12),
                     MyAppTextFormField(
                       controller: dayCtrl,
-                      labelText: 'Occasion / Day Tag',
-                      hintText: 'e.g. Day 1 / નોરતા ૧',
+                      labelText: 'Occasion / Day Tag (English)',
+                      hintText: 'e.g. Day 1',
+                      prefixIcon: const Icon(Icons.tag_rounded),
+                      showClearIcon: true,
+                    ),
+                    const SizedBox(height: 12),
+                    MyAppTextFormField(
+                      controller: dayGuCtrl,
+                      labelText: 'Occasion / Day Tag (Gujarati)',
+                      hintText: 'e.g. દિવસ ૧',
                       prefixIcon: const Icon(Icons.tag_rounded),
                       showClearIcon: true,
                     ),
@@ -352,7 +371,7 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                     Row(
                       children: [
                         Expanded(
-                          flex: 3,
+                          flex: 2,
                           child: MyAppTextFormField(
                             controller: yearCtrl,
                             labelText: 'Festival Year',
@@ -365,11 +384,22 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          flex: 4,
+                          flex: 3,
                           child: MyAppTextFormField(
                             controller: dayCtrl,
-                            labelText: 'Occasion / Day Tag',
+                            labelText: 'Day Tag (EN)',
                             hintText: 'e.g. Day 1',
+                            prefixIcon: const Icon(Icons.tag_rounded),
+                            showClearIcon: true,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 3,
+                          child: MyAppTextFormField(
+                            controller: dayGuCtrl,
+                            labelText: 'Day Tag (GU)',
+                            hintText: 'e.g. દિવસ ૧',
                             prefixIcon: const Icon(Icons.tag_rounded),
                             showClearIcon: true,
                           ),
@@ -380,9 +410,18 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                   const SizedBox(height: 12),
                   MyAppTextAreaField(
                     controller: descCtrl,
-                    labelText: 'Album Description / Cultural Narrative',
+                    labelText: 'Album Description (English)',
                     hintText:
                         'Brief context about the celebrations in this album...',
+                    minLines: 2,
+                    maxLines: 3,
+                    showClearIcon: true,
+                  ),
+                  const SizedBox(height: 12),
+                  MyAppTextAreaField(
+                    controller: descGuCtrl,
+                    labelText: 'Album Description (Gujarati - optional)',
+                    hintText: 'આલ્બમ અથવા ઉજવણીનું વર્ણન...',
                     minLines: 2,
                     maxLines: 3,
                     showClearIcon: true,
@@ -415,9 +454,12 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                     AdminAlbum(
                       id: newAlbumId,
                       name: name,
+                      nameGu: nameGuCtrl.text.trim(),
                       year: yearCtrl.text.trim(),
                       dayTag: dayCtrl.text.trim(),
+                      dayTagGu: dayGuCtrl.text.trim(),
                       description: descCtrl.text.trim(),
+                      descriptionGu: descGuCtrl.text.trim(),
                       coverImageUrl: coverUrl,
                     ),
                   );
@@ -431,9 +473,12 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                   widget.store.updateAlbum(
                     album.copyWith(
                       name: name,
+                      nameGu: nameGuCtrl.text.trim(),
                       year: yearCtrl.text.trim(),
                       dayTag: dayCtrl.text.trim(),
+                      dayTagGu: dayGuCtrl.text.trim(),
                       description: descCtrl.text.trim(),
+                      descriptionGu: descGuCtrl.text.trim(),
                       coverImageUrl: coverUrl,
                     ),
                   );
@@ -872,21 +917,12 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                         child: SizedBox(
                           width: double.infinity,
                           height: isMobile ? 240 : 340,
-                          child: photo.imageUrl.startsWith('http')
-                              ? CachedNetworkImage(
-                                  imageUrl: photo.imageUrl,
-                                  fit: BoxFit.cover,
-                                  placeholder: (_, _) =>
-                                      Container(color: colors.deepMaroon),
-                                  errorWidget: (_, _, _) => Image.asset(
-                                    'assets/images/pavan_putra_logo.jpg',
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : Image.asset(
-                                  'assets/images/pavan_putra_logo.jpg',
-                                  fit: BoxFit.cover,
-                                ),
+                          child: AppCachedImage(
+                            imageUrl: photo.imageUrl,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 800,
+                            memCacheHeight: 600,
+                          ),
                         ),
                       ),
                       Positioned(
@@ -1371,19 +1407,12 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                 child: SizedBox(
                   width: 54,
                   height: 54,
-                  child: album.coverImageUrl.startsWith('http')
-                      ? CachedNetworkImage(
-                          imageUrl: album.coverImageUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, _, _) => Image.asset(
-                            'assets/images/pavan_putra_logo.jpg',
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : Image.asset(
-                          'assets/images/pavan_putra_logo.jpg',
-                          fit: BoxFit.cover,
-                        ),
+                  child: AppCachedImage(
+                    imageUrl: album.coverImageUrl,
+                    fit: BoxFit.cover,
+                    memCacheWidth: 150,
+                    memCacheHeight: 150,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -1596,19 +1625,12 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                                   borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(11),
                                   ),
-                                  child: photo.imageUrl.startsWith('http')
-                                      ? CachedNetworkImage(
-                                          imageUrl: photo.imageUrl,
-                                          fit: BoxFit.cover,
-                                          errorWidget: (_, _, _) => Image.asset(
-                                            'assets/images/pavan_putra_logo.jpg',
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )
-                                      : Image.asset(
-                                          'assets/images/pavan_putra_logo.jpg',
-                                          fit: BoxFit.cover,
-                                        ),
+                                  child: AppCachedImage(
+                                    imageUrl: photo.imageUrl,
+                                    fit: BoxFit.cover,
+                                    memCacheWidth: 400,
+                                    memCacheHeight: 400,
+                                  ),
                                 ),
                                 if (isCover)
                                   Positioned(
@@ -2156,23 +2178,12 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                                   child: SizedBox(
                                     width: double.infinity,
                                     height: 85,
-                                    child:
-                                        album.coverImageUrl.startsWith('http')
-                                        ? CachedNetworkImage(
-                                            imageUrl: album.coverImageUrl,
-                                            fit: BoxFit.cover,
-                                            placeholder: (_, _) => Container(
-                                              color: colors.deepMaroon,
-                                            ),
-                                            errorWidget: (_, _, _) => Image.asset(
-                                              'assets/images/pavan_putra_logo.jpg',
-                                              fit: BoxFit.cover,
-                                            ),
-                                          )
-                                        : Image.asset(
-                                            'assets/images/pavan_putra_logo.jpg',
-                                            fit: BoxFit.cover,
-                                          ),
+                                    child: AppCachedImage(
+                                      imageUrl: album.coverImageUrl,
+                                      fit: BoxFit.cover,
+                                      memCacheWidth: 400,
+                                      memCacheHeight: 300,
+                                    ),
                                   ),
                                 ),
                                 Padding(
@@ -2602,21 +2613,12 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(13),
                     ),
-                    child: album.coverImageUrl.startsWith('http')
-                        ? CachedNetworkImage(
-                            imageUrl: album.coverImageUrl,
-                            fit: BoxFit.cover,
-                            placeholder: (_, _) =>
-                                Container(color: colors.deepMaroon),
-                            errorWidget: (_, _, _) => Image.asset(
-                              'assets/images/pavan_putra_logo.jpg',
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Image.asset(
-                            'assets/images/pavan_putra_logo.jpg',
-                            fit: BoxFit.cover,
-                          ),
+                    child: AppCachedImage(
+                      imageUrl: album.coverImageUrl,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 600,
+                      memCacheHeight: 400,
+                    ),
                   ),
                   Positioned(
                     top: 8,

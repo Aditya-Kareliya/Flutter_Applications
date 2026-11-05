@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/dependency_injection/dependency_injection.dart';
@@ -8,6 +7,7 @@ import '../../../../../core/widgets/admin/admin_website_context_banner.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../../core/widgets/heritage_badge.dart';
 import '../../../../../core/widgets/heritage_divider.dart';
+import '../../../../../core/widgets/image/app_cached_image.dart';
 import '../../../../../core/widgets/image_picker/my_app_image_picker.dart';
 import '../../../../../core/widgets/my_app_ui_components.dart';
 import '../../../../../core/widgets/toast/my_app_toast_message.dart';
@@ -2012,20 +2012,15 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(7),
-                    child: item.imageUrl.startsWith('http')
-                        ? CachedNetworkImage(
+                    child: item.imageUrl.isNotEmpty
+                        ? AppCachedImage(
                             imageUrl: item.imageUrl,
                             fit: BoxFit.cover,
-                            placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
-                            errorWidget: (_, _, _) => Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 18),
+                            memCacheWidth: 100,
+                            memCacheHeight: 100,
+                            fallbackWidget: Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 18),
                           )
-                        : (item.imageUrl.isNotEmpty && item.imageUrl.startsWith('assets/'))
-                            ? Image.asset(
-                                item.imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 18),
-                              )
-                            : Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 18),
+                        : Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 18),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -2161,20 +2156,15 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(9),
-                    child: item.imageUrl.startsWith('http')
-                        ? CachedNetworkImage(
+                    child: item.imageUrl.isNotEmpty
+                        ? AppCachedImage(
                             imageUrl: item.imageUrl,
                             fit: BoxFit.cover,
-                            placeholder: (_, _) => const Center(child: CircularProgressIndicator(strokeWidth: 1.5)),
-                            errorWidget: (_, _, _) => Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 20),
+                            memCacheWidth: 100,
+                            memCacheHeight: 100,
+                            fallbackWidget: Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 20),
                           )
-                        : (item.imageUrl.isNotEmpty && item.imageUrl.startsWith('assets/'))
-                            ? Image.asset(
-                                item.imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 20),
-                              )
-                            : Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 20),
+                        : Icon(_iconForMilestone(item.iconName), color: colors.heritageGold, size: 20),
                   ),
                 ),
                 const SizedBox(width: 10),

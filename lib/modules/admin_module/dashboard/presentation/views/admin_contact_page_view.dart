@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -12,6 +11,7 @@ import '../../../../../core/widgets/admin/admin_website_context_banner.dart';
 import '../../../../../core/widgets/brand_logo/brand_logo_widget.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../../core/widgets/heritage_badge.dart';
+import '../../../../../core/widgets/image/app_cached_image.dart';
 import '../../../../../core/widgets/image_picker/my_app_image_picker.dart';
 import '../../../../../core/widgets/my_app_ui_components.dart';
 import '../../../../../core/widgets/toast/my_app_toast_message.dart';
@@ -492,20 +492,13 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                           ],
                         ),
                         child: hasQr
-                            ? CachedNetworkImage(
+                            ? AppCachedImage(
                                 imageUrl: _paymentQrImageUrl.trim(),
                                 width: 220,
                                 height: 220,
                                 fit: BoxFit.contain,
-                                placeholder: (_, _) => const SizedBox(
-                                  width: 220,
-                                  height: 220,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                ),
+                                memCacheWidth: 440,
+                                memCacheHeight: 440,
                                 errorWidget: (_, _, _) => Container(
                                   width: 220,
                                   height: 220,
@@ -4088,20 +4081,13 @@ class _AdminContactPageViewState extends State<AdminContactPageView> {
                     ? Stack(
                         alignment: Alignment.bottomRight,
                         children: [
-                          CachedNetworkImage(
+                          AppCachedImage(
                             imageUrl: _paymentQrImageUrl,
                             width: 160,
                             height: 160,
                             fit: BoxFit.contain,
-                            placeholder: (_, _) => const SizedBox(
-                              width: 160,
-                              height: 160,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            ),
+                            memCacheWidth: 320,
+                            memCacheHeight: 320,
                             errorWidget: (_, _, _) => Container(
                               width: 160,
                               height: 160,

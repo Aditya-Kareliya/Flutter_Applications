@@ -8,124 +8,171 @@ import '../../../../core/localization/google_translation_service.dart';
 import '../../../../core/localization/my_app_translations.dart';
 import '../../../../core/utils/youtube_url_helper.dart';
 
-/// Activity log model for tracking all actions in the admin portal
 class AdminActivityLog {
-  final String id;
-  final DateTime timestamp;
-  final String action; // 'CREATE', 'UPDATE', 'DELETE', 'CONFIG'
-  final String module;
-  final String details;
-  final String user;
+  AdminActivityLog({this.id = '', DateTime? timestamp, this.action = 'UPDATE', this.module = 'General', this.details = '', this.user = 'admin'})
+    : timestamp = timestamp ?? DateTime.now();
 
-  AdminActivityLog({required this.id, required this.timestamp, required this.action, required this.module, required this.details, this.user = 'admin'});
-
-  Map<String, dynamic> toMap() {
-    return {'id': id, 'timestamp': timestamp.toIso8601String(), 'action': action, 'module': module, 'details': details, 'user': user};
+  AdminActivityLog.fromJson(dynamic json) {
+    if (json is! Map) {
+      timestamp = DateTime.now();
+      return;
+    }
+    id = json['id']?.toString() ?? 'log-${DateTime.now().millisecondsSinceEpoch}';
+    timestamp = DateTime.tryParse(json['timestamp']?.toString() ?? '') ?? DateTime.now();
+    action = json['action']?.toString() ?? 'UPDATE';
+    module = json['module']?.toString() ?? 'General';
+    details = json['details']?.toString() ?? '';
+    user = json['user']?.toString() ?? 'admin';
   }
 
-  factory AdminActivityLog.fromMap(Map<String, dynamic> map) {
-    return AdminActivityLog(
-      id: map['id'] as String? ?? 'log-${DateTime.now().millisecondsSinceEpoch}',
-      timestamp: DateTime.tryParse(map['timestamp'] as String? ?? '') ?? DateTime.now(),
-      action: map['action'] as String? ?? 'UPDATE',
-      module: map['module'] as String? ?? 'General',
-      details: map['details'] as String? ?? '',
-      user: map['user'] as String? ?? 'admin',
-    );
+  factory AdminActivityLog.fromMap(Map<String, dynamic> map) => AdminActivityLog.fromJson(map);
+
+  String id = '';
+  DateTime timestamp = DateTime.now();
+  String action = 'UPDATE';
+  String module = 'General';
+  String details = '';
+  String user = 'admin';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['timestamp'] = timestamp.toIso8601String();
+    map['action'] = action;
+    map['module'] = module;
+    map['details'] = details;
+    map['user'] = user;
+    return map;
   }
+
+  Map<String, dynamic> toMap() => toJson();
 }
 
-/// Site content field model for editable text across the website
 class AdminContentField {
-  final String key;
-  final String label;
-  final String section;
-  String valueEn;
-  String valueGu;
-  final bool isMultiline;
+  AdminContentField({this.key = '', this.label = '', this.section = 'General', this.valueEn = '', this.valueGu = '', this.isMultiline = false});
 
-  AdminContentField({required this.key, required this.label, required this.section, required this.valueEn, required this.valueGu, this.isMultiline = false});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'key': key,
-      'label': label,
-      'section': section,
-      'valueEn': valueEn,
-      'valueGu': valueGu,
-      'isMultiline': isMultiline,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
 
-  factory AdminContentField.fromMap(Map<String, dynamic> map) {
-    return AdminContentField(
-      key: map['key'] as String? ?? '',
-      label: map['label'] as String? ?? '',
-      section: map['section'] as String? ?? 'General',
-      valueEn: map['valueEn'] as String? ?? map['value_en'] as String? ?? '',
-      valueGu: map['valueGu'] as String? ?? map['value_gu'] as String? ?? '',
-      isMultiline: map['isMultiline'] as bool? ?? map['is_multiline'] as bool? ?? false,
-    );
+  AdminContentField.fromJson(dynamic json) {
+    if (json is! Map) return;
+    key = json['key']?.toString() ?? '';
+    label = json['label']?.toString() ?? '';
+    section = json['section']?.toString() ?? 'General';
+    valueEn = json['valueEn']?.toString() ?? json['value_en']?.toString() ?? '';
+    valueGu = json['valueGu']?.toString() ?? json['value_gu']?.toString() ?? '';
+    isMultiline = _toBool(json['isMultiline'] ?? json['is_multiline']) ?? false;
   }
+
+  factory AdminContentField.fromMap(Map<String, dynamic> map) => AdminContentField.fromJson(map);
+
+  String key = '';
+  String label = '';
+  String section = 'General';
+  String valueEn = '';
+  String valueGu = '';
+  bool isMultiline = false;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['key'] = key;
+    map['label'] = label;
+    map['section'] = section;
+    map['valueEn'] = valueEn;
+    map['valueGu'] = valueGu;
+    map['isMultiline'] = isMultiline;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminContentField copyWith({String? valueEn, String? valueGu}) {
     return AdminContentField(key: key, label: label, section: section, valueEn: valueEn ?? this.valueEn, valueGu: valueGu ?? this.valueGu, isMultiline: isMultiline);
   }
 }
 
-/// Committee Member / Trustee model for About page CRUD
 class AdminCommitteeMember {
-  final String id;
-  final String nameEn;
-  final String nameGu;
-  final String designationEn;
-  final String designationGu;
-  final String phone;
-  final String photoUrl;
-  final int order;
-  final bool isActive;
-
-  const AdminCommitteeMember({
-    required this.id,
-    required this.nameEn,
-    required this.nameGu,
-    required this.designationEn,
-    required this.designationGu,
+  AdminCommitteeMember({
+    this.id = '',
+    this.nameEn = '',
+    this.nameGu = '',
+    this.designationEn = '',
+    this.designationGu = '',
     this.phone = '',
     this.photoUrl = 'assets/images/pavan_putra_logo.png',
     this.order = 0,
     this.isActive = true,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'nameEn': nameEn,
-      'nameGu': nameGu,
-      'designationEn': designationEn,
-      'designationGu': designationGu,
-      'phone': phone,
-      'photoUrl': photoUrl,
-      'order': order,
-      'isActive': isActive,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
-  factory AdminCommitteeMember.fromMap(Map<String, dynamic> map) {
-    return AdminCommitteeMember(
-      id: map['id'] as String? ?? '',
-      nameEn: map['nameEn'] as String? ?? map['name_en'] as String? ?? '',
-      nameGu: map['nameGu'] as String? ?? map['name_gu'] as String? ?? '',
-      designationEn: map['designationEn'] as String? ?? map['designation_en'] as String? ?? '',
-      designationGu: map['designationGu'] as String? ?? map['designation_gu'] as String? ?? '',
-      phone: map['phone'] as String? ?? '',
-      photoUrl: map['photoUrl'] as String? ?? map['photo_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
-    );
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
+
+  AdminCommitteeMember.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    nameEn = json['nameEn']?.toString() ?? json['name_en']?.toString() ?? '';
+    nameGu = json['nameGu']?.toString() ?? json['name_gu']?.toString() ?? '';
+    designationEn = json['designationEn']?.toString() ?? json['designation_en']?.toString() ?? '';
+    designationGu = json['designationGu']?.toString() ?? json['designation_gu']?.toString() ?? '';
+    phone = json['phone']?.toString() ?? '';
+    photoUrl = json['photoUrl']?.toString() ?? json['photo_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    order = _toInt(json['order']) ?? 0;
+    isActive = _toBool(json['isActive'] ?? json['is_active']) ?? true;
+  }
+
+  factory AdminCommitteeMember.fromMap(Map<String, dynamic> map) => AdminCommitteeMember.fromJson(map);
+
+  String id = '';
+  String nameEn = '';
+  String nameGu = '';
+  String designationEn = '';
+  String designationGu = '';
+  String phone = '';
+  String photoUrl = 'assets/images/pavan_putra_logo.png';
+  int order = 0;
+  bool isActive = true;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['nameEn'] = nameEn;
+    map['nameGu'] = nameGu;
+    map['designationEn'] = designationEn;
+    map['designationGu'] = designationGu;
+    map['phone'] = phone;
+    map['photoUrl'] = photoUrl;
+    map['order'] = order;
+    map['isActive'] = isActive;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminCommitteeMember copyWith({
     String? id,
@@ -152,70 +199,91 @@ class AdminCommitteeMember {
   }
 }
 
-/// History Milestone Timeline item for History page CRUD
 class AdminHistoryMilestone {
-  final String id;
-  final String year;
-  final String badgeEn;
-  final String badgeGu;
-  final String titleEn;
-  final String titleGu;
-  final String descEn;
-  final String descGu;
-  final String iconName;
-  final String imageUrl;
-  final int order;
-  final bool isActive;
-
   AdminHistoryMilestone({
-    required this.id,
-    required this.year,
-    required this.badgeEn,
-    required this.badgeGu,
-    required this.titleEn,
-    required this.titleGu,
-    required this.descEn,
-    required this.descGu,
+    this.id = '',
+    this.year = '',
+    this.badgeEn = 'MILESTONE',
+    this.badgeGu = 'માઇલસ્ટોન',
+    this.titleEn = '',
+    this.titleGu = '',
+    this.descEn = '',
+    this.descGu = '',
     this.iconName = 'local_fire_department_rounded',
     this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.order = 0,
     this.isActive = true,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'year': year,
-      'badgeEn': badgeEn,
-      'badgeGu': badgeGu,
-      'titleEn': titleEn,
-      'titleGu': titleGu,
-      'descEn': descEn,
-      'descGu': descGu,
-      'iconName': iconName,
-      'imageUrl': imageUrl,
-      'order': order,
-      'isActive': isActive,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
-  factory AdminHistoryMilestone.fromMap(Map<String, dynamic> map) {
-    return AdminHistoryMilestone(
-      id: map['id'] as String? ?? '',
-      year: map['year'] as String? ?? '',
-      badgeEn: map['badgeEn'] as String? ?? map['badge_en'] as String? ?? 'MILESTONE',
-      badgeGu: map['badgeGu'] as String? ?? map['badge_gu'] as String? ?? 'માઇલસ્ટોન',
-      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
-      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
-      iconName: map['iconName'] as String? ?? map['icon_name'] as String? ?? 'local_fire_department_rounded',
-      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
-    );
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
+
+  AdminHistoryMilestone.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    year = json['year']?.toString() ?? '';
+    badgeEn = json['badgeEn']?.toString() ?? json['badge_en']?.toString() ?? 'MILESTONE';
+    badgeGu = json['badgeGu']?.toString() ?? json['badge_gu']?.toString() ?? 'માઇલસ્ટોન';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    iconName = json['iconName']?.toString() ?? json['icon_name']?.toString() ?? 'local_fire_department_rounded';
+    imageUrl = json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    order = _toInt(json['order']) ?? 0;
+    isActive = _toBool(json['isActive'] ?? json['is_active']) ?? true;
+  }
+
+  factory AdminHistoryMilestone.fromMap(Map<String, dynamic> map) => AdminHistoryMilestone.fromJson(map);
+
+  String id = '';
+  String year = '';
+  String badgeEn = 'MILESTONE';
+  String badgeGu = 'માઇલસ્ટોન';
+  String titleEn = '';
+  String titleGu = '';
+  String descEn = '';
+  String descGu = '';
+  String iconName = 'local_fire_department_rounded';
+  String imageUrl = 'assets/images/pavan_putra_logo.png';
+  int order = 0;
+  bool isActive = true;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['year'] = year;
+    map['badgeEn'] = badgeEn;
+    map['badgeGu'] = badgeGu;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['iconName'] = iconName;
+    map['imageUrl'] = imageUrl;
+    map['order'] = order;
+    map['isActive'] = isActive;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminHistoryMilestone copyWith({
     String? id,
@@ -248,58 +316,68 @@ class AdminHistoryMilestone {
   }
 }
 
-/// Home singer & musician card model for Home page CRUD
 class AdminHomeSinger {
-  final String id;
-  final String nameEn;
-  final String nameGu;
-  final String roleEn;
-  final String roleGu;
-  final String descEn;
-  final String descGu;
-  final String imageUrl;
-  final int order;
-
   AdminHomeSinger({
-    required this.id,
-    required this.nameEn,
-    required this.nameGu,
-    required this.roleEn,
-    required this.roleGu,
-    required this.descEn,
-    required this.descGu,
+    this.id = '',
+    this.nameEn = '',
+    this.nameGu = '',
+    this.roleEn = '',
+    this.roleGu = '',
+    this.descEn = '',
+    this.descGu = '',
     this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.order = 0,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'nameEn': nameEn,
-      'nameGu': nameGu,
-      'roleEn': roleEn,
-      'roleGu': roleGu,
-      'descEn': descEn,
-      'descGu': descGu,
-      'imageUrl': imageUrl,
-      'order': order,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
-  factory AdminHomeSinger.fromMap(Map<String, dynamic> map) {
-    return AdminHomeSinger(
-      id: map['id'] as String? ?? '',
-      nameEn: map['nameEn'] as String? ?? map['name_en'] as String? ?? '',
-      nameGu: map['nameGu'] as String? ?? map['name_gu'] as String? ?? '',
-      roleEn: map['roleEn'] as String? ?? map['role_en'] as String? ?? '',
-      roleGu: map['roleGu'] as String? ?? map['role_gu'] as String? ?? '',
-      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
-      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
-      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      order: (map['order'] as num?)?.toInt() ?? 0,
-    );
+  AdminHomeSinger.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    nameEn = json['nameEn']?.toString() ?? json['name_en']?.toString() ?? '';
+    nameGu = json['nameGu']?.toString() ?? json['name_gu']?.toString() ?? '';
+    roleEn = json['roleEn']?.toString() ?? json['role_en']?.toString() ?? '';
+    roleGu = json['roleGu']?.toString() ?? json['role_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    imageUrl = json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    order = _toInt(json['order']) ?? 0;
   }
+
+  factory AdminHomeSinger.fromMap(Map<String, dynamic> map) => AdminHomeSinger.fromJson(map);
+
+  String id = '';
+  String nameEn = '';
+  String nameGu = '';
+  String roleEn = '';
+  String roleGu = '';
+  String descEn = '';
+  String descGu = '';
+  String imageUrl = 'assets/images/pavan_putra_logo.png';
+  int order = 0;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['nameEn'] = nameEn;
+    map['nameGu'] = nameGu;
+    map['roleEn'] = roleEn;
+    map['roleGu'] = roleGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['imageUrl'] = imageUrl;
+    map['order'] = order;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminHomeSinger copyWith({String? id, String? nameEn, String? nameGu, String? roleEn, String? roleGu, String? descEn, String? descGu, String? imageUrl, int? order}) {
     return AdminHomeSinger(
@@ -316,29 +394,8 @@ class AdminHomeSinger {
   }
 }
 
-/// Hero Section complete management model
 class AdminHeroData {
-  final String sacredInvocationEn;
-  final String sacredInvocationGu;
-  final String tagBadgeEn;
-  final String tagBadgeGu;
-  final String titleEn;
-  final String titleGu;
-  final String mottoEn;
-  final String mottoGu;
-  final String descEn;
-  final String descGu;
-  final String ctaPrimaryTextEn;
-  final String ctaPrimaryTextGu;
-  final String ctaPrimaryRoute;
-  final String ctaSecondaryTextEn;
-  final String ctaSecondaryTextGu;
-  final String ctaSecondaryRoute;
-  final String bottomBadgeEn;
-  final String bottomBadgeGu;
-  final String imageUrl;
-
-  const AdminHeroData({
+  AdminHeroData({
     this.sacredInvocationEn = '',
     this.sacredInvocationGu = '',
     this.tagBadgeEn = '',
@@ -359,6 +416,78 @@ class AdminHeroData {
     this.bottomBadgeGu = '',
     this.imageUrl = '',
   });
+
+  AdminHeroData.fromJson(dynamic json) {
+    if (json is! Map) return;
+    sacredInvocationEn = json['sacredInvocationEn']?.toString() ?? json['sacred_invocation_en']?.toString() ?? '';
+    sacredInvocationGu = json['sacredInvocationGu']?.toString() ?? json['sacred_invocation_gu']?.toString() ?? '';
+    tagBadgeEn = json['tagBadgeEn']?.toString() ?? json['tag_badge_en']?.toString() ?? '';
+    tagBadgeGu = json['tagBadgeGu']?.toString() ?? json['tag_badge_gu']?.toString() ?? '';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    mottoEn = json['mottoEn']?.toString() ?? json['motto_en']?.toString() ?? '';
+    mottoGu = json['mottoGu']?.toString() ?? json['motto_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    ctaPrimaryTextEn = json['ctaPrimaryTextEn']?.toString() ?? json['cta_primary_text_en']?.toString() ?? '';
+    ctaPrimaryTextGu = json['ctaPrimaryTextGu']?.toString() ?? json['cta_primary_text_gu']?.toString() ?? '';
+    ctaPrimaryRoute = json['ctaPrimaryRoute']?.toString() ?? json['cta_primary_route']?.toString() ?? '/archive';
+    ctaSecondaryTextEn = json['ctaSecondaryTextEn']?.toString() ?? json['cta_secondary_text_en']?.toString() ?? '';
+    ctaSecondaryTextGu = json['ctaSecondaryTextGu']?.toString() ?? json['cta_secondary_text_gu']?.toString() ?? '';
+    ctaSecondaryRoute = json['ctaSecondaryRoute']?.toString() ?? json['cta_secondary_route']?.toString() ?? '/about';
+    bottomBadgeEn = json['bottomBadgeEn']?.toString() ?? json['bottom_badge_en']?.toString() ?? '';
+    bottomBadgeGu = json['bottomBadgeGu']?.toString() ?? json['bottom_badge_gu']?.toString() ?? '';
+    imageUrl = json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? '';
+  }
+
+  factory AdminHeroData.fromMap(Map<String, dynamic> map) => AdminHeroData.fromJson(map);
+
+  String sacredInvocationEn = '';
+  String sacredInvocationGu = '';
+  String tagBadgeEn = '';
+  String tagBadgeGu = '';
+  String titleEn = '';
+  String titleGu = '';
+  String mottoEn = '';
+  String mottoGu = '';
+  String descEn = '';
+  String descGu = '';
+  String ctaPrimaryTextEn = '';
+  String ctaPrimaryTextGu = '';
+  String ctaPrimaryRoute = '/archive';
+  String ctaSecondaryTextEn = '';
+  String ctaSecondaryTextGu = '';
+  String ctaSecondaryRoute = '/about';
+  String bottomBadgeEn = '';
+  String bottomBadgeGu = '';
+  String imageUrl = '';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['sacredInvocationEn'] = sacredInvocationEn;
+    map['sacredInvocationGu'] = sacredInvocationGu;
+    map['tagBadgeEn'] = tagBadgeEn;
+    map['tagBadgeGu'] = tagBadgeGu;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['mottoEn'] = mottoEn;
+    map['mottoGu'] = mottoGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['ctaPrimaryTextEn'] = ctaPrimaryTextEn;
+    map['ctaPrimaryTextGu'] = ctaPrimaryTextGu;
+    map['ctaPrimaryRoute'] = ctaPrimaryRoute;
+    map['ctaSecondaryTextEn'] = ctaSecondaryTextEn;
+    map['ctaSecondaryTextGu'] = ctaSecondaryTextGu;
+    map['ctaSecondaryRoute'] = ctaSecondaryRoute;
+    map['bottomBadgeEn'] = bottomBadgeEn;
+    map['bottomBadgeGu'] = bottomBadgeGu;
+    map['imageUrl'] = imageUrl;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String getSacredInvocation(String lang) => lang == 'gu'
       ? (sacredInvocationGu.trim().isNotEmpty ? sacredInvocationGu.trim() : sacredInvocationEn.trim())
@@ -448,15 +577,38 @@ class AdminHeroData {
   }
 }
 
-/// Model for an individual metric highlight counter (Section 2)
 class AdminHighlightStat {
-  final String titleEn;
-  final String titleGu;
-  final String descEn;
-  final String descGu;
-  final String iconKey; // 'book', 'music', 'flame', 'history'
+  AdminHighlightStat({this.titleEn = '', this.titleGu = '', this.descEn = '', this.descGu = '', this.iconKey = 'book'});
 
-  const AdminHighlightStat({this.titleEn = '', this.titleGu = '', this.descEn = '', this.descGu = '', this.iconKey = 'book'});
+  AdminHighlightStat.fromJson(dynamic json) {
+    if (json is! Map) return;
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    iconKey = json['iconKey']?.toString() ?? json['icon_key']?.toString() ?? 'book';
+  }
+
+  factory AdminHighlightStat.fromMap(Map<String, dynamic> map) => AdminHighlightStat.fromJson(map);
+
+  String titleEn = '';
+  String titleGu = '';
+  String descEn = '';
+  String descGu = '';
+  String iconKey = 'book';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['iconKey'] = iconKey;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String getTitle(String lang) => lang == 'gu' ? (titleGu.trim().isNotEmpty ? titleGu.trim() : titleEn.trim()) : (titleEn.trim().isNotEmpty ? titleEn.trim() : titleGu.trim());
 
@@ -493,19 +645,43 @@ class AdminHighlightStat {
   }
 }
 
-/// Model for all 4 metric counters in Section 2 (Heritage Highlights)
 class AdminStatsData {
-  final AdminHighlightStat stat1;
-  final AdminHighlightStat stat2;
-  final AdminHighlightStat stat3;
-  final AdminHighlightStat stat4;
+  AdminStatsData({AdminHighlightStat? stat1, AdminHighlightStat? stat2, AdminHighlightStat? stat3, AdminHighlightStat? stat4})
+    : stat1 = stat1 ?? AdminHighlightStat(iconKey: 'book'),
+      stat2 = stat2 ?? AdminHighlightStat(iconKey: 'music'),
+      stat3 = stat3 ?? AdminHighlightStat(iconKey: 'flame'),
+      stat4 = stat4 ?? AdminHighlightStat(iconKey: 'history');
 
-  const AdminStatsData({
-    this.stat1 = const AdminHighlightStat(iconKey: 'book'),
-    this.stat2 = const AdminHighlightStat(iconKey: 'music'),
-    this.stat3 = const AdminHighlightStat(iconKey: 'flame'),
-    this.stat4 = const AdminHighlightStat(iconKey: 'history'),
-  });
+  AdminStatsData.fromJson(dynamic json)
+    : stat1 = AdminHighlightStat(iconKey: 'book'),
+      stat2 = AdminHighlightStat(iconKey: 'music'),
+      stat3 = AdminHighlightStat(iconKey: 'flame'),
+      stat4 = AdminHighlightStat(iconKey: 'history') {
+    if (json is! Map) return;
+    if (json['stat1'] != null) stat1 = AdminHighlightStat.fromJson(json['stat1']);
+    if (json['stat2'] != null) stat2 = AdminHighlightStat.fromJson(json['stat2']);
+    if (json['stat3'] != null) stat3 = AdminHighlightStat.fromJson(json['stat3']);
+    if (json['stat4'] != null) stat4 = AdminHighlightStat.fromJson(json['stat4']);
+  }
+
+  factory AdminStatsData.fromMap(Map<String, dynamic> map) => AdminStatsData.fromJson(map);
+
+  AdminHighlightStat stat1;
+  AdminHighlightStat stat2;
+  AdminHighlightStat stat3;
+  AdminHighlightStat stat4;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['stat1'] = stat1.toJson();
+    map['stat2'] = stat2.toJson();
+    map['stat3'] = stat3.toJson();
+    map['stat4'] = stat4.toJson();
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   List<AdminHighlightStat> get allStats => [stat1, stat2, stat3, stat4];
 
@@ -518,17 +694,52 @@ class AdminStatsData {
   }
 }
 
-/// Model for dynamic about/pillar value cards on homepage (Section 3)
 class AdminAboutCard {
-  final String id;
-  final String titleEn;
-  final String titleGu;
-  final String descEn;
-  final String descGu;
-  final String iconKey; // 'shield', 'music', 'reverence', 'flower', 'flame', 'book', 'history'
-  final int order;
+  AdminAboutCard({this.id = '', this.titleEn = '', this.titleGu = '', this.descEn = '', this.descGu = '', this.iconKey = 'shield', this.order = 0});
 
-  const AdminAboutCard({required this.id, this.titleEn = '', this.titleGu = '', this.descEn = '', this.descGu = '', this.iconKey = 'shield', this.order = 0});
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  AdminAboutCard.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? 'card-${DateTime.now().millisecondsSinceEpoch}';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    iconKey = json['iconKey']?.toString() ?? json['icon_key']?.toString() ?? 'shield';
+    order = _toInt(json['order']) ?? 0;
+  }
+
+  factory AdminAboutCard.fromMap(Map<String, dynamic> map) => AdminAboutCard.fromJson(map);
+
+  String id = '';
+  String titleEn = '';
+  String titleGu = '';
+  String descEn = '';
+  String descGu = '';
+  String iconKey = 'shield';
+  int order = 0;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['iconKey'] = iconKey;
+    map['order'] = order;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String getTitle(String lang) => lang == 'gu' ? (titleGu.trim().isNotEmpty ? titleGu.trim() : titleEn.trim()) : (titleEn.trim().isNotEmpty ? titleEn.trim() : titleGu.trim());
 
@@ -567,31 +778,6 @@ class AdminAboutCard {
     }
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'titleEn': titleEn,
-      'titleGu': titleGu,
-      'descEn': descEn,
-      'descGu': descGu,
-      'iconKey': iconKey,
-      'order': order,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
-  }
-
-  factory AdminAboutCard.fromMap(Map<String, dynamic> map) {
-    return AdminAboutCard(
-      id: map['id'] as String? ?? 'card-${DateTime.now().millisecondsSinceEpoch}',
-      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
-      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
-      iconKey: map['iconKey'] as String? ?? map['icon_key'] as String? ?? 'shield',
-      order: (map['order'] as num?)?.toInt() ?? 0,
-    );
-  }
-
   AdminAboutCard copyWith({String? id, String? titleEn, String? titleGu, String? descEn, String? descGu, String? iconKey, int? order}) {
     return AdminAboutCard(
       id: id ?? this.id,
@@ -605,18 +791,47 @@ class AdminAboutCard {
   }
 }
 
-/// Model for the About Mandal header and announcements (Section 3)
 class AdminAboutData {
-  final String tagEn;
-  final String tagGu;
-  final String titleEn;
-  final String titleGu;
-  final String descEn;
-  final String descGu;
-  final String aartiEn;
-  final String aartiGu;
+  AdminAboutData({this.tagEn = '', this.tagGu = '', this.titleEn = '', this.titleGu = '', this.descEn = '', this.descGu = '', this.aartiEn = '', this.aartiGu = ''});
 
-  const AdminAboutData({this.tagEn = '', this.tagGu = '', this.titleEn = '', this.titleGu = '', this.descEn = '', this.descGu = '', this.aartiEn = '', this.aartiGu = ''});
+  AdminAboutData.fromJson(dynamic json) {
+    if (json is! Map) return;
+    tagEn = json['tagEn']?.toString() ?? json['tag_en']?.toString() ?? '';
+    tagGu = json['tagGu']?.toString() ?? json['tag_gu']?.toString() ?? '';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    aartiEn = json['aartiEn']?.toString() ?? json['aarti_en']?.toString() ?? '';
+    aartiGu = json['aartiGu']?.toString() ?? json['aarti_gu']?.toString() ?? '';
+  }
+
+  factory AdminAboutData.fromMap(Map<String, dynamic> map) => AdminAboutData.fromJson(map);
+
+  String tagEn = '';
+  String tagGu = '';
+  String titleEn = '';
+  String titleGu = '';
+  String descEn = '';
+  String descGu = '';
+  String aartiEn = '';
+  String aartiGu = '';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['tagEn'] = tagEn;
+    map['tagGu'] = tagGu;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['aartiEn'] = aartiEn;
+    map['aartiGu'] = aartiGu;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String tag(String lang) => lang == 'gu' ? (tagGu.trim().isNotEmpty ? tagGu.trim() : tagEn.trim()) : (tagEn.trim().isNotEmpty ? tagEn.trim() : tagGu.trim());
 
@@ -637,20 +852,9 @@ class AdminAboutData {
   bool get isEmpty => !hasTag && !hasTitle && !hasDesc && !hasAarti;
 }
 
-/// Dynamic Cultural Principle / Value model for About page
 class AdminAboutPrinciple {
-  final String id;
-  final String number;
-  final String titleEn;
-  final String titleGu;
-  final String descEn;
-  final String descGu;
-  final String iconKey;
-  final int order;
-  final bool isActive;
-
-  const AdminAboutPrinciple({
-    required this.id,
+  AdminAboutPrinciple({
+    this.id = '',
     this.number = '૦૧',
     this.titleEn = '',
     this.titleGu = '',
@@ -660,6 +864,67 @@ class AdminAboutPrinciple {
     this.order = 0,
     this.isActive = true,
   });
+
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
+  }
+
+  AdminAboutPrinciple.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? 'principle-${DateTime.now().millisecondsSinceEpoch}';
+    number = json['number']?.toString() ?? '૦૧';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    iconKey = json['iconKey']?.toString() ?? json['icon_key']?.toString() ?? 'verified';
+    order = _toInt(json['order']) ?? 0;
+    isActive = _toBool(json['isActive'] ?? json['is_active']) ?? true;
+  }
+
+  factory AdminAboutPrinciple.fromMap(Map<String, dynamic> map) => AdminAboutPrinciple.fromJson(map);
+
+  String id = '';
+  String number = '૦૧';
+  String titleEn = '';
+  String titleGu = '';
+  String descEn = '';
+  String descGu = '';
+  String iconKey = 'verified';
+  int order = 0;
+  bool isActive = true;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['number'] = number;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['iconKey'] = iconKey;
+    map['order'] = order;
+    map['isActive'] = isActive;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String getTitle(String lang) => lang == 'gu' ? (titleGu.trim().isNotEmpty ? titleGu.trim() : titleEn.trim()) : (titleEn.trim().isNotEmpty ? titleEn.trim() : titleGu.trim());
 
@@ -701,35 +966,6 @@ class AdminAboutPrinciple {
     }
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'number': number,
-      'titleEn': titleEn,
-      'titleGu': titleGu,
-      'descEn': descEn,
-      'descGu': descGu,
-      'iconKey': iconKey,
-      'order': order,
-      'isActive': isActive,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
-  }
-
-  factory AdminAboutPrinciple.fromMap(Map<String, dynamic> map) {
-    return AdminAboutPrinciple(
-      id: map['id'] as String? ?? 'principle-${DateTime.now().millisecondsSinceEpoch}',
-      number: map['number'] as String? ?? '૦૧',
-      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
-      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
-      iconKey: map['iconKey'] as String? ?? map['icon_key'] as String? ?? 'verified',
-      order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
-    );
-  }
-
   AdminAboutPrinciple copyWith({String? id, String? number, String? titleEn, String? titleGu, String? descEn, String? descGu, String? iconKey, int? order, bool? isActive}) {
     return AdminAboutPrinciple(
       id: id ?? this.id,
@@ -745,44 +981,8 @@ class AdminAboutPrinciple {
   }
 }
 
-/// Complete Data model for About Us Page
 class AdminAboutPageData {
-  final String tagBadgeEn;
-  final String tagBadgeGu;
-  final String titleEn;
-  final String titleGu;
-  final String descEn;
-  final String descGu;
-
-  final String foundationTitleEn;
-  final String foundationTitleGu;
-  final String foundationDescEn;
-  final String foundationDescGu;
-  final String foundationMottoEn;
-  final String foundationMottoGu;
-  final String foundationImageUrl;
-
-  final String valuesTagEn;
-  final String valuesTagGu;
-  final String valuesTitleEn;
-  final String valuesTitleGu;
-
-  final String committeeBadgeEn;
-  final String committeeBadgeGu;
-  final String committeeTitleEn;
-  final String committeeTitleGu;
-  final String committeeDescEn;
-  final String committeeDescGu;
-
-  final String ctaTitleEn;
-  final String ctaTitleGu;
-  final String ctaDescEn;
-  final String ctaDescGu;
-  final String ctaBtnTextEn;
-  final String ctaBtnTextGu;
-  final String ctaRoute;
-
-  const AdminAboutPageData({
+  AdminAboutPageData({
     this.tagBadgeEn = '',
     this.tagBadgeGu = '',
     this.titleEn = '',
@@ -814,6 +1014,110 @@ class AdminAboutPageData {
     this.ctaBtnTextGu = '',
     this.ctaRoute = '/history',
   });
+
+  AdminAboutPageData.fromJson(dynamic json) {
+    if (json is! Map) return;
+    tagBadgeEn = json['tagBadgeEn']?.toString() ?? json['tag_badge_en']?.toString() ?? '';
+    tagBadgeGu = json['tagBadgeGu']?.toString() ?? json['tag_badge_gu']?.toString() ?? '';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    foundationTitleEn = json['foundationTitleEn']?.toString() ?? json['foundation_title_en']?.toString() ?? '';
+    foundationTitleGu = json['foundationTitleGu']?.toString() ?? json['foundation_title_gu']?.toString() ?? '';
+    foundationDescEn = json['foundationDescEn']?.toString() ?? json['foundation_desc_en']?.toString() ?? '';
+    foundationDescGu = json['foundationDescGu']?.toString() ?? json['foundation_desc_gu']?.toString() ?? '';
+    foundationMottoEn = json['foundationMottoEn']?.toString() ?? json['foundation_motto_en']?.toString() ?? '';
+    foundationMottoGu = json['foundationMottoGu']?.toString() ?? json['foundation_motto_gu']?.toString() ?? '';
+    foundationImageUrl = json['foundationImageUrl']?.toString() ?? json['foundation_image_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    valuesTagEn = json['valuesTagEn']?.toString() ?? json['values_tag_en']?.toString() ?? '';
+    valuesTagGu = json['valuesTagGu']?.toString() ?? json['values_tag_gu']?.toString() ?? '';
+    valuesTitleEn = json['valuesTitleEn']?.toString() ?? json['values_title_en']?.toString() ?? '';
+    valuesTitleGu = json['valuesTitleGu']?.toString() ?? json['values_title_gu']?.toString() ?? '';
+    committeeBadgeEn = json['committeeBadgeEn']?.toString() ?? json['committee_badge_en']?.toString() ?? '';
+    committeeBadgeGu = json['committeeBadgeGu']?.toString() ?? json['committee_badge_gu']?.toString() ?? '';
+    committeeTitleEn = json['committeeTitleEn']?.toString() ?? json['committee_title_en']?.toString() ?? '';
+    committeeTitleGu = json['committeeTitleGu']?.toString() ?? json['committee_title_gu']?.toString() ?? '';
+    committeeDescEn = json['committeeDescEn']?.toString() ?? json['committee_desc_en']?.toString() ?? '';
+    committeeDescGu = json['committeeDescGu']?.toString() ?? json['committee_desc_gu']?.toString() ?? '';
+    ctaTitleEn = json['ctaTitleEn']?.toString() ?? json['cta_title_en']?.toString() ?? '';
+    ctaTitleGu = json['ctaTitleGu']?.toString() ?? json['cta_title_gu']?.toString() ?? '';
+    ctaDescEn = json['ctaDescEn']?.toString() ?? json['cta_desc_en']?.toString() ?? '';
+    ctaDescGu = json['ctaDescGu']?.toString() ?? json['cta_desc_gu']?.toString() ?? '';
+    ctaBtnTextEn = json['ctaBtnTextEn']?.toString() ?? json['cta_btn_text_en']?.toString() ?? '';
+    ctaBtnTextGu = json['ctaBtnTextGu']?.toString() ?? json['cta_btn_text_gu']?.toString() ?? '';
+    ctaRoute = json['ctaRoute']?.toString() ?? json['cta_route']?.toString() ?? '/history';
+  }
+
+  factory AdminAboutPageData.fromMap(Map<String, dynamic> map) => AdminAboutPageData.fromJson(map);
+
+  String tagBadgeEn = '';
+  String tagBadgeGu = '';
+  String titleEn = '';
+  String titleGu = '';
+  String descEn = '';
+  String descGu = '';
+  String foundationTitleEn = '';
+  String foundationTitleGu = '';
+  String foundationDescEn = '';
+  String foundationDescGu = '';
+  String foundationMottoEn = '';
+  String foundationMottoGu = '';
+  String foundationImageUrl = 'assets/images/pavan_putra_logo.png';
+  String valuesTagEn = '';
+  String valuesTagGu = '';
+  String valuesTitleEn = '';
+  String valuesTitleGu = '';
+  String committeeBadgeEn = '';
+  String committeeBadgeGu = '';
+  String committeeTitleEn = '';
+  String committeeTitleGu = '';
+  String committeeDescEn = '';
+  String committeeDescGu = '';
+  String ctaTitleEn = '';
+  String ctaTitleGu = '';
+  String ctaDescEn = '';
+  String ctaDescGu = '';
+  String ctaBtnTextEn = '';
+  String ctaBtnTextGu = '';
+  String ctaRoute = '/history';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['tagBadgeEn'] = tagBadgeEn;
+    map['tagBadgeGu'] = tagBadgeGu;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['foundationTitleEn'] = foundationTitleEn;
+    map['foundationTitleGu'] = foundationTitleGu;
+    map['foundationDescEn'] = foundationDescGu;
+    map['foundationMottoEn'] = foundationMottoEn;
+    map['foundationMottoGu'] = foundationMottoGu;
+    map['foundationImageUrl'] = foundationImageUrl;
+    map['valuesTagEn'] = valuesTagEn;
+    map['valuesTagGu'] = valuesTagGu;
+    map['valuesTitleEn'] = valuesTitleEn;
+    map['valuesTitleGu'] = valuesTitleGu;
+    map['committeeBadgeEn'] = committeeBadgeEn;
+    map['committeeBadgeGu'] = committeeBadgeGu;
+    map['committeeTitleEn'] = committeeTitleEn;
+    map['committeeTitleGu'] = committeeTitleGu;
+    map['committeeDescEn'] = committeeDescEn;
+    map['committeeDescGu'] = committeeDescGu;
+    map['ctaTitleEn'] = ctaTitleEn;
+    map['ctaTitleGu'] = ctaTitleGu;
+    map['ctaDescEn'] = ctaDescEn;
+    map['ctaDescGu'] = ctaDescGu;
+    map['ctaBtnTextEn'] = ctaBtnTextEn;
+    map['ctaBtnTextGu'] = ctaBtnTextGu;
+    map['ctaRoute'] = ctaRoute;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String getTagBadge(String lang) =>
       lang == 'gu' ? (tagBadgeGu.trim().isNotEmpty ? tagBadgeGu.trim() : tagBadgeEn.trim()) : (tagBadgeEn.trim().isNotEmpty ? tagBadgeEn.trim() : tagBadgeGu.trim());
@@ -867,30 +1171,15 @@ class AdminAboutPageData {
   static String conscience(String gu, String en) => gu.trim().isNotEmpty ? gu.trim() : en.trim();
 }
 
-/// Home banner item for hero carousel CRUD
 class AdminHomeBanner {
-  final String id;
-  final String badgeEn;
-  final String badgeGu;
-  final String titleEn;
-  final String titleGu;
-  final String subtitleEn;
-  final String subtitleGu;
-  final String imageUrl;
-  final String ctaTextEn;
-  final String ctaTextGu;
-  final String ctaRoute;
-  final int order;
-  final bool isActive;
-
   AdminHomeBanner({
-    required this.id,
-    required this.badgeEn,
-    required this.badgeGu,
-    required this.titleEn,
-    required this.titleGu,
-    required this.subtitleEn,
-    required this.subtitleGu,
+    this.id = '',
+    this.badgeEn = 'HERITAGE',
+    this.badgeGu = 'વારસો',
+    this.titleEn = '',
+    this.titleGu = '',
+    this.subtitleEn = '',
+    this.subtitleGu = '',
     this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.ctaTextEn = 'EXPLORE ARCHIVE',
     this.ctaTextGu = 'આર્કાઇવ જુઓ',
@@ -899,42 +1188,78 @@ class AdminHomeBanner {
     this.isActive = true,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'badgeEn': badgeEn,
-      'badgeGu': badgeGu,
-      'titleEn': titleEn,
-      'titleGu': titleGu,
-      'subtitleEn': subtitleEn,
-      'subtitleGu': subtitleGu,
-      'imageUrl': imageUrl,
-      'ctaTextEn': ctaTextEn,
-      'ctaTextGu': ctaTextGu,
-      'ctaRoute': ctaRoute,
-      'order': order,
-      'isActive': isActive,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
-  factory AdminHomeBanner.fromMap(Map<String, dynamic> map) {
-    return AdminHomeBanner(
-      id: map['id'] as String? ?? '',
-      badgeEn: map['badgeEn'] as String? ?? map['badge_en'] as String? ?? 'HERITAGE',
-      badgeGu: map['badgeGu'] as String? ?? map['badge_gu'] as String? ?? 'વારસો',
-      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      subtitleEn: map['subtitleEn'] as String? ?? map['subtitle_en'] as String? ?? '',
-      subtitleGu: map['subtitleGu'] as String? ?? map['subtitle_gu'] as String? ?? '',
-      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      ctaTextEn: map['ctaTextEn'] as String? ?? map['cta_text_en'] as String? ?? 'EXPLORE',
-      ctaTextGu: map['ctaTextGu'] as String? ?? map['cta_text_gu'] as String? ?? 'જુઓ',
-      ctaRoute: map['ctaRoute'] as String? ?? map['cta_route'] as String? ?? '/archive',
-      order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
-    );
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
+
+  AdminHomeBanner.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    badgeEn = json['badgeEn']?.toString() ?? json['badge_en']?.toString() ?? 'HERITAGE';
+    badgeGu = json['badgeGu']?.toString() ?? json['badge_gu']?.toString() ?? 'વારસો';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    subtitleEn = json['subtitleEn']?.toString() ?? json['subtitle_en']?.toString() ?? '';
+    subtitleGu = json['subtitleGu']?.toString() ?? json['subtitle_gu']?.toString() ?? '';
+    imageUrl = json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    ctaTextEn = json['ctaTextEn']?.toString() ?? json['cta_text_en']?.toString() ?? 'EXPLORE';
+    ctaTextGu = json['ctaTextGu']?.toString() ?? json['cta_text_gu']?.toString() ?? 'જુઓ';
+    ctaRoute = json['ctaRoute']?.toString() ?? json['cta_route']?.toString() ?? '/archive';
+    order = _toInt(json['order']) ?? 0;
+    isActive = _toBool(json['isActive'] ?? json['is_active']) ?? true;
+  }
+
+  factory AdminHomeBanner.fromMap(Map<String, dynamic> map) => AdminHomeBanner.fromJson(map);
+
+  String id = '';
+  String badgeEn = 'HERITAGE';
+  String badgeGu = 'વારસો';
+  String titleEn = '';
+  String titleGu = '';
+  String subtitleEn = '';
+  String subtitleGu = '';
+  String imageUrl = 'assets/images/pavan_putra_logo.png';
+  String ctaTextEn = 'EXPLORE ARCHIVE';
+  String ctaTextGu = 'આર્કાઇવ જુઓ';
+  String ctaRoute = '/archive';
+  int order = 0;
+  bool isActive = true;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['badgeEn'] = badgeEn;
+    map['badgeGu'] = badgeGu;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['subtitleEn'] = subtitleEn;
+    map['subtitleGu'] = subtitleGu;
+    map['imageUrl'] = imageUrl;
+    map['ctaTextEn'] = ctaTextEn;
+    map['ctaTextGu'] = ctaTextGu;
+    map['ctaRoute'] = ctaRoute;
+    map['order'] = order;
+    map['isActive'] = isActive;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminHomeBanner copyWith({
     String? id,
@@ -969,20 +1294,9 @@ class AdminHomeBanner {
   }
 }
 
-/// Model for Sacred Foundations / Pillars of Garbi (Section 4)
 class AdminHomePillar {
-  final String id;
-  final String number; // '૦૧', '૦૨', '૦૩'
-  final String titleEn;
-  final String titleGu;
-  final String descEn;
-  final String descGu;
-  final String iconKey; // 'group', 'book', 'flame', 'music', 'shield', 'flower'
-  final int order;
-  final bool isActive;
-
-  const AdminHomePillar({
-    required this.id,
+  AdminHomePillar({
+    this.id = '',
     this.number = '૦૧',
     this.titleEn = '',
     this.titleGu = '',
@@ -992,6 +1306,67 @@ class AdminHomePillar {
     this.order = 0,
     this.isActive = true,
   });
+
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
+  }
+
+  AdminHomePillar.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? 'pillar-${DateTime.now().millisecondsSinceEpoch}';
+    number = json['number']?.toString() ?? '૦૧';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    descEn = json['descEn']?.toString() ?? json['desc_en']?.toString() ?? '';
+    descGu = json['descGu']?.toString() ?? json['desc_gu']?.toString() ?? '';
+    iconKey = json['iconKey']?.toString() ?? json['icon_key']?.toString() ?? 'group';
+    order = _toInt(json['order']) ?? 0;
+    isActive = _toBool(json['isActive'] ?? json['is_active']) ?? true;
+  }
+
+  factory AdminHomePillar.fromMap(Map<String, dynamic> map) => AdminHomePillar.fromJson(map);
+
+  String id = '';
+  String number = '૦૧';
+  String titleEn = '';
+  String titleGu = '';
+  String descEn = '';
+  String descGu = '';
+  String iconKey = 'group';
+  int order = 0;
+  bool isActive = true;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['number'] = number;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['descEn'] = descEn;
+    map['descGu'] = descGu;
+    map['iconKey'] = iconKey;
+    map['order'] = order;
+    map['isActive'] = isActive;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String getTitle(String lang) => lang == 'gu' ? (titleGu.trim().isNotEmpty ? titleGu.trim() : titleEn.trim()) : (titleEn.trim().isNotEmpty ? titleEn.trim() : titleGu.trim());
 
@@ -1025,35 +1400,6 @@ class AdminHomePillar {
     }
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'number': number,
-      'titleEn': titleEn,
-      'titleGu': titleGu,
-      'descEn': descEn,
-      'descGu': descGu,
-      'iconKey': iconKey,
-      'order': order,
-      'isActive': isActive,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
-  }
-
-  factory AdminHomePillar.fromMap(Map<String, dynamic> map) {
-    return AdminHomePillar(
-      id: map['id'] as String? ?? 'pillar-${DateTime.now().millisecondsSinceEpoch}',
-      number: map['number'] as String? ?? '૦૧',
-      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      descEn: map['descEn'] as String? ?? map['desc_en'] as String? ?? '',
-      descGu: map['descGu'] as String? ?? map['desc_gu'] as String? ?? '',
-      iconKey: map['iconKey'] as String? ?? map['icon_key'] as String? ?? 'group',
-      order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
-    );
-  }
-
   AdminHomePillar copyWith({String? id, String? number, String? titleEn, String? titleGu, String? descEn, String? descGu, String? iconKey, int? order, bool? isActive}) {
     return AdminHomePillar(
       id: id ?? this.id,
@@ -1069,21 +1415,9 @@ class AdminHomePillar {
   }
 }
 
-/// Model for Elders & Dignitaries Blessings (Section 6)
 class AdminHomeBlessing {
-  final String id;
-  final String quoteEn;
-  final String quoteGu;
-  final String authorEn;
-  final String authorGu;
-  final String designationEn;
-  final String designationGu;
-  final String photoUrl;
-  final int order;
-  final bool isActive;
-
-  const AdminHomeBlessing({
-    required this.id,
+  AdminHomeBlessing({
+    this.id = '',
     this.quoteEn = '',
     this.quoteGu = '',
     this.authorEn = '',
@@ -1094,6 +1428,70 @@ class AdminHomeBlessing {
     this.order = 0,
     this.isActive = true,
   });
+
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
+  }
+
+  AdminHomeBlessing.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? 'blessing-${DateTime.now().millisecondsSinceEpoch}';
+    quoteEn = json['quoteEn']?.toString() ?? json['quote_en']?.toString() ?? '';
+    quoteGu = json['quoteGu']?.toString() ?? json['quote_gu']?.toString() ?? '';
+    authorEn = json['authorEn']?.toString() ?? json['author_en']?.toString() ?? '';
+    authorGu = json['authorGu']?.toString() ?? json['author_gu']?.toString() ?? '';
+    designationEn = json['designationEn']?.toString() ?? json['designation_en']?.toString() ?? '';
+    designationGu = json['designationGu']?.toString() ?? json['designation_gu']?.toString() ?? '';
+    photoUrl = json['photoUrl']?.toString() ?? json['photo_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    order = _toInt(json['order']) ?? 0;
+    isActive = _toBool(json['isActive'] ?? json['is_active']) ?? true;
+  }
+
+  factory AdminHomeBlessing.fromMap(Map<String, dynamic> map) => AdminHomeBlessing.fromJson(map);
+
+  String id = '';
+  String quoteEn = '';
+  String quoteGu = '';
+  String authorEn = '';
+  String authorGu = '';
+  String designationEn = '';
+  String designationGu = '';
+  String photoUrl = 'assets/images/pavan_putra_logo.png';
+  int order = 0;
+  bool isActive = true;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['quoteEn'] = quoteEn;
+    map['quoteGu'] = quoteGu;
+    map['authorEn'] = authorEn;
+    map['authorGu'] = authorGu;
+    map['designationEn'] = designationEn;
+    map['designationGu'] = designationGu;
+    map['photoUrl'] = photoUrl;
+    map['order'] = order;
+    map['isActive'] = isActive;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String getQuote(String lang) => lang == 'gu' ? (quoteGu.trim().isNotEmpty ? quoteGu.trim() : quoteEn.trim()) : (quoteEn.trim().isNotEmpty ? quoteEn.trim() : quoteGu.trim());
 
@@ -1107,37 +1505,6 @@ class AdminHomeBlessing {
   bool get hasQuote => quoteEn.trim().isNotEmpty || quoteGu.trim().isNotEmpty;
 
   bool get hasAuthor => authorEn.trim().isNotEmpty || authorGu.trim().isNotEmpty;
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'quoteEn': quoteEn,
-      'quoteGu': quoteGu,
-      'authorEn': authorEn,
-      'authorGu': authorGu,
-      'designationEn': designationEn,
-      'designationGu': designationGu,
-      'photoUrl': photoUrl,
-      'order': order,
-      'isActive': isActive,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
-  }
-
-  factory AdminHomeBlessing.fromMap(Map<String, dynamic> map) {
-    return AdminHomeBlessing(
-      id: map['id'] as String? ?? 'blessing-${DateTime.now().millisecondsSinceEpoch}',
-      quoteEn: map['quoteEn'] as String? ?? map['quote_en'] as String? ?? '',
-      quoteGu: map['quoteGu'] as String? ?? map['quote_gu'] as String? ?? '',
-      authorEn: map['authorEn'] as String? ?? map['author_en'] as String? ?? '',
-      authorGu: map['authorGu'] as String? ?? map['author_gu'] as String? ?? '',
-      designationEn: map['designationEn'] as String? ?? map['designation_en'] as String? ?? '',
-      designationGu: map['designationGu'] as String? ?? map['designation_gu'] as String? ?? '',
-      photoUrl: map['photoUrl'] as String? ?? map['photo_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      order: (map['order'] as num?)?.toInt() ?? 0,
-      isActive: map['isActive'] as bool? ?? map['is_active'] as bool? ?? true,
-    );
-  }
 
   AdminHomeBlessing copyWith({
     String? id,
@@ -1166,17 +1533,8 @@ class AdminHomeBlessing {
   }
 }
 
-/// Model for Cultural Call To Action Banner (Section 7)
 class AdminHomeCtaData {
-  final String invocationEn;
-  final String invocationGu;
-  final String mottoEn;
-  final String mottoGu;
-  final String btnTextEn;
-  final String btnTextGu;
-  final String btnRoute;
-
-  const AdminHomeCtaData({
+  AdminHomeCtaData({
     this.invocationEn = '|| Jagti Jogmaya ||',
     this.invocationGu = '|| જાગતી જોગમાયા ||',
     this.mottoEn = 'Connect with our sacred tradition and feel the divine presence of Maa Ambe.',
@@ -1185,6 +1543,42 @@ class AdminHomeCtaData {
     this.btnTextGu = 'સંપર્ક કરો / સહભાગી બનો',
     this.btnRoute = '/contact',
   });
+
+  AdminHomeCtaData.fromJson(dynamic json) {
+    if (json is! Map) return;
+    invocationEn = json['invocationEn']?.toString() ?? json['invocation_en']?.toString() ?? '|| Jagti Jogmaya ||';
+    invocationGu = json['invocationGu']?.toString() ?? json['invocation_gu']?.toString() ?? '|| જાગતી જોગમાયા ||';
+    mottoEn = json['mottoEn']?.toString() ?? json['motto_en']?.toString() ?? '';
+    mottoGu = json['mottoGu']?.toString() ?? json['motto_gu']?.toString() ?? '';
+    btnTextEn = json['btnTextEn']?.toString() ?? json['btn_text_en']?.toString() ?? 'Connect With Us';
+    btnTextGu = json['btnTextGu']?.toString() ?? json['btn_text_gu']?.toString() ?? 'સંપર્ક કરો / સહભાગી બનો';
+    btnRoute = json['btnRoute']?.toString() ?? json['btn_route']?.toString() ?? '/contact';
+  }
+
+  factory AdminHomeCtaData.fromMap(Map<String, dynamic> map) => AdminHomeCtaData.fromJson(map);
+
+  String invocationEn = '|| Jagti Jogmaya ||';
+  String invocationGu = '|| જાગતી જોગમાયા ||';
+  String mottoEn = 'Connect with our sacred tradition and feel the divine presence of Maa Ambe.';
+  String mottoGu = 'આપણી પ્રાચીન સંસ્કૃતિ, પરંપરા અને ભક્તિ સાથે જોડાઓ અને માં અંબાના આશીર્વાદ પ્રાપ્ત કરો.';
+  String btnTextEn = 'Connect With Us';
+  String btnTextGu = 'સંપર્ક કરો / સહભાગી બનો';
+  String btnRoute = '/contact';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['invocationEn'] = invocationEn;
+    map['invocationGu'] = invocationGu;
+    map['mottoEn'] = mottoEn;
+    map['mottoGu'] = mottoGu;
+    map['btnTextEn'] = btnTextEn;
+    map['btnTextGu'] = btnTextGu;
+    map['btnRoute'] = btnRoute;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   String invocation(String lang) =>
       lang == 'gu' ? (invocationGu.trim().isNotEmpty ? invocationGu.trim() : invocationEn.trim()) : (invocationEn.trim().isNotEmpty ? invocationEn.trim() : invocationGu.trim());
@@ -1205,40 +1599,62 @@ class AdminHomeCtaData {
 }
 
 class AdminGarbiYear {
-  final String id;
-  final int year;
-  final String titleEn;
-  final String titleGu;
-  final String description;
-  final bool isPublished;
-  final int albumCount;
+  AdminGarbiYear({this.id = '', this.year = 2025, this.titleEn = '', this.titleGu = '', this.description = '', this.isPublished = true, this.albumCount = 0});
 
-  AdminGarbiYear({required this.id, required this.year, required this.titleEn, required this.titleGu, required this.description, this.isPublished = true, this.albumCount = 0});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'year': year,
-      'titleEn': titleEn,
-      'titleGu': titleGu,
-      'description': description,
-      'isPublished': isPublished,
-      'albumCount': albumCount,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
-  factory AdminGarbiYear.fromMap(Map<String, dynamic> map) {
-    return AdminGarbiYear(
-      id: map['id'] as String? ?? '',
-      year: (map['year'] as num?)?.toInt() ?? 2025,
-      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      description: map['description'] as String? ?? '',
-      isPublished: map['isPublished'] as bool? ?? map['is_published'] as bool? ?? true,
-      albumCount: (map['albumCount'] as num?)?.toInt() ?? (map['album_count'] as num?)?.toInt() ?? 0,
-    );
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
+
+  AdminGarbiYear.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    year = _toInt(json['year']) ?? 2025;
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    description = json['description']?.toString() ?? '';
+    isPublished = _toBool(json['isPublished'] ?? json['is_published']) ?? true;
+    albumCount = _toInt(json['albumCount'] ?? json['album_count']) ?? 0;
+  }
+
+  factory AdminGarbiYear.fromMap(Map<String, dynamic> map) => AdminGarbiYear.fromJson(map);
+
+  String id = '';
+  int year = 2025;
+  String titleEn = '';
+  String titleGu = '';
+  String description = '';
+  bool isPublished = true;
+  int albumCount = 0;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['year'] = year;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['description'] = description;
+    map['isPublished'] = isPublished;
+    map['albumCount'] = albumCount;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminGarbiYear copyWith({String? id, int? year, String? titleEn, String? titleGu, String? description, bool? isPublished, int? albumCount}) {
     return AdminGarbiYear(
@@ -1254,56 +1670,108 @@ class AdminGarbiYear {
 }
 
 class AdminAlbum {
-  final String id;
-  final String year;
-  final String name;
-  final String dayTag;
-  final String description;
-  final String coverImageUrl;
-  final int photoCount;
-
   AdminAlbum({
-    required this.id,
-    required this.year,
-    required this.name,
-    required this.dayTag,
-    required this.description,
+    this.id = '',
+    this.year = '2025',
+    this.name = '',
+    this.nameGu = '',
+    this.dayTag = 'Day 1',
+    this.dayTagGu = '',
+    this.description = '',
+    this.descriptionGu = '',
     this.coverImageUrl = 'assets/images/pavan_putra_logo.png',
     this.photoCount = 0,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'year': year,
-      'name': name,
-      'dayTag': dayTag,
-      'description': description,
-      'coverImageUrl': coverImageUrl,
-      'photoCount': photoCount,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
-  factory AdminAlbum.fromMap(Map<String, dynamic> map) {
-    return AdminAlbum(
-      id: map['id'] as String? ?? '',
-      year: map['year'] as String? ?? '2025',
-      name: map['name'] as String? ?? '',
-      dayTag: map['dayTag'] as String? ?? map['day_tag'] as String? ?? 'Day 1',
-      description: map['description'] as String? ?? '',
-      coverImageUrl: map['coverImageUrl'] as String? ?? map['cover_image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      photoCount: (map['photoCount'] as num?)?.toInt() ?? (map['photo_count'] as num?)?.toInt() ?? 0,
-    );
+  AdminAlbum.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    year = json['year']?.toString() ?? '2025';
+    name = json['name']?.toString() ?? json['nameEn']?.toString() ?? json['name_en']?.toString() ?? '';
+    nameGu = json['nameGu']?.toString() ?? json['name_gu']?.toString() ?? '';
+    dayTag = json['dayTag']?.toString() ?? json['day_tag']?.toString() ?? 'Day 1';
+    dayTagGu = json['dayTagGu']?.toString() ?? json['day_tag_gu']?.toString() ?? '';
+    description = json['description']?.toString() ?? json['descriptionEn']?.toString() ?? json['description_en']?.toString() ?? '';
+    descriptionGu = json['descriptionGu']?.toString() ?? json['description_gu']?.toString() ?? '';
+    coverImageUrl = json['coverImageUrl']?.toString() ?? json['cover_image_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    photoCount = _toInt(json['photoCount'] ?? json['photo_count']) ?? 0;
   }
 
-  AdminAlbum copyWith({String? id, String? year, String? name, String? dayTag, String? description, String? coverImageUrl, int? photoCount}) {
+  factory AdminAlbum.fromMap(Map<String, dynamic> map) => AdminAlbum.fromJson(map);
+
+  String id = '';
+  String year = '2025';
+  String name = '';
+  String nameGu = '';
+  String dayTag = 'Day 1';
+  String dayTagGu = '';
+  String description = '';
+  String descriptionGu = '';
+  String coverImageUrl = 'assets/images/pavan_putra_logo.png';
+  int photoCount = 0;
+
+  String getName([String lang = 'en']) {
+    if (lang == 'gu' && nameGu.trim().isNotEmpty) return nameGu.trim();
+    return name;
+  }
+
+  String getDescription([String lang = 'en']) {
+    if (lang == 'gu' && descriptionGu.trim().isNotEmpty) return descriptionGu.trim();
+    return description;
+  }
+
+  String getDayTag([String lang = 'en']) {
+    if (lang == 'gu' && dayTagGu.trim().isNotEmpty) return dayTagGu.trim();
+    return dayTag;
+  }
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['year'] = year;
+    map['name'] = name;
+    map['nameGu'] = nameGu;
+    map['dayTag'] = dayTag;
+    map['dayTagGu'] = dayTagGu;
+    map['description'] = description;
+    map['descriptionGu'] = descriptionGu;
+    map['coverImageUrl'] = coverImageUrl;
+    map['photoCount'] = photoCount;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
+
+  AdminAlbum copyWith({
+    String? id,
+    String? year,
+    String? name,
+    String? nameGu,
+    String? dayTag,
+    String? dayTagGu,
+    String? description,
+    String? descriptionGu,
+    String? coverImageUrl,
+    int? photoCount,
+  }) {
     return AdminAlbum(
       id: id ?? this.id,
       year: year ?? this.year,
       name: name ?? this.name,
+      nameGu: nameGu ?? this.nameGu,
       dayTag: dayTag ?? this.dayTag,
+      dayTagGu: dayTagGu ?? this.dayTagGu,
       description: description ?? this.description,
+      descriptionGu: descriptionGu ?? this.descriptionGu,
       coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       photoCount: photoCount ?? this.photoCount,
     );
@@ -1311,56 +1779,70 @@ class AdminAlbum {
 }
 
 class AdminPhoto {
-  final String id;
-  final String year;
-  final String albumId;
-  final String day;
-  final String titleEn;
-  final String titleGu;
-  final String imageUrl;
-  final String caption;
-  final bool isFeatured;
-
   AdminPhoto({
-    required this.id,
-    required this.year,
-    required this.albumId,
-    required this.day,
-    required this.titleEn,
-    required this.titleGu,
+    this.id = '',
+    this.year = '2025',
+    this.albumId = '',
+    this.day = 'Day 1',
+    this.titleEn = '',
+    this.titleGu = '',
     this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.caption = '',
     this.isFeatured = true,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'year': year,
-      'albumId': albumId,
-      'day': day,
-      'titleEn': titleEn,
-      'titleGu': titleGu,
-      'imageUrl': imageUrl,
-      'caption': caption,
-      'isFeatured': isFeatured,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
 
-  factory AdminPhoto.fromMap(Map<String, dynamic> map) {
-    return AdminPhoto(
-      id: map['id'] as String? ?? '',
-      year: map['year'] as String? ?? '2025',
-      albumId: map['albumId'] as String? ?? map['album_id'] as String? ?? '',
-      day: map['day'] as String? ?? 'Day 1',
-      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      caption: map['caption'] as String? ?? '',
-      isFeatured: map['isFeatured'] as bool? ?? map['is_featured'] as bool? ?? true,
-    );
+  AdminPhoto.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    year = json['year']?.toString() ?? '2025';
+    albumId = json['albumId']?.toString() ?? json['album_id']?.toString() ?? '';
+    day = json['day']?.toString() ?? 'Day 1';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    imageUrl = json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    caption = json['caption']?.toString() ?? '';
+    isFeatured = _toBool(json['isFeatured'] ?? json['is_featured']) ?? true;
   }
+
+  factory AdminPhoto.fromMap(Map<String, dynamic> map) => AdminPhoto.fromJson(map);
+
+  String id = '';
+  String year = '2025';
+  String albumId = '';
+  String day = 'Day 1';
+  String titleEn = '';
+  String titleGu = '';
+  String imageUrl = 'assets/images/pavan_putra_logo.png';
+  String caption = '';
+  bool isFeatured = true;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['year'] = year;
+    map['albumId'] = albumId;
+    map['day'] = day;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['imageUrl'] = imageUrl;
+    map['caption'] = caption;
+    map['isFeatured'] = isFeatured;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminPhoto copyWith({String? id, String? year, String? albumId, String? day, String? titleEn, String? titleGu, String? imageUrl, String? caption, bool? isFeatured}) {
     return AdminPhoto(
@@ -1378,28 +1860,15 @@ class AdminPhoto {
 }
 
 class AdminVideo {
-  final String id;
-  final String youtubeVideoId;
-  final String title;
-  final String titleGu;
-  final String tag;
-  final String duration;
-  final String youtubeUrl;
-  final String year;
-  final String thumbnailUrl;
-  final bool isFeatured;
-  final bool isPublished;
-  final String sourceChannel;
-
   AdminVideo({
-    required this.id,
+    this.id = '',
     String? youtubeVideoId,
-    required this.title,
+    this.title = '',
     this.titleGu = '',
-    required this.tag,
-    required this.duration,
-    required this.youtubeUrl,
-    required this.year,
+    this.tag = 'Garbi',
+    this.duration = '',
+    this.youtubeUrl = '',
+    this.year = '2024',
     String? thumbnailUrl,
     this.isFeatured = true,
     this.isPublished = true,
@@ -1409,49 +1878,76 @@ class AdminVideo {
            ? thumbnailUrl
            : ((youtubeVideoId != null && youtubeVideoId.isNotEmpty)
                  ? YoutubeUrlHelper.buildThumbnailUrl(youtubeVideoId)
-                 : (YoutubeUrlHelper.extractVideoId(youtubeUrl) != null ? YoutubeUrlHelper.buildThumbnailUrl(YoutubeUrlHelper.extractVideoId(youtubeUrl)!) : ''));
+                 : (YoutubeUrlHelper.extractVideoId(youtubeUrl) != null
+                       ? YoutubeUrlHelper.buildThumbnailUrl(YoutubeUrlHelper.extractVideoId(youtubeUrl)!)
+                       : 'assets/images/pavan_putra_logo.png'));
 
-  Map<String, dynamic> toMap() {
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
+  }
+
+  AdminVideo.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    youtubeUrl = json['youtubeUrl']?.toString() ?? json['youtube_url']?.toString() ?? '';
+    final rawExtractedId = json['youtubeVideoId']?.toString() ?? json['youtube_video_id']?.toString() ?? YoutubeUrlHelper.extractVideoId(youtubeUrl) ?? '';
+    youtubeVideoId = rawExtractedId;
+    title = json['title']?.toString() ?? json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    tag = json['tag']?.toString() ?? json['category']?.toString() ?? 'Garbi';
+    duration = json['duration']?.toString() ?? '';
+    year = json['year']?.toString() ?? '2024';
+    final rawThumb = json['thumbnailUrl']?.toString() ?? json['thumbnail_url']?.toString() ?? '';
+    thumbnailUrl = rawThumb.isNotEmpty ? rawThumb : (rawExtractedId.isNotEmpty ? YoutubeUrlHelper.buildThumbnailUrl(rawExtractedId) : 'assets/images/pavan_putra_logo.png');
+    isFeatured = _toBool(json['isFeatured'] ?? json['is_featured']) ?? true;
+    isPublished = _toBool(json['isPublished'] ?? json['is_published']) ?? true;
+    sourceChannel = json['sourceChannel']?.toString() ?? json['source_channel']?.toString() ?? 'Ratnadeep Sound';
+  }
+
+  factory AdminVideo.fromMap(Map<String, dynamic> map) => AdminVideo.fromJson(map);
+
+  String id = '';
+  String youtubeVideoId = '';
+  String title = '';
+  String titleGu = '';
+  String tag = 'Garbi';
+  String duration = '';
+  String youtubeUrl = '';
+  String year = '2024';
+  String thumbnailUrl = 'assets/images/pavan_putra_logo.png';
+  bool isFeatured = true;
+  bool isPublished = true;
+  String sourceChannel = 'Ratnadeep Sound';
+
+  Map<String, dynamic> toJson() {
     final canonId = youtubeVideoId.isNotEmpty ? youtubeVideoId : (YoutubeUrlHelper.extractVideoId(youtubeUrl) ?? '');
-    final thumb = thumbnailUrl.isNotEmpty ? thumbnailUrl : (canonId.isNotEmpty ? YoutubeUrlHelper.buildThumbnailUrl(canonId) : '');
+    final thumb = thumbnailUrl.isNotEmpty ? thumbnailUrl : (canonId.isNotEmpty ? YoutubeUrlHelper.buildThumbnailUrl(canonId) : 'assets/images/pavan_putra_logo.png');
 
-    return {
-      'id': id,
-      'youtubeVideoId': canonId,
-      'title': title,
-      'titleGu': titleGu,
-      'tag': tag,
-      'duration': duration,
-      'youtubeUrl': youtubeUrl,
-      'year': year,
-      'thumbnailUrl': thumb,
-      'isFeatured': isFeatured,
-      'isPublished': isPublished,
-      'sourceChannel': sourceChannel,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['youtubeVideoId'] = canonId;
+    map['title'] = title;
+    map['titleGu'] = titleGu;
+    map['tag'] = tag;
+    map['duration'] = duration;
+    map['youtubeUrl'] = youtubeUrl;
+    map['year'] = year;
+    map['thumbnailUrl'] = thumb;
+    map['isFeatured'] = isFeatured;
+    map['isPublished'] = isPublished;
+    map['sourceChannel'] = sourceChannel;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
   }
 
-  factory AdminVideo.fromMap(Map<String, dynamic> map) {
-    final rawUrl = map['youtubeUrl'] as String? ?? map['youtube_url'] as String? ?? '';
-    final extractedId = map['youtubeVideoId'] as String? ?? map['youtube_video_id'] as String? ?? YoutubeUrlHelper.extractVideoId(rawUrl) ?? '';
-    final thumb = map['thumbnailUrl'] as String? ?? map['thumbnail_url'] as String? ?? (extractedId.isNotEmpty ? YoutubeUrlHelper.buildThumbnailUrl(extractedId) : '');
-
-    return AdminVideo(
-      id: map['id'] as String? ?? '',
-      youtubeVideoId: extractedId,
-      title: map['title'] as String? ?? map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      tag: map['tag'] as String? ?? map['category'] as String? ?? 'Garbi',
-      duration: map['duration'] as String? ?? '',
-      youtubeUrl: rawUrl,
-      year: map['year'] as String? ?? '2024',
-      thumbnailUrl: thumb,
-      isFeatured: map['isFeatured'] as bool? ?? map['is_featured'] as bool? ?? true,
-      isPublished: map['isPublished'] as bool? ?? map['is_published'] as bool? ?? true,
-      sourceChannel: map['sourceChannel'] as String? ?? map['source_channel'] as String? ?? 'Ratnadeep Sound',
-    );
-  }
+  Map<String, dynamic> toMap() => toJson();
 
   AdminVideo copyWith({
     String? id,
@@ -1485,34 +1981,48 @@ class AdminVideo {
 }
 
 class AdminLiveStreamSettings {
-  final bool isLive;
-  final String title;
-  final String streamUrl;
-  final String announcement;
-  final String scheduleTime;
+  AdminLiveStreamSettings({this.isLive = false, this.title = '', this.streamUrl = '', this.announcement = '', this.scheduleTime = ''});
 
-  const AdminLiveStreamSettings({this.isLive = false, this.title = '', this.streamUrl = '', this.announcement = '', this.scheduleTime = ''});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'isLive': isLive,
-      'title': title,
-      'streamUrl': streamUrl,
-      'announcement': announcement,
-      'scheduleTime': scheduleTime,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
 
-  factory AdminLiveStreamSettings.fromMap(Map<String, dynamic> map) {
-    return AdminLiveStreamSettings(
-      isLive: map['isLive'] as bool? ?? map['is_live'] as bool? ?? false,
-      title: map['title'] as String? ?? '',
-      streamUrl: map['streamUrl'] as String? ?? map['stream_url'] as String? ?? '',
-      announcement: map['announcement'] as String? ?? '',
-      scheduleTime: map['scheduleTime'] as String? ?? map['schedule_time'] as String? ?? '',
-    );
+  AdminLiveStreamSettings.fromJson(dynamic json) {
+    if (json is! Map) return;
+    isLive = _toBool(json['isLive'] ?? json['is_live']) ?? false;
+    title = json['title']?.toString() ?? '';
+    streamUrl = json['streamUrl']?.toString() ?? json['stream_url']?.toString() ?? '';
+    announcement = json['announcement']?.toString() ?? '';
+    scheduleTime = json['scheduleTime']?.toString() ?? json['schedule_time']?.toString() ?? '';
   }
+
+  factory AdminLiveStreamSettings.fromMap(Map<String, dynamic> map) => AdminLiveStreamSettings.fromJson(map);
+
+  bool isLive = false;
+  String title = '';
+  String streamUrl = '';
+  String announcement = '';
+  String scheduleTime = '';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['isLive'] = isLive;
+    map['title'] = title;
+    map['streamUrl'] = streamUrl;
+    map['announcement'] = announcement;
+    map['scheduleTime'] = scheduleTime;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminLiveStreamSettings copyWith({bool? isLive, String? title, String? streamUrl, String? announcement, String? scheduleTime}) {
     return AdminLiveStreamSettings(
@@ -1526,72 +2036,92 @@ class AdminLiveStreamSettings {
 }
 
 class AdminBlog {
-  final String id;
-  final String slug;
-  final String title;
-  final String titleGu;
-  final String category;
-  final String date;
-  final String readTime;
-  final String snippet;
-  final String snippetGu;
-  final String content;
-  final String imageUrl;
-  final bool isPublished;
-
   AdminBlog({
-    required this.id,
-    required this.slug,
-    required this.title,
+    this.id = '',
+    this.slug = '',
+    this.title = '',
     this.titleGu = '',
-    required this.category,
-    required this.date,
-    required this.readTime,
-    required this.snippet,
+    this.category = 'Heritage',
+    this.date = '',
+    this.readTime = '5 min',
+    this.snippet = '',
     this.snippetGu = '',
-    required this.content,
+    this.content = '',
+    this.contentGu = '',
     this.imageUrl = 'assets/images/pavan_putra_logo.png',
     this.isPublished = true,
   });
+
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
+  }
+
+  AdminBlog.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    slug = json['slug']?.toString() ?? '';
+    title = json['title']?.toString() ?? json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    category = json['category']?.toString() ?? 'Heritage';
+    date = json['date']?.toString() ?? '';
+    readTime = json['readTime']?.toString() ?? json['read_time']?.toString() ?? '5 min';
+    snippet = json['snippet']?.toString() ?? json['snippetEn']?.toString() ?? json['snippet_en']?.toString() ?? '';
+    snippetGu = json['snippetGu']?.toString() ?? json['snippet_gu']?.toString() ?? '';
+    content = json['content']?.toString() ?? json['contentEn']?.toString() ?? json['content_en']?.toString() ?? '';
+    contentGu = json['contentGu']?.toString() ?? json['content_gu']?.toString() ?? '';
+    imageUrl = json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? 'assets/images/pavan_putra_logo.png';
+    isPublished = _toBool(json['isPublished'] ?? json['is_published']) ?? true;
+  }
+
+  factory AdminBlog.fromMap(Map<String, dynamic> map) => AdminBlog.fromJson(map);
+
+  String id = '';
+  String slug = '';
+  String title = '';
+  String titleGu = '';
+  String category = 'Heritage';
+  String date = '';
+  String readTime = '5 min';
+  String snippet = '';
+  String snippetGu = '';
+  String content = '';
+  String contentGu = '';
+  String imageUrl = 'assets/images/pavan_putra_logo.png';
+  bool isPublished = true;
 
   String getTitle(String lang) => (lang == 'gu' && titleGu.isNotEmpty) ? titleGu : title;
 
   String getSnippet(String lang) => (lang == 'gu' && snippetGu.isNotEmpty) ? snippetGu : snippet;
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'slug': slug,
-      'title': title,
-      'titleGu': titleGu,
-      'category': category,
-      'date': date,
-      'readTime': readTime,
-      'snippet': snippet,
-      'snippetGu': snippetGu,
-      'content': content,
-      'imageUrl': imageUrl,
-      'isPublished': isPublished,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  String getContent(String lang) => (lang == 'gu' && contentGu.isNotEmpty) ? contentGu : content;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['slug'] = slug;
+    map['title'] = title;
+    map['titleGu'] = titleGu;
+    map['category'] = category;
+    map['date'] = date;
+    map['readTime'] = readTime;
+    map['snippet'] = snippet;
+    map['snippetGu'] = snippetGu;
+    map['content'] = content;
+    map['contentGu'] = contentGu;
+    map['imageUrl'] = imageUrl;
+    map['isPublished'] = isPublished;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
   }
 
-  factory AdminBlog.fromMap(Map<String, dynamic> map) {
-    return AdminBlog(
-      id: map['id'] as String? ?? '',
-      slug: map['slug'] as String? ?? '',
-      title: map['title'] as String? ?? map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      category: map['category'] as String? ?? 'Heritage',
-      date: map['date'] as String? ?? '',
-      readTime: map['readTime'] as String? ?? map['read_time'] as String? ?? '5 min',
-      snippet: map['snippet'] as String? ?? map['snippetEn'] as String? ?? map['snippet_en'] as String? ?? '',
-      snippetGu: map['snippetGu'] as String? ?? map['snippet_gu'] as String? ?? '',
-      content: map['content'] as String? ?? '',
-      imageUrl: map['imageUrl'] as String? ?? map['image_url'] as String? ?? 'assets/images/pavan_putra_logo.png',
-      isPublished: map['isPublished'] as bool? ?? map['is_published'] as bool? ?? true,
-    );
-  }
+  Map<String, dynamic> toMap() => toJson();
 
   AdminBlog copyWith({
     String? id,
@@ -1604,6 +2134,7 @@ class AdminBlog {
     String? snippet,
     String? snippetGu,
     String? content,
+    String? contentGu,
     String? imageUrl,
     bool? isPublished,
   }) {
@@ -1618,6 +2149,7 @@ class AdminBlog {
       snippet: snippet ?? this.snippet,
       snippetGu: snippetGu ?? this.snippetGu,
       content: content ?? this.content,
+      contentGu: contentGu ?? this.contentGu,
       imageUrl: imageUrl ?? this.imageUrl,
       isPublished: isPublished ?? this.isPublished,
     );
@@ -1625,31 +2157,43 @@ class AdminBlog {
 }
 
 class AdminEnquiry {
-  final String id;
-  final String name;
-  final String phone;
-  final String email;
-  final String message;
-  final String date;
-  final String status;
+  AdminEnquiry({this.id = '', this.name = '', this.phone = '', this.email = '', this.message = '', this.date = '', this.status = 'New'});
 
-  AdminEnquiry({required this.id, required this.name, required this.phone, required this.email, required this.message, required this.date, this.status = 'New'});
-
-  Map<String, dynamic> toMap() {
-    return {'id': id, 'name': name, 'phone': phone, 'email': email, 'message': message, 'date': date, 'status': status, 'updatedAt': DateTime.now().toIso8601String()};
+  AdminEnquiry.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    name = json['name']?.toString() ?? '';
+    phone = json['phone']?.toString() ?? '';
+    email = json['email']?.toString() ?? '';
+    message = json['message']?.toString() ?? '';
+    date = json['date']?.toString() ?? '';
+    status = json['status']?.toString() ?? 'New';
   }
 
-  factory AdminEnquiry.fromMap(Map<String, dynamic> map) {
-    return AdminEnquiry(
-      id: map['id'] as String? ?? '',
-      name: map['name'] as String? ?? '',
-      phone: map['phone'] as String? ?? '',
-      email: map['email'] as String? ?? '',
-      message: map['message'] as String? ?? '',
-      date: map['date'] as String? ?? '',
-      status: map['status'] as String? ?? 'New',
-    );
+  factory AdminEnquiry.fromMap(Map<String, dynamic> map) => AdminEnquiry.fromJson(map);
+
+  String id = '';
+  String name = '';
+  String phone = '';
+  String email = '';
+  String message = '';
+  String date = '';
+  String status = 'New';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['name'] = name;
+    map['phone'] = phone;
+    map['email'] = email;
+    map['message'] = message;
+    map['date'] = date;
+    map['status'] = status;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
   }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminEnquiry copyWith({String? id, String? name, String? phone, String? email, String? message, String? date, String? status}) {
     return AdminEnquiry(
@@ -1664,60 +2208,65 @@ class AdminEnquiry {
   }
 }
 
-/// Inbound admin notification email address model for contact form routing
 class AdminNotificationEmail {
-  final String id;
-  final String email;
-  final String recipientName;
-  final String department;
-  final bool isPrimary;
-  final bool isEnabled;
-  final String createdAt;
-
-  const AdminNotificationEmail({
-    required this.id,
-    required this.email,
-    required this.recipientName,
+  AdminNotificationEmail({
+    this.id = '',
+    this.email = '',
+    this.recipientName = '',
     this.department = 'General Management',
     this.isPrimary = false,
     this.isEnabled = true,
     this.createdAt = '',
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'email': email,
-      'recipientName': recipientName,
-      'department': department,
-      'isPrimary': isPrimary,
-      'isEnabled': isEnabled,
-      'createdAt': createdAt.isNotEmpty ? createdAt : DateTime.now().toIso8601String(),
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
 
-  factory AdminNotificationEmail.fromMap(Map<String, dynamic> map) {
-    return AdminNotificationEmail(
-      id: map['id'] as String? ?? '',
-      email: map['email'] as String? ?? '',
-      recipientName: map['recipientName'] as String? ?? '',
-      department: map['department'] as String? ?? 'General Management',
-      isPrimary: map['isPrimary'] as bool? ?? false,
-      isEnabled: map['isEnabled'] as bool? ?? true,
-      createdAt: map['createdAt'] as String? ?? '',
-    );
+  AdminNotificationEmail.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? '';
+    email = json['email']?.toString() ?? '';
+    recipientName = json['recipientName']?.toString() ?? '';
+    department = json['department']?.toString() ?? 'General Management';
+    isPrimary = _toBool(json['isPrimary'] ?? json['is_primary']) ?? false;
+    isEnabled = _toBool(json['isEnabled'] ?? json['is_enabled']) ?? true;
+    createdAt = json['createdAt']?.toString() ?? '';
   }
 
-  AdminNotificationEmail copyWith({
-    String? id,
-    String? email,
-    String? recipientName,
-    String? department,
-    bool? isPrimary,
-    bool? isEnabled,
-    String? createdAt,
-  }) {
+  factory AdminNotificationEmail.fromMap(Map<String, dynamic> map) => AdminNotificationEmail.fromJson(map);
+
+  String id = '';
+  String email = '';
+  String recipientName = '';
+  String department = 'General Management';
+  bool isPrimary = false;
+  bool isEnabled = true;
+  String createdAt = '';
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['email'] = email;
+    map['recipientName'] = recipientName;
+    map['department'] = department;
+    map['isPrimary'] = isPrimary;
+    map['isEnabled'] = isEnabled;
+    map['createdAt'] = createdAt.isNotEmpty ? createdAt : DateTime.now().toIso8601String();
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
+
+  AdminNotificationEmail copyWith({String? id, String? email, String? recipientName, String? department, bool? isPrimary, bool? isEnabled, String? createdAt}) {
     return AdminNotificationEmail(
       id: id ?? this.id,
       email: email ?? this.email,
@@ -1731,31 +2280,9 @@ class AdminNotificationEmail {
 }
 
 class AdminSettings {
-  final String mandalNameEn;
-  final String mandalNameGu;
-  final String contactPhone;
-  final String contactEmail;
-  final String address;
-  final String addressGu;
-  final String dailyAartiTime;
-  final String dailyAartiTimeGu;
-  final String youtubeChannel;
-  final String instagramHandle;
-  final String facebookUrl;
-  final String whatsappNumber;
-  final String logoImageUrl;
-  final String paymentQrImageUrl;
-  final String paymentUpiId;
-  final String paymentRecipientName;
-  final String paymentRecipientNameGu;
-  final String paymentNotes;
-  final String paymentNotesGu;
-  final bool isPaymentEnabled;
-  String get logoUrl => logoImageUrl;
-
-  const AdminSettings({
-    this.mandalNameEn = '',
-    this.mandalNameGu = '',
+  AdminSettings({
+    this.mandalNameEn = 'Pavan Putra Garbi Mandal',
+    this.mandalNameGu = 'શ્રી પવનપુત્ર ગરબી મંડળ',
     this.contactPhone = '',
     this.contactEmail = '',
     this.address = '',
@@ -1776,59 +2303,94 @@ class AdminSettings {
     this.isPaymentEnabled = false,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'mandalNameEn': mandalNameEn,
-      'mandalNameGu': mandalNameGu,
-      'contactPhone': contactPhone,
-      'contactEmail': contactEmail,
-      'address': address,
-      'addressGu': addressGu,
-      'dailyAartiTime': dailyAartiTime,
-      'dailyAartiTimeGu': dailyAartiTimeGu,
-      'youtubeChannel': youtubeChannel,
-      'instagramHandle': instagramHandle,
-      'facebookUrl': facebookUrl,
-      'whatsappNumber': whatsappNumber,
-      'logoImageUrl': logoImageUrl,
-      'paymentQrImageUrl': paymentQrImageUrl,
-      'paymentUpiId': paymentUpiId,
-      'paymentRecipientName': paymentRecipientName,
-      'paymentRecipientNameGu': paymentRecipientNameGu,
-      'paymentNotes': paymentNotes,
-      'paymentNotesGu': paymentNotesGu,
-      'isPaymentEnabled': isPaymentEnabled,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
 
-  factory AdminSettings.fromMap(Map<String, dynamic> map) {
-    return AdminSettings(
-      mandalNameEn: map['mandalNameEn'] as String? ?? map['mandal_name_en'] as String? ?? 'Pavan Putra Garbi Mandal',
-      mandalNameGu: map['mandalNameGu'] as String? ?? map['mandal_name_gu'] as String? ?? 'શ્રી પવનપુત્ર ગરબી મંડળ',
-      contactPhone: map['contactPhone'] as String? ?? map['contact_phone'] as String? ?? '',
-      contactEmail: map['contactEmail'] as String? ?? map['contact_email'] as String? ?? '',
-      address: map['address'] as String? ?? '',
-      addressGu: map['addressGu'] as String? ?? map['address_gu'] as String? ?? '',
-      dailyAartiTime: map['dailyAartiTime'] as String? ?? map['daily_aarti_time'] as String? ?? '',
-      dailyAartiTimeGu: map['dailyAartiTimeGu'] as String? ?? map['daily_aarti_time_gu'] as String? ?? '',
-      youtubeChannel: map['youtubeChannel'] as String? ?? map['youtube_channel'] as String? ?? '',
-      instagramHandle: map['instagramHandle'] as String? ?? map['instagram_handle'] as String? ?? '',
-      facebookUrl: map['facebookUrl'] as String? ?? map['facebook_url'] as String? ?? 'https://facebook.com/PavanPutraGarbiRajkot',
-      whatsappNumber: map['whatsappNumber'] as String? ?? map['whatsapp_number'] as String? ?? '+919876543210',
-      logoImageUrl: () {
-        final raw = (map['logoImageUrl'] as String? ?? map['logo_image_url'] as String? ?? '').trim();
-        return raw.isNotEmpty ? raw : 'assets/images/pavan_putra_logo.png';
-      }(),
-      paymentQrImageUrl: map['paymentQrImageUrl'] as String? ?? map['payment_qr_image_url'] as String? ?? '',
-      paymentUpiId: map['paymentUpiId'] as String? ?? map['payment_upi_id'] as String? ?? '',
-      paymentRecipientName: map['paymentRecipientName'] as String? ?? map['payment_recipient_name'] as String? ?? '',
-      paymentRecipientNameGu: map['paymentRecipientNameGu'] as String? ?? map['payment_recipient_name_gu'] as String? ?? '',
-      paymentNotes: map['paymentNotes'] as String? ?? map['payment_notes'] as String? ?? '',
-      paymentNotesGu: map['paymentNotesGu'] as String? ?? map['payment_notes_gu'] as String? ?? '',
-      isPaymentEnabled: map['isPaymentEnabled'] as bool? ?? map['is_payment_enabled'] as bool? ?? false,
-    );
+  AdminSettings.fromJson(dynamic json) {
+    if (json is! Map) return;
+    mandalNameEn = json['mandalNameEn']?.toString() ?? json['mandal_name_en']?.toString() ?? 'Pavan Putra Garbi Mandal';
+    mandalNameGu = json['mandalNameGu']?.toString() ?? json['mandal_name_gu']?.toString() ?? 'શ્રી પવનપુત્ર ગરબી મંડળ';
+    contactPhone = json['contactPhone']?.toString() ?? json['contact_phone']?.toString() ?? '';
+    contactEmail = json['contactEmail']?.toString() ?? json['contact_email']?.toString() ?? '';
+    address = json['address']?.toString() ?? '';
+    addressGu = json['addressGu']?.toString() ?? json['address_gu']?.toString() ?? '';
+    dailyAartiTime = json['dailyAartiTime']?.toString() ?? json['daily_aarti_time']?.toString() ?? '';
+    dailyAartiTimeGu = json['dailyAartiTimeGu']?.toString() ?? json['daily_aarti_time_gu']?.toString() ?? '';
+    youtubeChannel = json['youtubeChannel']?.toString() ?? json['youtube_channel']?.toString() ?? '';
+    instagramHandle = json['instagramHandle']?.toString() ?? json['instagram_handle']?.toString() ?? '';
+    facebookUrl = json['facebookUrl']?.toString() ?? json['facebook_url']?.toString() ?? 'https://facebook.com/PavanPutraGarbiRajkot';
+    whatsappNumber = json['whatsappNumber']?.toString() ?? json['whatsapp_number']?.toString() ?? '+919876543210';
+    final rawLogo = (json['logoImageUrl']?.toString() ?? json['logo_image_url']?.toString() ?? '').trim();
+    logoImageUrl = rawLogo.isNotEmpty ? rawLogo : 'assets/images/pavan_putra_logo.png';
+    paymentQrImageUrl = json['paymentQrImageUrl']?.toString() ?? json['payment_qr_image_url']?.toString() ?? '';
+    paymentUpiId = json['paymentUpiId']?.toString() ?? json['payment_upi_id']?.toString() ?? '';
+    paymentRecipientName = json['paymentRecipientName']?.toString() ?? json['payment_recipient_name']?.toString() ?? '';
+    paymentRecipientNameGu = json['paymentRecipientNameGu']?.toString() ?? json['payment_recipient_name_gu']?.toString() ?? '';
+    paymentNotes = json['paymentNotes']?.toString() ?? json['payment_notes']?.toString() ?? '';
+    paymentNotesGu = json['paymentNotesGu']?.toString() ?? json['payment_notes_gu']?.toString() ?? '';
+    isPaymentEnabled = _toBool(json['isPaymentEnabled'] ?? json['is_payment_enabled']) ?? false;
   }
+
+  factory AdminSettings.fromMap(Map<String, dynamic> map) => AdminSettings.fromJson(map);
+
+  String mandalNameEn = 'Pavan Putra Garbi Mandal';
+  String mandalNameGu = 'શ્રી પવનપુત્ર ગરબી મંડળ';
+  String contactPhone = '';
+  String contactEmail = '';
+  String address = '';
+  String addressGu = '';
+  String dailyAartiTime = '';
+  String dailyAartiTimeGu = '';
+  String youtubeChannel = '';
+  String instagramHandle = '';
+  String facebookUrl = 'https://facebook.com/PavanPutraGarbiRajkot';
+  String whatsappNumber = '+919876543210';
+  String logoImageUrl = 'assets/images/pavan_putra_logo.png';
+  String paymentQrImageUrl = '';
+  String paymentUpiId = '';
+  String paymentRecipientName = '';
+  String paymentRecipientNameGu = '';
+  String paymentNotes = '';
+  String paymentNotesGu = '';
+  bool isPaymentEnabled = false;
+
+  String get logoUrl => logoImageUrl;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['mandalNameEn'] = mandalNameEn;
+    map['mandalNameGu'] = mandalNameGu;
+    map['contactPhone'] = contactPhone;
+    map['contactEmail'] = contactEmail;
+    map['address'] = address;
+    map['addressGu'] = addressGu;
+    map['dailyAartiTime'] = dailyAartiTime;
+    map['dailyAartiTimeGu'] = dailyAartiTimeGu;
+    map['youtubeChannel'] = youtubeChannel;
+    map['instagramHandle'] = instagramHandle;
+    map['facebookUrl'] = facebookUrl;
+    map['whatsappNumber'] = whatsappNumber;
+    map['logoImageUrl'] = logoImageUrl;
+    map['paymentQrImageUrl'] = paymentQrImageUrl;
+    map['paymentUpiId'] = paymentUpiId;
+    map['paymentRecipientName'] = paymentRecipientName;
+    map['paymentRecipientNameGu'] = paymentRecipientNameGu;
+    map['paymentNotes'] = paymentNotes;
+    map['paymentNotesGu'] = paymentNotesGu;
+    map['isPaymentEnabled'] = isPaymentEnabled;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
 
   AdminSettings copyWith({
     String? mandalNameEn,
@@ -1877,65 +2439,68 @@ class AdminSettings {
   }
 }
 
-/// Model for dynamic website footer quick navigation links
 class AdminFooterLink {
-  final String id;
-  final String titleEn;
-  final String titleGu;
-  final String url;
-  final String column; // 'col1' (Explore Archive) or 'col2' (About Mandal)
-  final int order;
-  final bool isEnabled;
-  final bool isExternal;
+  AdminFooterLink({this.id = '', this.titleEn = '', this.titleGu = '', this.url = '/', this.column = 'col1', this.order = 1, this.isEnabled = true, this.isExternal = false});
 
-  const AdminFooterLink({
-    required this.id,
-    required this.titleEn,
-    required this.titleGu,
-    required this.url,
-    this.column = 'col1',
-    this.order = 1,
-    this.isEnabled = true,
-    this.isExternal = false,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'titleEn': titleEn,
-      'titleGu': titleGu,
-      'url': url,
-      'column': column,
-      'order': order,
-      'isEnabled': isEnabled,
-      'isExternal': isExternal,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
-  factory AdminFooterLink.fromMap(Map<String, dynamic> map) {
-    return AdminFooterLink(
-      id: map['id'] as String? ?? 'flink-${DateTime.now().millisecondsSinceEpoch}',
-      titleEn: map['titleEn'] as String? ?? map['title_en'] as String? ?? '',
-      titleGu: map['titleGu'] as String? ?? map['title_gu'] as String? ?? '',
-      url: map['url'] as String? ?? '/',
-      column: map['column'] as String? ?? 'col1',
-      order: (map['order'] as num?)?.toInt() ?? 1,
-      isEnabled: map['isEnabled'] as bool? ?? map['is_enabled'] as bool? ?? true,
-      isExternal: map['isExternal'] as bool? ?? map['is_external'] as bool? ?? false,
-    );
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
 
-  AdminFooterLink copyWith({
-    String? id,
-    String? titleEn,
-    String? titleGu,
-    String? url,
-    String? column,
-    int? order,
-    bool? isEnabled,
-    bool? isExternal,
-  }) {
+  AdminFooterLink.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? 'flink-${DateTime.now().millisecondsSinceEpoch}';
+    titleEn = json['titleEn']?.toString() ?? json['title_en']?.toString() ?? '';
+    titleGu = json['titleGu']?.toString() ?? json['title_gu']?.toString() ?? '';
+    url = json['url']?.toString() ?? '/';
+    column = json['column']?.toString() ?? 'col1';
+    order = _toInt(json['order']) ?? 1;
+    isEnabled = _toBool(json['isEnabled'] ?? json['is_enabled']) ?? true;
+    isExternal = _toBool(json['isExternal'] ?? json['is_external']) ?? false;
+  }
+
+  factory AdminFooterLink.fromMap(Map<String, dynamic> map) => AdminFooterLink.fromJson(map);
+
+  String id = '';
+  String titleEn = '';
+  String titleGu = '';
+  String url = '/';
+  String column = 'col1';
+  int order = 1;
+  bool isEnabled = true;
+  bool isExternal = false;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['titleEn'] = titleEn;
+    map['titleGu'] = titleGu;
+    map['url'] = url;
+    map['column'] = column;
+    map['order'] = order;
+    map['isEnabled'] = isEnabled;
+    map['isExternal'] = isExternal;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
+
+  AdminFooterLink copyWith({String? id, String? titleEn, String? titleGu, String? url, String? column, int? order, bool? isEnabled, bool? isExternal}) {
     return AdminFooterLink(
       id: id ?? this.id,
       titleEn: titleEn ?? this.titleEn,
@@ -1949,55 +2514,62 @@ class AdminFooterLink {
   }
 }
 
-/// Model for dynamic official social channel buttons in website footer
 class AdminFooterSocialLink {
-  final String id;
-  final String platform;
-  final String url;
-  final String iconKey;
-  final int order;
-  final bool isEnabled;
+  AdminFooterSocialLink({this.id = '', this.platform = 'Social', this.url = '', this.iconKey = 'link', this.order = 1, this.isEnabled = true});
 
-  const AdminFooterSocialLink({
-    required this.id,
-    required this.platform,
-    required this.url,
-    this.iconKey = 'link',
-    this.order = 1,
-    this.isEnabled = true,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'platform': platform,
-      'url': url,
-      'iconKey': iconKey,
-      'order': order,
-      'isEnabled': isEnabled,
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
-  factory AdminFooterSocialLink.fromMap(Map<String, dynamic> map) {
-    return AdminFooterSocialLink(
-      id: map['id'] as String? ?? 'fsoc-${DateTime.now().millisecondsSinceEpoch}',
-      platform: map['platform'] as String? ?? 'Social',
-      url: map['url'] as String? ?? '',
-      iconKey: map['iconKey'] as String? ?? map['icon_key'] as String? ?? 'link',
-      order: (map['order'] as num?)?.toInt() ?? 1,
-      isEnabled: map['isEnabled'] as bool? ?? map['is_enabled'] as bool? ?? true,
-    );
+  bool? _toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final lower = value.toLowerCase().trim();
+      return lower == 'true' || lower == '1';
+    }
+    return null;
   }
 
-  AdminFooterSocialLink copyWith({
-    String? id,
-    String? platform,
-    String? url,
-    String? iconKey,
-    int? order,
-    bool? isEnabled,
-  }) {
+  AdminFooterSocialLink.fromJson(dynamic json) {
+    if (json is! Map) return;
+    id = json['id']?.toString() ?? 'fsoc-${DateTime.now().millisecondsSinceEpoch}';
+    platform = json['platform']?.toString() ?? 'Social';
+    url = json['url']?.toString() ?? '';
+    iconKey = json['iconKey']?.toString() ?? json['icon_key']?.toString() ?? 'link';
+    order = _toInt(json['order']) ?? 1;
+    isEnabled = _toBool(json['isEnabled'] ?? json['is_enabled']) ?? true;
+  }
+
+  factory AdminFooterSocialLink.fromMap(Map<String, dynamic> map) => AdminFooterSocialLink.fromJson(map);
+
+  String id = '';
+  String platform = 'Social';
+  String url = '';
+  String iconKey = 'link';
+  int order = 1;
+  bool isEnabled = true;
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    map['platform'] = platform;
+    map['url'] = url;
+    map['iconKey'] = iconKey;
+    map['order'] = order;
+    map['isEnabled'] = isEnabled;
+    map['updatedAt'] = DateTime.now().toIso8601String();
+    return map;
+  }
+
+  Map<String, dynamic> toMap() => toJson();
+
+  AdminFooterSocialLink copyWith({String? id, String? platform, String? url, String? iconKey, int? order, bool? isEnabled}) {
     return AdminFooterSocialLink(
       id: id ?? this.id,
       platform: platform ?? this.platform,
@@ -2035,19 +2607,23 @@ class AdminDataStore extends ChangeNotifier {
   final List<AdminFooterSocialLink> _footerSocialLinks = [];
   final Map<String, AdminContentField> _siteContentMap = {};
 
-  AdminLiveStreamSettings _liveStreamSettings = const AdminLiveStreamSettings();
+  AdminLiveStreamSettings _liveStreamSettings = AdminLiveStreamSettings();
 
-  AdminSettings _settings = const AdminSettings();
+  AdminSettings _settings = AdminSettings();
 
   bool _isFirestoreConnected = false;
+
   bool get isFirestoreConnected => _isFirestoreConnected;
 
   bool _isInitialized = false;
+
   bool get isInitialized => _isInitialized;
 
   bool _isBusy = false;
   String? _busyMessage;
+
   bool get isBusy => _isBusy;
+
   String? get busyMessage => _busyMessage;
 
   void setBusy(bool value, [String? message]) {
@@ -2083,6 +2659,9 @@ class AdminDataStore extends ChangeNotifier {
   List<AdminHomeBlessing> get blessings => List.unmodifiable(_blessings);
 
   List<AdminGarbiYear> get years => List.unmodifiable(_years);
+
+  /// True when all essential home screen data groups are populated in memory
+  bool get hasEssentialHomeData => _pillars.isNotEmpty && _blessings.isNotEmpty && _years.isNotEmpty;
 
   List<AdminAlbum> get albums => List.unmodifiable(_albums);
 
@@ -2299,12 +2878,7 @@ class AdminDataStore extends ChangeNotifier {
   Map<String, String> get homeArticlesHeader {
     String getVal(String key, String lang) => getContentVal(key, lang);
 
-    return {
-      'tagEn': getVal('sec_blog_tag', 'en'),
-      'tagGu': getVal('sec_blog_tag', 'gu'),
-      'titleEn': getVal('sec_blog_title', 'en'),
-      'titleGu': getVal('sec_blog_title', 'gu'),
-    };
+    return {'tagEn': getVal('sec_blog_tag', 'en'), 'tagGu': getVal('sec_blog_tag', 'gu'), 'titleEn': getVal('sec_blog_title', 'en'), 'titleGu': getVal('sec_blog_title', 'gu')};
   }
 
   AdminHomeCtaData get homeCtaData {
@@ -2355,14 +2929,44 @@ class AdminDataStore extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
   // --- Cloud Firestore Integration ---
+
+  Future<QuerySnapshot<Map<String, dynamic>>> _getCollectionWithFallback(
+    CollectionReference<Map<String, dynamic>> col, {
+    bool forceServer = false,
+  }) async {
+    if (forceServer) {
+      try {
+        return await col.get(const GetOptions(source: Source.server));
+      } catch (e) {
+        debugPrint('Server fetch fallback to cache for ${col.path}: $e');
+        return await col.get();
+      }
+    }
+    return await col.get();
+  }
+
+  Future<DocumentSnapshot<Map<String, dynamic>>> _getDocWithFallback(
+    DocumentReference<Map<String, dynamic>> doc, {
+    bool forceServer = false,
+  }) async {
+    if (forceServer) {
+      try {
+        return await doc.get(const GetOptions(source: Source.server));
+      } catch (e) {
+        debugPrint('Server fetch fallback to cache for ${doc.path}: $e');
+        return await doc.get();
+      }
+    }
+    return await doc.get();
+  }
 
   Future<void> _fetchSettings(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final settingsDoc = await db.collection('settings').doc('mandal_settings').get(getOpt);
+      final settingsDoc = await _getDocWithFallback(
+        db.collection('settings').doc('mandal_settings'),
+        forceServer: forceServer,
+      );
       if (settingsDoc.exists && settingsDoc.data() != null && settingsDoc.data()!.isNotEmpty) {
         final data = settingsDoc.data()!;
         if (data['is_deleted'] != true && data['isDeleted'] != true) {
@@ -2370,14 +2974,16 @@ class AdminDataStore extends ChangeNotifier {
         }
       }
     } catch (e) {
-      debugPrint('Settings fetch notice: ');
+      debugPrint('Settings fetch notice: $e');
     }
   }
 
   Future<void> _fetchSiteContent(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final contentSnap = await db.collection('site_content').get(getOpt);
+      final contentSnap = await _getCollectionWithFallback(
+        db.collection('site_content'),
+        forceServer: forceServer,
+      );
       for (final doc in contentSnap.docs) {
         final data = doc.data();
         if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
@@ -2385,14 +2991,16 @@ class AdminDataStore extends ChangeNotifier {
         _siteContentMap[f.key] = f;
       }
     } catch (e) {
-      debugPrint('Site content fetch notice: ');
+      debugPrint('Site content fetch notice: $e');
     }
   }
 
   Future<void> _fetchHomeBanners(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final hbSnap = await db.collection('home_banners').get(getOpt);
+      final hbSnap = await _getCollectionWithFallback(
+        db.collection('home_banners'),
+        forceServer: forceServer,
+      );
       if (hbSnap.docs.isNotEmpty) {
         _homeBanners.clear();
         for (final doc in hbSnap.docs) {
@@ -2409,8 +3017,10 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchHomeAboutCards(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final acSnap = await db.collection('home_about_cards').get(getOpt);
+      final acSnap = await _getCollectionWithFallback(
+        db.collection('home_about_cards'),
+        forceServer: forceServer,
+      );
       if (acSnap.docs.isNotEmpty) {
         _aboutCards.clear();
         for (final doc in acSnap.docs) {
@@ -2427,8 +3037,10 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchPillars(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final pillarsSnap = await db.collection('home_pillars').get(getOpt);
+      final pillarsSnap = await _getCollectionWithFallback(
+        db.collection('home_pillars'),
+        forceServer: forceServer,
+      );
       if (pillarsSnap.docs.isNotEmpty) {
         _pillars.clear();
         for (final doc in pillarsSnap.docs) {
@@ -2445,8 +3057,10 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchHomeSingers(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final hsSnap = await db.collection('home_singers').get(getOpt);
+      final hsSnap = await _getCollectionWithFallback(
+        db.collection('home_singers'),
+        forceServer: forceServer,
+      );
       if (hsSnap.docs.isNotEmpty) {
         _homeSingers.clear();
         for (final doc in hsSnap.docs) {
@@ -2463,8 +3077,10 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchBlessings(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final blessingsSnap = await db.collection('home_blessings').get(getOpt);
+      final blessingsSnap = await _getCollectionWithFallback(
+        db.collection('home_blessings'),
+        forceServer: forceServer,
+      );
       if (blessingsSnap.docs.isNotEmpty) {
         _blessings.clear();
         for (final doc in blessingsSnap.docs) {
@@ -2481,10 +3097,9 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchFooter(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
       final results = await Future.wait([
-        db.collection('footer_links').get(getOpt),
-        db.collection('footer_social_links').get(getOpt),
+        _getCollectionWithFallback(db.collection('footer_links'), forceServer: forceServer),
+        _getCollectionWithFallback(db.collection('footer_social_links'), forceServer: forceServer),
       ]);
       final fLinksSnap = results[0];
       if (fLinksSnap.docs.isNotEmpty) {
@@ -2513,8 +3128,10 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchLiveStream(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final liveDoc = await db.collection('live_stream').doc('current').get(getOpt);
+      final liveDoc = await _getDocWithFallback(
+        db.collection('live_stream').doc('current'),
+        forceServer: forceServer,
+      );
       if (liveDoc.exists && liveDoc.data() != null && liveDoc.data()!.isNotEmpty) {
         final data = liveDoc.data()!;
         if (data['is_deleted'] != true && data['isDeleted'] != true) {
@@ -2528,8 +3145,10 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchGarbiYears(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final yearsSnap = await db.collection('garbi_years').get(getOpt);
+      final yearsSnap = await _getCollectionWithFallback(
+        db.collection('garbi_years'),
+        forceServer: forceServer,
+      );
       if (yearsSnap.docs.isNotEmpty) {
         _years.clear();
         for (final doc in yearsSnap.docs) {
@@ -2546,8 +3165,10 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchAlbums(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      final albumsSnap = await db.collection('albums').get(getOpt);
+      final albumsSnap = await _getCollectionWithFallback(
+        db.collection('albums'),
+        forceServer: forceServer,
+      );
       if (albumsSnap.docs.isNotEmpty) {
         _albums.clear();
         for (final doc in albumsSnap.docs) {
@@ -2563,9 +3184,17 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchHomeVideosPreview(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      // Query published videos with limit 6 for Home Screen preview
-      final videosSnap = await db.collection('videos').where('isPublished', isEqualTo: true).limit(6).get(getOpt);
+      final col = db.collection('videos');
+      QuerySnapshot<Map<String, dynamic>> videosSnap;
+      if (forceServer) {
+        try {
+          videosSnap = await col.where('isPublished', isEqualTo: true).limit(6).get(const GetOptions(source: Source.server));
+        } catch (_) {
+          videosSnap = await col.where('isPublished', isEqualTo: true).limit(6).get();
+        }
+      } else {
+        videosSnap = await col.where('isPublished', isEqualTo: true).limit(6).get();
+      }
       if (videosSnap.docs.isNotEmpty) {
         _videos.clear();
         for (final doc in videosSnap.docs) {
@@ -2581,9 +3210,17 @@ class AdminDataStore extends ChangeNotifier {
 
   Future<void> _fetchHomeBlogsPreview(FirebaseFirestore db, {bool forceServer = false}) async {
     try {
-      final getOpt = forceServer ? const GetOptions(source: Source.server) : const GetOptions();
-      // Limit 3 for Home Screen preview
-      final blogsSnap = await db.collection('blogs').limit(3).get(getOpt);
+      final col = db.collection('blogs');
+      QuerySnapshot<Map<String, dynamic>> blogsSnap;
+      if (forceServer) {
+        try {
+          blogsSnap = await col.limit(3).get(const GetOptions(source: Source.server));
+        } catch (_) {
+          blogsSnap = await col.limit(3).get();
+        }
+      } else {
+        blogsSnap = await col.limit(3).get();
+      }
       if (blogsSnap.docs.isNotEmpty) {
         _blogs.clear();
         for (final doc in blogsSnap.docs) {
@@ -2598,9 +3235,11 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _hasLocalCache = false;
+
   bool get hasLocalCache => _hasLocalCache;
 
   String _lastLocalUpdatedAt = '';
+
   String get lastLocalUpdatedAt => _lastLocalUpdatedAt;
   static const String _kSyncMetadataKey = 'ppg_last_synced_timestamp';
 
@@ -2614,217 +3253,260 @@ class AdminDataStore extends ChangeNotifier {
       // 1. Settings
       final settingsJson = prefs.getString('ppg_cache_settings');
       if (settingsJson != null && settingsJson.isNotEmpty) {
-        final map = jsonDecode(settingsJson) as Map<String, dynamic>;
-        _settings = AdminSettings.fromMap(map);
+        try {
+          final decoded = jsonDecode(settingsJson);
+          if (decoded is Map) {
+            _settings = AdminSettings.fromJson(decoded);
+          }
+        } catch (_) {}
       }
 
       // 2. Site Content
       final contentJson = prefs.getString('ppg_cache_site_content');
       if (contentJson != null && contentJson.isNotEmpty) {
-        final list = jsonDecode(contentJson) as List<dynamic>;
-        for (final item in list) {
-          if (item is Map<String, dynamic>) {
-            final f = AdminContentField.fromMap(item);
-            _siteContentMap[f.key] = f;
+        try {
+          final list = jsonDecode(contentJson);
+          if (list is List) {
+            for (final item in list) {
+              if (item is Map) {
+                final f = AdminContentField.fromJson(item);
+                _siteContentMap[f.key] = f;
+              }
+            }
           }
-        }
+        } catch (_) {}
       }
 
       // 3. Home Banners
       final bannersJson = prefs.getString('ppg_cache_home_banners');
       if (bannersJson != null && bannersJson.isNotEmpty) {
-        final list = jsonDecode(bannersJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _homeBanners.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _homeBanners.add(AdminHomeBanner.fromMap(item));
+        try {
+          final list = jsonDecode(bannersJson);
+          if (list is List) {
+            _homeBanners.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _homeBanners.add(AdminHomeBanner.fromJson(item));
+              }
             }
+            _homeBanners.sort((a, b) => a.order.compareTo(b.order));
           }
-          _homeBanners.sort((a, b) => a.order.compareTo(b.order));
-        }
+        } catch (_) {}
       }
 
       // 4. Home About Cards
       final cardsJson = prefs.getString('ppg_cache_home_about_cards');
       if (cardsJson != null && cardsJson.isNotEmpty) {
-        final list = jsonDecode(cardsJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _aboutCards.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _aboutCards.add(AdminAboutCard.fromMap(item));
+        try {
+          final list = jsonDecode(cardsJson);
+          if (list is List) {
+            _aboutCards.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _aboutCards.add(AdminAboutCard.fromJson(item));
+              }
             }
+            _aboutCards.sort((a, b) => a.order.compareTo(b.order));
           }
-          _aboutCards.sort((a, b) => a.order.compareTo(b.order));
-        }
+        } catch (_) {}
       }
 
       // 5. Pillars
       final pillarsJson = prefs.getString('ppg_cache_home_pillars');
       if (pillarsJson != null && pillarsJson.isNotEmpty) {
-        final list = jsonDecode(pillarsJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _pillars.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _pillars.add(AdminHomePillar.fromMap(item));
+        try {
+          final list = jsonDecode(pillarsJson);
+          if (list is List) {
+            _pillars.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _pillars.add(AdminHomePillar.fromJson(item));
+              }
             }
+            _pillars.sort((a, b) => a.order.compareTo(b.order));
           }
-        }
+        } catch (_) {}
       }
 
       // 6. Singers
       final singersJson = prefs.getString('ppg_cache_home_singers');
       if (singersJson != null && singersJson.isNotEmpty) {
-        final list = jsonDecode(singersJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _homeSingers.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _homeSingers.add(AdminHomeSinger.fromMap(item));
+        try {
+          final list = jsonDecode(singersJson);
+          if (list is List) {
+            _homeSingers.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _homeSingers.add(AdminHomeSinger.fromJson(item));
+              }
             }
+            _homeSingers.sort((a, b) => a.order.compareTo(b.order));
           }
-        }
+        } catch (_) {}
       }
 
       // 7. Blessings
       final blessingsJson = prefs.getString('ppg_cache_home_blessings');
       if (blessingsJson != null && blessingsJson.isNotEmpty) {
-        final list = jsonDecode(blessingsJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _blessings.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _blessings.add(AdminHomeBlessing.fromMap(item));
+        try {
+          final list = jsonDecode(blessingsJson);
+          if (list is List) {
+            _blessings.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _blessings.add(AdminHomeBlessing.fromJson(item));
+              }
             }
+            _blessings.sort((a, b) => a.order.compareTo(b.order));
           }
-        }
+        } catch (_) {}
       }
 
       // 8. Footer Social Links
       final footerJson = prefs.getString('ppg_cache_footer_social_links');
       if (footerJson != null && footerJson.isNotEmpty) {
-        final list = jsonDecode(footerJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _footerSocialLinks.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _footerSocialLinks.add(AdminFooterSocialLink.fromMap(item));
+        try {
+          final list = jsonDecode(footerJson);
+          if (list is List) {
+            _footerSocialLinks.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _footerSocialLinks.add(AdminFooterSocialLink.fromJson(item));
+              }
             }
+            _footerSocialLinks.sort((a, b) => a.order.compareTo(b.order));
           }
-        }
+        } catch (_) {}
       }
 
       // 9. Live Stream
       final liveJson = prefs.getString('ppg_cache_live_stream');
       if (liveJson != null && liveJson.isNotEmpty) {
-        final map = jsonDecode(liveJson) as Map<String, dynamic>;
-        _liveStreamSettings = AdminLiveStreamSettings.fromMap(map);
+        try {
+          final decoded = jsonDecode(liveJson);
+          if (decoded is Map) {
+            _liveStreamSettings = AdminLiveStreamSettings.fromJson(decoded);
+          }
+        } catch (_) {}
       }
 
       // 10. Garbi Years
       final yearsJson = prefs.getString('ppg_cache_garbi_years');
       if (yearsJson != null && yearsJson.isNotEmpty) {
-        final list = jsonDecode(yearsJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _years.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _years.add(AdminGarbiYear.fromMap(item));
+        try {
+          final list = jsonDecode(yearsJson);
+          if (list is List) {
+            _years.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _years.add(AdminGarbiYear.fromJson(item));
+              }
             }
+            _years.sort((a, b) => b.year.compareTo(a.year));
           }
-        }
+        } catch (_) {}
       }
 
       // 11. Albums
       final albumsJson = prefs.getString('ppg_cache_albums');
       if (albumsJson != null && albumsJson.isNotEmpty) {
-        final list = jsonDecode(albumsJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _albums.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _albums.add(AdminAlbum.fromMap(item));
+        try {
+          final list = jsonDecode(albumsJson);
+          if (list is List) {
+            _albums.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _albums.add(AdminAlbum.fromJson(item));
+              }
             }
           }
-        }
+        } catch (_) {}
       }
 
       // 12. Videos
       final videosJson = prefs.getString('ppg_cache_videos');
       if (videosJson != null && videosJson.isNotEmpty) {
-        final list = jsonDecode(videosJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _videos.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _videos.add(AdminVideo.fromMap(item));
+        try {
+          final list = jsonDecode(videosJson);
+          if (list is List) {
+            _videos.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _videos.add(AdminVideo.fromJson(item));
+              }
             }
           }
-        }
+        } catch (_) {}
       }
 
       // 13. Blogs
       final blogsJson = prefs.getString('ppg_cache_blogs');
       if (blogsJson != null && blogsJson.isNotEmpty) {
-        final list = jsonDecode(blogsJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _blogs.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _blogs.add(AdminBlog.fromMap(item));
+        try {
+          final list = jsonDecode(blogsJson);
+          if (list is List) {
+            _blogs.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _blogs.add(AdminBlog.fromJson(item));
+              }
             }
           }
-        }
+        } catch (_) {}
       }
 
       // 14. Committee Members
       final cmJson = prefs.getString('ppg_cache_committee_members');
       if (cmJson != null && cmJson.isNotEmpty) {
-        final list = jsonDecode(cmJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _committeeMembers.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _committeeMembers.add(AdminCommitteeMember.fromMap(item));
+        try {
+          final list = jsonDecode(cmJson);
+          if (list is List) {
+            _committeeMembers.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _committeeMembers.add(AdminCommitteeMember.fromJson(item));
+              }
             }
+            _committeeMembers.sort((a, b) => a.order.compareTo(b.order));
           }
-          _committeeMembers.sort((a, b) => a.order.compareTo(b.order));
-        }
+        } catch (_) {}
       }
 
       // 15. About Principles
       final prJson = prefs.getString('ppg_cache_about_principles');
       if (prJson != null && prJson.isNotEmpty) {
-        final list = jsonDecode(prJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _aboutPrinciples.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _aboutPrinciples.add(AdminAboutPrinciple.fromMap(item));
+        try {
+          final list = jsonDecode(prJson);
+          if (list is List) {
+            _aboutPrinciples.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _aboutPrinciples.add(AdminAboutPrinciple.fromJson(item));
+              }
             }
+            _aboutPrinciples.sort((a, b) => a.order.compareTo(b.order));
           }
-          _aboutPrinciples.sort((a, b) => a.order.compareTo(b.order));
-        }
+        } catch (_) {}
       }
 
       // 16. History Milestones
       final hmJson = prefs.getString('ppg_cache_history_milestones');
       if (hmJson != null && hmJson.isNotEmpty) {
-        final list = jsonDecode(hmJson) as List<dynamic>;
-        if (list.isNotEmpty) {
-          _historyMilestones.clear();
-          for (final item in list) {
-            if (item is Map<String, dynamic>) {
-              _historyMilestones.add(AdminHistoryMilestone.fromMap(item));
+        try {
+          final list = jsonDecode(hmJson);
+          if (list is List) {
+            _historyMilestones.clear();
+            for (final item in list) {
+              if (item is Map) {
+                _historyMilestones.add(AdminHistoryMilestone.fromJson(item));
+              }
             }
+            _historyMilestones.sort((a, b) => a.order.compareTo(b.order));
           }
-          _historyMilestones.sort((a, b) => a.order.compareTo(b.order));
-        }
+        } catch (_) {}
       }
 
-      if (_settings.mandalNameEn.isNotEmpty || _siteContentMap.isNotEmpty || _homeBanners.isNotEmpty) {
+      if (hasEssentialHomeData) {
         _hasLocalCache = true;
         _isInitialized = true;
         notifyListeners();
@@ -2873,8 +3555,8 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-  /// Saves critical first-viewport data into device local storage
-  Future<void> _saveEssentialToLocalStorage() async {
+  /// Saves all cached data atomically into device local storage with sync metadata
+  Future<void> _saveAllToLocalStorage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (_lastLocalUpdatedAt.isEmpty) {
@@ -2885,19 +3567,6 @@ class AdminDataStore extends ChangeNotifier {
         prefs.setString('ppg_cache_site_content', jsonEncode(_siteContentMap.values.map((f) => f.toMap()).toList())),
         prefs.setString('ppg_cache_home_banners', jsonEncode(_homeBanners.map((b) => b.toMap()).toList())),
         prefs.setString('ppg_cache_home_about_cards', jsonEncode(_aboutCards.map((c) => c.toMap()).toList())),
-        prefs.setString(_kSyncMetadataKey, _lastLocalUpdatedAt),
-      ]);
-      _hasLocalCache = true;
-    } catch (e) {
-      debugPrint('Failed to save essential data to local storage: $e');
-    }
-  }
-
-  /// Saves secondary background-loaded data into device local storage
-  Future<void> _saveBackgroundToLocalStorage() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await Future.wait([
         prefs.setString('ppg_cache_home_pillars', jsonEncode(_pillars.map((p) => p.toMap()).toList())),
         prefs.setString('ppg_cache_home_singers', jsonEncode(_homeSingers.map((s) => s.toMap()).toList())),
         prefs.setString('ppg_cache_home_blessings', jsonEncode(_blessings.map((b) => b.toMap()).toList())),
@@ -2910,13 +3579,18 @@ class AdminDataStore extends ChangeNotifier {
         prefs.setString('ppg_cache_committee_members', jsonEncode(_committeeMembers.map((c) => c.toMap()).toList())),
         prefs.setString('ppg_cache_about_principles', jsonEncode(_aboutPrinciples.map((p) => p.toMap()).toList())),
         prefs.setString('ppg_cache_history_milestones', jsonEncode(_historyMilestones.map((h) => h.toMap()).toList())),
+        prefs.setString(_kSyncMetadataKey, _lastLocalUpdatedAt),
       ]);
+      _hasLocalCache = true;
     } catch (e) {
-      debugPrint('Failed to save background data to local storage: $e');
+      debugPrint('Failed to save data to local storage: $e');
     }
   }
 
-  /// Priority 1: Initialize ONLY the critical first-viewport data concurrently (~150-250ms)
+  Future<void> _saveEssentialToLocalStorage() => _saveAllToLocalStorage();
+  Future<void> _saveBackgroundToLocalStorage() => _saveAllToLocalStorage();
+
+  /// Priority 1: Initialize essential first-viewport data concurrently (~150-250ms)
   Future<void> initializeEssentialFirstViewport({bool forceRefresh = false}) async {
     final db = _firestore;
     if (db == null) {
@@ -2925,8 +3599,8 @@ class AdminDataStore extends ChangeNotifier {
       return;
     }
 
-    // If local cache is present and we are not forcing refresh, check if remote data changed
-    if (_hasLocalCache && !forceRefresh) {
+    // Only skip fetching if local cache exists AND all essential home data is present
+    if (_hasLocalCache && hasEssentialHomeData && !forceRefresh) {
       final hasChanges = await checkForRemoteChanges();
       if (!hasChanges) {
         // Nothing changed! Everything is already fresh in memory & local storage.
@@ -2939,13 +3613,22 @@ class AdminDataStore extends ChangeNotifier {
 
     try {
       await Future.wait([
-        _fetchSettings(db),
-        _fetchSiteContent(db),
-        _fetchHomeAboutCards(db),
-        _fetchHomeBanners(db),
+        _fetchSettings(db, forceServer: forceRefresh),
+        _fetchSiteContent(db, forceServer: forceRefresh),
+        _fetchHomeBanners(db, forceServer: forceRefresh),
+        _fetchHomeAboutCards(db, forceServer: forceRefresh),
+        _fetchPillars(db, forceServer: forceRefresh),
+        _fetchHomeSingers(db, forceServer: forceRefresh),
+        _fetchBlessings(db, forceServer: forceRefresh),
+        _fetchFooter(db, forceServer: forceRefresh),
+        _fetchLiveStream(db, forceServer: forceRefresh),
+        _fetchGarbiYears(db, forceServer: forceRefresh),
+        _fetchHomeVideosPreview(db, forceServer: forceRefresh),
+        _fetchHomeBlogsPreview(db, forceServer: forceRefresh),
+        _fetchAlbums(db, forceServer: forceRefresh),
       ]);
       _isFirestoreConnected = true;
-      unawaited(_saveEssentialToLocalStorage());
+      await _saveAllToLocalStorage();
     } catch (e) {
       debugPrint('Essential first-viewport fetch notice: $e');
     } finally {
@@ -2963,48 +3646,17 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
 
-    // If we have local cache and forceRefresh is false, all background items are ALREADY in memory!
-    // Simply attach real-time listeners for live events and skip re-fetching all collections over the network!
-    if (_hasLocalCache && !forceRefresh) {
-      _listenToRealtimeUpdates(db);
-      return;
-    }
-
     try {
-      // Stage A: Home Mid-Fold (pillars, singers, blessings)
-      await Future.wait([
-        _fetchPillars(db),
-        _fetchHomeSingers(db),
-        _fetchBlessings(db),
-      ]);
-      notifyListeners();
-
-      // Gentle pause to yield CPU & keep 60fps
-      await Future.delayed(const Duration(milliseconds: 60));
-
-      // Stage B: Home Lower-Fold & Footer
-      await Future.wait([
-        _fetchFooter(db),
-        _fetchLiveStream(db),
-      ]);
-      notifyListeners();
-
-      // Gentle pause to yield CPU
-      await Future.delayed(const Duration(milliseconds: 60));
-
-      // Stage C: Home Previews with limits (years, top 6 videos, top 3 blogs, albums)
-      await Future.wait([
-        _fetchGarbiYears(db),
-        _fetchHomeVideosPreview(db),
-        _fetchHomeBlogsPreview(db),
-        _fetchAlbums(db),
-      ]);
-      notifyListeners();
-
-      unawaited(_saveBackgroundToLocalStorage());
+      if (_committeeMembers.isEmpty || forceRefresh) {
+        await ensureAboutPageLoaded(forceRefresh: forceRefresh);
+      }
+      if (_historyMilestones.isEmpty || forceRefresh) {
+        await ensureHistoryLoaded(forceRefresh: forceRefresh);
+      }
       _listenToRealtimeUpdates(db);
+      await _saveAllToLocalStorage();
     } catch (e) {
-      debugPrint('Gentle background loading notice: $e');
+      debugPrint('Background loading notice: $e');
     }
   }
 
@@ -3017,13 +3669,12 @@ class AdminDataStore extends ChangeNotifier {
   // --- On-Demand Screen-Level Loaders ---
 
   bool _isGalleryLoaded = false;
+
   Future<void> ensureGalleryLoaded([String? year, String? album, bool forceRefresh = false]) async {
     final db = _firestore;
     if (db == null || (_isGalleryLoaded && !forceRefresh)) return;
     try {
-      final snap = await db.collection('photos').get(
-        forceRefresh ? const GetOptions(source: Source.server) : const GetOptions(),
-      );
+      final snap = await _getCollectionWithFallback(db.collection('photos'), forceServer: forceRefresh);
       if (snap.docs.isNotEmpty) {
         _photos.clear();
         for (final doc in snap.docs) {
@@ -3040,14 +3691,14 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isAboutDetailsLoaded = false;
+
   Future<void> ensureAboutPageLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
     if (db == null || (_isAboutDetailsLoaded && !forceRefresh)) return;
     try {
-      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
       final results = await Future.wait([
-        db.collection('committee_members').get(getOpt),
-        db.collection('about_principles').get(getOpt),
+        _getCollectionWithFallback(db.collection('committee_members'), forceServer: forceRefresh),
+        _getCollectionWithFallback(db.collection('about_principles'), forceServer: forceRefresh),
       ]);
       final cmSnap = results[0];
       if (cmSnap.docs.isNotEmpty) {
@@ -3078,12 +3729,12 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isHistoryLoaded = false;
+
   Future<void> ensureHistoryLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
     if (db == null || (_isHistoryLoaded && !forceRefresh)) return;
     try {
-      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
-      final hmSnap = await db.collection('history_milestones').get(getOpt);
+      final hmSnap = await _getCollectionWithFallback(db.collection('history_milestones'), forceServer: forceRefresh);
       if (hmSnap.docs.isNotEmpty) {
         _historyMilestones.clear();
         for (final doc in hmSnap.docs) {
@@ -3101,12 +3752,12 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isFullVideosLoaded = false;
+
   Future<void> ensureVideosLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
     if (db == null || (_isFullVideosLoaded && !forceRefresh)) return;
     try {
-      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
-      final snap = await db.collection('videos').get(getOpt);
+      final snap = await _getCollectionWithFallback(db.collection('videos'), forceServer: forceRefresh);
       if (snap.docs.isNotEmpty) {
         _videos.clear();
         for (final doc in snap.docs) {
@@ -3123,12 +3774,12 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isFullBlogsLoaded = false;
+
   Future<void> ensureBlogsLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
     if (db == null || (_isFullBlogsLoaded && !forceRefresh)) return;
     try {
-      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
-      final snap = await db.collection('blogs').get(getOpt);
+      final snap = await _getCollectionWithFallback(db.collection('blogs'), forceServer: forceRefresh);
       if (snap.docs.isNotEmpty) {
         _blogs.clear();
         for (final doc in snap.docs) {
@@ -3145,14 +3796,14 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _isAdminDataLoaded = false;
+
   Future<void> ensureAdminDataLoaded({bool forceRefresh = false}) async {
     final db = _firestore;
     if (db == null || (_isAdminDataLoaded && !forceRefresh)) return;
     try {
-      final getOpt = forceRefresh ? const GetOptions(source: Source.server) : const GetOptions();
       final results = await Future.wait([
-        db.collection('enquiries').get(getOpt),
-        db.collection('activity_logs').get(getOpt),
+        _getCollectionWithFallback(db.collection('enquiries'), forceServer: forceRefresh),
+        _getCollectionWithFallback(db.collection('activity_logs'), forceServer: forceRefresh),
         ensureGalleryLoaded(null, null, forceRefresh),
         ensureVideosLoaded(forceRefresh: forceRefresh),
         ensureBlogsLoaded(forceRefresh: forceRefresh),
@@ -3162,28 +3813,28 @@ class AdminDataStore extends ChangeNotifier {
       final enqSnap = results[0] as QuerySnapshot<Map<String, dynamic>>;
       _enquiries.clear();
       for (final doc in enqSnap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _enquiries.add(AdminEnquiry.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _enquiries.add(AdminEnquiry.fromMap(data));
       }
       final logsSnap = results[1] as QuerySnapshot<Map<String, dynamic>>;
       _activityLogs.clear();
       for (final doc in logsSnap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _activityLogs.add(AdminActivityLog.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _activityLogs.add(AdminActivityLog.fromMap(data));
       }
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
       // Fetch Inbound Notification Emails
       try {
-        final notifSnap = await db.collection('notification_emails').get(getOpt);
+        final notifSnap = await _getCollectionWithFallback(db.collection('notification_emails'), forceServer: forceRefresh);
         if (notifSnap.docs.isNotEmpty) {
           _notificationEmails.clear();
           for (final doc in notifSnap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _notificationEmails.add(AdminNotificationEmail.fromMap(data));
+            final data = doc.data();
+            if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+            _notificationEmails.add(AdminNotificationEmail.fromMap(data));
           }
         }
       } catch (e) {
@@ -3198,6 +3849,7 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   bool _adminListenersAttached = false;
+
   void _listenToAdminRealtimeUpdates(FirebaseFirestore db) {
     if (_adminListenersAttached) return;
     _adminListenersAttached = true;
@@ -3205,9 +3857,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('enquiries').snapshots().listen((snap) {
       _enquiries.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _enquiries.add(AdminEnquiry.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _enquiries.add(AdminEnquiry.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Enquiries stream notice: $e'));
@@ -3215,9 +3867,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('activity_logs').snapshots().listen((snap) {
       _activityLogs.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _activityLogs.add(AdminActivityLog.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _activityLogs.add(AdminActivityLog.fromMap(data));
       }
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       notifyListeners();
@@ -3252,9 +3904,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('committee_members').snapshots().listen((snap) {
       _committeeMembers.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _committeeMembers.add(AdminCommitteeMember.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _committeeMembers.add(AdminCommitteeMember.fromMap(data));
       }
       _committeeMembers.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3263,9 +3915,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('about_principles').snapshots().listen((snap) {
       _aboutPrinciples.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _aboutPrinciples.add(AdminAboutPrinciple.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _aboutPrinciples.add(AdminAboutPrinciple.fromMap(data));
       }
       _aboutPrinciples.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3274,9 +3926,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('history_milestones').snapshots().listen((snap) {
       _historyMilestones.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _historyMilestones.add(AdminHistoryMilestone.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _historyMilestones.add(AdminHistoryMilestone.fromMap(data));
       }
       _historyMilestones.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3285,9 +3937,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_singers').snapshots().listen((snap) {
       _homeSingers.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _homeSingers.add(AdminHomeSinger.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _homeSingers.add(AdminHomeSinger.fromMap(data));
       }
       _homeSingers.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3296,9 +3948,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_banners').snapshots().listen((snap) {
       _homeBanners.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _homeBanners.add(AdminHomeBanner.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _homeBanners.add(AdminHomeBanner.fromMap(data));
       }
       _homeBanners.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3320,9 +3972,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_about_cards').snapshots().listen((snap) {
       _aboutCards.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _aboutCards.add(AdminAboutCard.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _aboutCards.add(AdminAboutCard.fromMap(data));
       }
       _aboutCards.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3331,9 +3983,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_pillars').snapshots().listen((snap) {
       _pillars.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _pillars.add(AdminHomePillar.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _pillars.add(AdminHomePillar.fromMap(data));
       }
       _pillars.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3342,9 +3994,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('home_blessings').snapshots().listen((snap) {
       _blessings.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _blessings.add(AdminHomeBlessing.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _blessings.add(AdminHomeBlessing.fromMap(data));
       }
       _blessings.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3353,9 +4005,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('garbi_years').snapshots().listen((snap) {
       _years.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _years.add(AdminGarbiYear.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _years.add(AdminGarbiYear.fromMap(data));
       }
       _years.sort((a, b) => b.year.compareTo(a.year));
       notifyListeners();
@@ -3364,9 +4016,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('albums').snapshots().listen((snap) {
       _albums.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _albums.add(AdminAlbum.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _albums.add(AdminAlbum.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Albums stream notice: $e'));
@@ -3374,9 +4026,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('photos').snapshots().listen((snap) {
       _photos.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _photos.add(AdminPhoto.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _photos.add(AdminPhoto.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Photos stream notice: $e'));
@@ -3384,9 +4036,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('videos').snapshots().listen((snap) {
       _videos.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _videos.add(AdminVideo.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _videos.add(AdminVideo.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Videos stream notice: $e'));
@@ -3401,9 +4053,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('blogs').snapshots().listen((snap) {
       _blogs.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _blogs.add(AdminBlog.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _blogs.add(AdminBlog.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Blogs stream notice: $e'));
@@ -3411,9 +4063,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('enquiries').snapshots().listen((snap) {
       _enquiries.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _enquiries.add(AdminEnquiry.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _enquiries.add(AdminEnquiry.fromMap(data));
       }
       notifyListeners();
     }, onError: (e) => debugPrint('Enquiries stream notice: $e'));
@@ -3421,9 +4073,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('activity_logs').snapshots().listen((snap) {
       _activityLogs.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _activityLogs.add(AdminActivityLog.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _activityLogs.add(AdminActivityLog.fromMap(data));
       }
       _activityLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       notifyListeners();
@@ -3444,9 +4096,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('footer_links').snapshots().listen((snap) {
       _footerLinks.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _footerLinks.add(AdminFooterLink.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _footerLinks.add(AdminFooterLink.fromMap(data));
       }
       _footerLinks.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3455,9 +4107,9 @@ class AdminDataStore extends ChangeNotifier {
     db.collection('footer_social_links').snapshots().listen((snap) {
       _footerSocialLinks.clear();
       for (final doc in snap.docs) {
-          final data = doc.data();
-          if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
-          _footerSocialLinks.add(AdminFooterSocialLink.fromMap(data));
+        final data = doc.data();
+        if (data['is_deleted'] == true || data['isDeleted'] == true) continue;
+        _footerSocialLinks.add(AdminFooterSocialLink.fromMap(data));
       }
       _footerSocialLinks.sort((a, b) => a.order.compareTo(b.order));
       notifyListeners();
@@ -3468,11 +4120,7 @@ class AdminDataStore extends ChangeNotifier {
     try {
       final now = DateTime.now().toIso8601String();
       _lastLocalUpdatedAt = now;
-      final updateData = <String, dynamic>{
-        'lastUpdatedAt': now,
-        'updatedAt': now,
-        'isDeleted': false,
-      };
+      final updateData = <String, dynamic>{'lastUpdatedAt': now, 'updatedAt': now, 'isDeleted': false};
       if (collectionName != null && collectionName.isNotEmpty) {
         updateData['collections.$collectionName.version'] = FieldValue.increment(1);
         updateData['collections.$collectionName.updatedAt'] = now;
@@ -3509,11 +4157,7 @@ class AdminDataStore extends ChangeNotifier {
     if (db == null) return;
     try {
       final now = DateTime.now().toIso8601String();
-      await db.collection(collection).doc(docId).set({
-        'isDeleted': true,
-        'deletedAt': now,
-        'updatedAt': now,
-      }, SetOptions(merge: true));
+      await db.collection(collection).doc(docId).set({'isDeleted': true, 'deletedAt': now, 'updatedAt': now}, SetOptions(merge: true));
       unawaited(_touchSyncMetadata(db, collection));
     } catch (e) {
       debugPrint('Firestore delete notice ($collection/$docId): $e');
@@ -3589,9 +4233,6 @@ class AdminDataStore extends ChangeNotifier {
     }
   }
 
-
-
-
   Future<void> restoreDatabaseDefaults() async {
     final db = _firestore;
     if (db == null) return;
@@ -3625,7 +4266,7 @@ class AdminDataStore extends ChangeNotifier {
   void deleteCommitteeMember(String id) {
     final item = _committeeMembers.firstWhere(
       (c) => c.id == id,
-      orElse: () => const AdminCommitteeMember(id: '', nameEn: '', nameGu: '', designationEn: '', designationGu: ''),
+      orElse: () => AdminCommitteeMember(id: '', nameEn: '', nameGu: '', designationEn: '', designationGu: ''),
     );
     _committeeMembers.removeWhere((c) => c.id == id);
     logActivity('DELETE', 'Committee', 'Deleted member: ${item.nameEn}');
@@ -4106,7 +4747,6 @@ class AdminDataStore extends ChangeNotifier {
     notifyListeners();
   }
 
-
   // --- Header: Home Singers (Section 5: Folk Artists Troupe) ---
   Future<void> saveHomeSingersHeader({
     required String tagEn,
@@ -4291,19 +4931,57 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   // --- CRUD: Albums ---
-  void addAlbum(AdminAlbum album) {
-    _albums.insert(0, album);
-    logActivity('CREATE', 'Albums', 'Created album "${album.name}" (${album.year})');
-    _writeToFirestore('albums', album.id, album.toMap());
+  void addAlbum(AdminAlbum album) async {
+    var finalAlbum = album;
+    if (finalAlbum.nameGu.trim().isEmpty && finalAlbum.name.trim().isNotEmpty) {
+      try {
+        final trans = await GoogleTranslationService.instance.translateToGujarati(finalAlbum.name);
+        finalAlbum = finalAlbum.copyWith(nameGu: trans);
+      } catch (_) {}
+    }
+    if (finalAlbum.descriptionGu.trim().isEmpty && finalAlbum.description.trim().isNotEmpty) {
+      try {
+        final trans = await GoogleTranslationService.instance.translateToGujarati(finalAlbum.description);
+        finalAlbum = finalAlbum.copyWith(descriptionGu: trans);
+      } catch (_) {}
+    }
+    if (finalAlbum.dayTagGu.trim().isEmpty && finalAlbum.dayTag.trim().isNotEmpty) {
+      try {
+        final trans = await GoogleTranslationService.instance.translateToGujarati(finalAlbum.dayTag);
+        finalAlbum = finalAlbum.copyWith(dayTagGu: trans);
+      } catch (_) {}
+    }
+    _albums.insert(0, finalAlbum);
+    logActivity('CREATE', 'Albums', 'Created album "${finalAlbum.name}" (${finalAlbum.year})');
+    _writeToFirestore('albums', finalAlbum.id, finalAlbum.toMap());
     notifyListeners();
   }
 
-  void updateAlbum(AdminAlbum updatedAlbum) {
-    final index = _albums.indexWhere((a) => a.id == updatedAlbum.id);
+  void updateAlbum(AdminAlbum updatedAlbum) async {
+    var finalAlbum = updatedAlbum;
+    if (finalAlbum.nameGu.trim().isEmpty && finalAlbum.name.trim().isNotEmpty) {
+      try {
+        final trans = await GoogleTranslationService.instance.translateToGujarati(finalAlbum.name);
+        finalAlbum = finalAlbum.copyWith(nameGu: trans);
+      } catch (_) {}
+    }
+    if (finalAlbum.descriptionGu.trim().isEmpty && finalAlbum.description.trim().isNotEmpty) {
+      try {
+        final trans = await GoogleTranslationService.instance.translateToGujarati(finalAlbum.description);
+        finalAlbum = finalAlbum.copyWith(descriptionGu: trans);
+      } catch (_) {}
+    }
+    if (finalAlbum.dayTagGu.trim().isEmpty && finalAlbum.dayTag.trim().isNotEmpty) {
+      try {
+        final trans = await GoogleTranslationService.instance.translateToGujarati(finalAlbum.dayTag);
+        finalAlbum = finalAlbum.copyWith(dayTagGu: trans);
+      } catch (_) {}
+    }
+    final index = _albums.indexWhere((a) => a.id == finalAlbum.id);
     if (index != -1) {
-      _albums[index] = updatedAlbum;
-      logActivity('UPDATE', 'Albums', 'Updated album "${updatedAlbum.name}"');
-      _writeToFirestore('albums', updatedAlbum.id, updatedAlbum.toMap());
+      _albums[index] = finalAlbum;
+      logActivity('UPDATE', 'Albums', 'Updated album "${finalAlbum.name}"');
+      _writeToFirestore('albums', finalAlbum.id, finalAlbum.toMap());
       notifyListeners();
     }
   }
@@ -4537,7 +5215,7 @@ class AdminDataStore extends ChangeNotifier {
   void deleteNotificationEmail(String id) {
     final item = _notificationEmails.firstWhere(
       (e) => e.id == id,
-      orElse: () => const AdminNotificationEmail(id: '', email: '', recipientName: ''),
+      orElse: () => AdminNotificationEmail(id: '', email: '', recipientName: ''),
     );
     _notificationEmails.removeWhere((e) => e.id == id);
     if (item.isPrimary && _notificationEmails.isNotEmpty) {
@@ -4599,7 +5277,7 @@ class AdminDataStore extends ChangeNotifier {
   Future<void> deleteFooterLink(String id) async {
     final item = _footerLinks.firstWhere(
       (l) => l.id == id,
-      orElse: () => const AdminFooterLink(id: '', titleEn: '', titleGu: '', url: ''),
+      orElse: () => AdminFooterLink(id: '', titleEn: '', titleGu: '', url: ''),
     );
     _footerLinks.removeWhere((l) => l.id == id);
     logActivity('DELETE', 'Footer', 'Deleted footer link: "${item.titleEn}"');
@@ -4651,7 +5329,7 @@ class AdminDataStore extends ChangeNotifier {
   Future<void> deleteFooterSocialLink(String id) async {
     final item = _footerSocialLinks.firstWhere(
       (s) => s.id == id,
-      orElse: () => const AdminFooterSocialLink(id: '', platform: '', url: ''),
+      orElse: () => AdminFooterSocialLink(id: '', platform: '', url: ''),
     );
     _footerSocialLinks.removeWhere((s) => s.id == id);
     logActivity('DELETE', 'Footer', 'Deleted social channel: "${item.platform}"');
@@ -4721,15 +5399,7 @@ class AdminDataStore extends ChangeNotifier {
   }
 
   Future<void> clearAllFooterFields() async {
-    final keys = [
-      'footer_tagline',
-      'footer_motto',
-      'footer_links_title',
-      'footer_links2_title',
-      'footer_social',
-      'footer_location',
-      'footer_copyright',
-    ];
+    final keys = ['footer_tagline', 'footer_motto', 'footer_links_title', 'footer_links2_title', 'footer_social', 'footer_location', 'footer_copyright'];
     for (final k in keys) {
       updateSiteContentField(k, valueEn: '', valueGu: '');
     }
@@ -4887,11 +5557,7 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await Future.wait([
-        _fetchSiteContent(db, forceServer: true),
-        _fetchHomeAboutCards(db, forceServer: true),
-        ensureAboutPageLoaded(forceRefresh: true),
-      ]);
+      await Future.wait([_fetchSiteContent(db, forceServer: true), _fetchHomeAboutCards(db, forceServer: true), ensureAboutPageLoaded(forceRefresh: true)]);
       notifyListeners();
     } catch (e) {
       debugPrint('About page reload error: $e');
@@ -4902,10 +5568,7 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await Future.wait([
-        _fetchSiteContent(db, forceServer: true),
-        ensureHistoryLoaded(forceRefresh: true),
-      ]);
+      await Future.wait([_fetchSiteContent(db, forceServer: true), ensureHistoryLoaded(forceRefresh: true)]);
       notifyListeners();
     } catch (e) {
       debugPrint('History page reload error: $e');
@@ -4916,11 +5579,7 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await Future.wait([
-        ensureGalleryLoaded(year, album, true),
-        _fetchGarbiYears(db, forceServer: true),
-        _fetchAlbums(db, forceServer: true),
-      ]);
+      await Future.wait([ensureGalleryLoaded(year, album, true), _fetchGarbiYears(db, forceServer: true), _fetchAlbums(db, forceServer: true)]);
       notifyListeners();
     } catch (e) {
       debugPrint('Gallery page reload error: $e');
@@ -4931,10 +5590,7 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await Future.wait([
-        ensureVideosLoaded(forceRefresh: true),
-        _fetchLiveStream(db, forceServer: true),
-      ]);
+      await Future.wait([ensureVideosLoaded(forceRefresh: true), _fetchLiveStream(db, forceServer: true)]);
       notifyListeners();
     } catch (e) {
       debugPrint('Videos page reload error: $e');
@@ -4945,9 +5601,7 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await Future.wait([
-        ensureBlogsLoaded(forceRefresh: true),
-      ]);
+      await Future.wait([ensureBlogsLoaded(forceRefresh: true)]);
       notifyListeners();
     } catch (e) {
       debugPrint('Blogs page reload error: $e');
@@ -4958,10 +5612,7 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await Future.wait([
-        _fetchGarbiYears(db, forceServer: true),
-        _fetchAlbums(db, forceServer: true),
-      ]);
+      await Future.wait([_fetchGarbiYears(db, forceServer: true), _fetchAlbums(db, forceServer: true)]);
       notifyListeners();
     } catch (e) {
       debugPrint('Archive page reload error: $e');
@@ -4972,10 +5623,7 @@ class AdminDataStore extends ChangeNotifier {
     final db = _firestore;
     if (db == null) return;
     try {
-      await Future.wait([
-        _fetchSiteContent(db, forceServer: true),
-        _fetchSettings(db, forceServer: true),
-      ]);
+      await Future.wait([_fetchSiteContent(db, forceServer: true), _fetchSettings(db, forceServer: true)]);
       notifyListeners();
     } catch (e) {
       debugPrint('Contact page reload error: $e');
@@ -4994,5 +5642,4 @@ class AdminDataStore extends ChangeNotifier {
       setBusy(false);
     }
   }
-
 }

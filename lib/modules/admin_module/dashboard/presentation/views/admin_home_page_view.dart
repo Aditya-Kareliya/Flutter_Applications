@@ -9,6 +9,7 @@ import '../../../../../core/widgets/admin/admin_website_context_banner.dart';
 import '../../../../../core/widgets/article_detail_modal.dart';
 import '../../../../../core/widgets/cultural_frame_card.dart';
 import '../../../../../core/widgets/heritage_badge.dart';
+import '../../../../../core/widgets/image/app_cached_image.dart';
 import '../../../../../core/widgets/image_picker/my_app_image_picker.dart';
 import '../../../../../core/widgets/toast/my_app_toast_message.dart';
 import '../../../../../core/widgets/my_app_ui_components.dart';
@@ -3358,10 +3359,12 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                                     shape: BoxShape.circle,
                                     border: Border.all(color: colors.heritageGold, width: 1.5),
                                   ),
-                                  child: ClipOval(
-                                    child: singer.imageUrl.startsWith('http')
-                                        ? Image.network(singer.imageUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png'))
-                                        : Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
+                                  child: AppCachedImage(
+                                    imageUrl: singer.imageUrl,
+                                    fit: BoxFit.cover,
+                                    isCircle: true,
+                                    memCacheWidth: 150,
+                                    memCacheHeight: 150,
                                   ),
                                 ),
                                 const SizedBox(width: 14),
@@ -3633,10 +3636,12 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                                 shape: BoxShape.circle,
                                 border: Border.all(color: colors.heritageGold, width: 1.5),
                               ),
-                              child: ClipOval(
-                                child: blessing.photoUrl.startsWith('http')
-                                    ? Image.network(blessing.photoUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png'))
-                                    : Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
+                              child: AppCachedImage(
+                                imageUrl: blessing.photoUrl,
+                                fit: BoxFit.cover,
+                                isCircle: true,
+                                memCacheWidth: 150,
+                                memCacheHeight: 150,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -5780,19 +5785,16 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                             child: SizedBox(
                               width: 56,
                               height: 56,
-                              child: s.imageUrl.isNotEmpty
-                                  ? Image.network(
-                                      s.imageUrl,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) => Container(
-                                        color: colors.heritageGold.withValues(alpha: 0.15),
-                                        child: Icon(Icons.person, color: colors.heritageGold),
-                                      ),
-                                    )
-                                  : Container(
-                                      color: colors.heritageGold.withValues(alpha: 0.15),
-                                      child: Icon(Icons.person, color: colors.heritageGold),
-                                    ),
+                              child: AppCachedImage(
+                                imageUrl: s.imageUrl,
+                                fit: BoxFit.cover,
+                                memCacheWidth: 150,
+                                memCacheHeight: 150,
+                                fallbackWidget: Container(
+                                  color: colors.heritageGold.withValues(alpha: 0.15),
+                                  child: Icon(Icons.person, color: colors.heritageGold),
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -6014,10 +6016,12 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
                                   shape: BoxShape.circle,
                                   border: Border.all(color: colors.heritageGold, width: 1.2),
                                 ),
-                                child: ClipOval(
-                                  child: b.photoUrl.startsWith('http')
-                                      ? Image.network(b.photoUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.png'))
-                                      : Image.asset('assets/images/pavan_putra_logo.png', fit: BoxFit.cover),
+                                child: AppCachedImage(
+                                  imageUrl: b.photoUrl,
+                                  fit: BoxFit.cover,
+                                  isCircle: true,
+                                  memCacheWidth: 100,
+                                  memCacheHeight: 100,
                                 ),
                               ),
                               const SizedBox(width: 10),

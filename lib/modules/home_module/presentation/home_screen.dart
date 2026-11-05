@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/dependency_injection/dependency_injection.dart';
@@ -11,23 +10,63 @@ import '../../../core/widgets/heritage_badge.dart';
 import '../../../core/widgets/heritage_divider.dart';
 import '../../../core/widgets/article_detail_modal.dart';
 import '../../../core/widgets/brand_logo/brand_logo_widget.dart';
+import '../../../core/widgets/image/app_cached_image.dart';
+import '../../../core/widgets/my_app_blurred_loader.dart';
 import '../../../utils/navigation_manager.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../admin_module/dashboard/data/admin_data_store.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Cold start / first viewport safety: Ensure Firestore data is actively fetched if not already in memory
+    if (!AdminDataStore.instance.hasEssentialHomeData) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AdminDataStore.instance.initializeEssentialFirstViewport(forceRefresh: false);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: AdminDataStore.instance,
-      builder: (context, _) => MyAppScaffold(
-        onRefresh: () async {
-          await AdminDataStore.instance.reloadHomePage();
-        },
-        body: const _HomeBody(),
-      ),
+      builder: (context, _) {
+        final store = AdminDataStore.instance;
+        final isLoaded = store.hasEssentialHomeData;
+
+        if (!isLoaded) {
+          final isGu = Localizations.maybeLocaleOf(context)?.languageCode == 'gu';
+          return MyAppScaffold(
+            body: SizedBox(
+              height: MediaQuery.sizeOf(context).height * 0.75,
+              child: Center(
+                child: MyAppBlurredLoader(
+                  message: isGu
+                      ? 'શ્રી પવનપુત્ર ગરબી મંડળ\nમાહિતી લોડ થઈ રહી છે...'
+                      : 'PAVAN PUTRA GARBI MANDAL\nLoading sacred heritage data...',
+                  isFullScreen: false,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return MyAppScaffold(
+          onRefresh: () async {
+            await AdminDataStore.instance.reloadHomePage();
+          },
+          body: const _HomeBody(),
+        );
+      },
     );
   }
 }
@@ -851,8 +890,8 @@ class _PillarsOfGarbiSection extends StatelessWidget {
 
     final pillars = AdminDataStore.instance.pillars;
 
-    // Strict zero-dummy fallback: if no pillars and no title/tag, hide entirely
-    if (pillars.isEmpty && title.isEmpty && tag.isEmpty) {
+    // Strict zero-dummy fallback: if no pillars in database, hide section cleanly
+    if (pillars.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -1036,29 +1075,12 @@ class _SingerBannerCarousel extends StatelessWidget {
                                     width: double.infinity,
                                     child: ClipRRect(
                                       borderRadius: const BorderRadius.only(topLeft: Radius.circular(22), topRight: Radius.circular(22)),
-                                      child: singer.imageUrl.startsWith('http')
-                                          ? Stack(
-                                              fit: StackFit.passthrough,
-                                              children: [
-                                                Image.asset(
-                                                  'assets/images/pavan_putra_logo.png',
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                                                ),
-                                                CachedNetworkImage(
-                                                  imageUrl: singer.imageUrl,
-                                                  fit: BoxFit.cover,
-                                                  fadeInDuration: const Duration(milliseconds: 300),
-                                                  placeholder: (_, _) => const SizedBox.shrink(),
-                                                  errorWidget: (_, _, _) => const SizedBox.shrink(),
-                                                ),
-                                              ],
-                                            )
-                                          : Image.asset(
-                                              singer.imageUrl.isNotEmpty ? singer.imageUrl : 'assets/images/pavan_putra_logo.png',
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                                            ),
+                                      child: AppCachedImage(
+                                        imageUrl: singer.imageUrl,
+                                        fit: BoxFit.cover,
+                                        memCacheWidth: 400,
+                                        memCacheHeight: 400,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1165,29 +1187,15 @@ class _SingerBannerCarousel extends StatelessWidget {
       ),
     );
 
-    final imageWidget = imageUrl.startsWith('http')
-        ? Stack(
-            fit: StackFit.passthrough,
-            children: [
-              baseAsset,
-              CachedNetworkImage(
-                imageUrl: imageUrl,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                fadeInDuration: const Duration(milliseconds: 300),
-                placeholder: (_, _) => const SizedBox.shrink(),
-                errorWidget: (_, _, _) => const SizedBox.shrink(),
-              ),
-            ],
-          )
-        : Image.asset(
-            imageUrl.isNotEmpty ? imageUrl : 'assets/images/pavan_putra_logo.png',
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => baseAsset,
-          );
+    final imageWidget = AppCachedImage(
+      imageUrl: imageUrl,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      memCacheWidth: (size * 2).toInt(),
+      memCacheHeight: (size * 2).toInt(),
+      fallbackWidget: baseAsset,
+    );
 
     return Container(
       width: size,
@@ -1224,8 +1232,8 @@ class _EldersBlessingsSection extends StatelessWidget {
 
     final blessings = AdminDataStore.instance.blessings;
 
-    // Strict zero dummy fallback
-    if (blessings.isEmpty && title.isEmpty && tag.isEmpty) {
+    // Strict zero-dummy fallback: if no blessings in database, hide section cleanly
+    if (blessings.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -1256,20 +1264,6 @@ class _EldersBlessingsSection extends StatelessWidget {
                 },
               );
             }).toList(),
-          )
-        else if (blessings.length == 1)
-          Center(
-            child: SizedBox(
-              width: isMobile ? screenWidth * 0.9 : 620,
-              height: isMobile ? 400 : 310,
-              child: _QuoteCard(
-                quote: blessings.first.getQuote(lang),
-                author: blessings.first.getDesignation(lang).isNotEmpty
-                    ? '${blessings.first.getAuthor(lang)} (${blessings.first.getDesignation(lang)})'
-                    : blessings.first.getAuthor(lang),
-                imagePath: blessings.first.photoUrl,
-              ),
-            ),
           )
         else if (blessings.length == 2)
           isMobile
@@ -1315,7 +1309,21 @@ class _EldersBlessingsSection extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                )
+        else if (blessings.length == 1)
+          Center(
+            child: SizedBox(
+              width: isMobile ? screenWidth * 0.9 : 620,
+              height: isMobile ? 400 : 310,
+              child: _QuoteCard(
+                quote: blessings.first.getQuote(lang),
+                author: blessings.first.getDesignation(lang).isNotEmpty
+                    ? '${blessings.first.getAuthor(lang)} (${blessings.first.getDesignation(lang)})'
+                    : blessings.first.getAuthor(lang),
+                imagePath: blessings.first.photoUrl,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -1345,17 +1353,12 @@ class _QuoteCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
         child: imagePath != null && imagePath!.isNotEmpty
-            ? (imagePath!.startsWith('http')
-                  ? Image.network(
-                      imagePath!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                    )
-                  : Image.asset(
-                      imagePath!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Image.asset('assets/images/pavan_putra_logo.jpg', fit: BoxFit.cover),
-                    ))
+            ? AppCachedImage(
+                imageUrl: imagePath,
+                fit: BoxFit.cover,
+                memCacheWidth: 400,
+                memCacheHeight: 400,
+              )
             : Icon(Icons.person_rounded, size: 60, color: colors.getAccentColor(context).withValues(alpha: 0.3)),
       ),
     );
@@ -1447,6 +1450,12 @@ class _YearArchiveSection extends StatelessWidget {
                 builder: (context) {
                   final years = AdminDataStore.instance.years.where((y) => y.isPublished).toList();
                   if (years.isEmpty) {
+                    if (!AdminDataStore.instance.isInitialized) {
+                      return const SizedBox(
+                        height: 126,
+                        child: Center(child: CircularProgressIndicator.adaptive()),
+                      );
+                    }
                     return CulturalFrameCard(
                       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
                       child: Center(
@@ -1705,8 +1714,8 @@ class _BlogSectionPreview extends StatelessWidget {
                 title: b.getTitle(isGu ? 'gu' : 'en'),
                 snippet: b.getSnippet(isGu ? 'gu' : 'en'),
                 slug: b.slug,
-                category: b.category,
-                content: b.content,
+                category: isGu ? context.trDynamic(b.category) : b.category,
+                content: b.getContent(isGu ? 'gu' : 'en'),
                 date: b.date,
                 readTime: b.readTime,
               )).toList()
@@ -1715,7 +1724,7 @@ class _BlogSectionPreview extends StatelessWidget {
                   title: context.tr('blog_1_title'),
                   snippet: context.tr('blog_1_snippet'),
                   slug: 'post-1',
-                  category: 'HERITAGE ARTICLE',
+                  category: context.tr('heritage_article'),
                   content: context.tr('blog_1_snippet'),
                   date: 'October 2025',
                   readTime: '5 min read',
@@ -1724,7 +1733,7 @@ class _BlogSectionPreview extends StatelessWidget {
                   title: context.tr('blog_2_title'),
                   snippet: context.tr('blog_2_snippet'),
                   slug: 'post-2',
-                  category: 'HERITAGE ARTICLE',
+                  category: context.tr('heritage_article'),
                   content: context.tr('blog_2_snippet'),
                   date: 'September 2025',
                   readTime: '6 min read',
@@ -1733,7 +1742,7 @@ class _BlogSectionPreview extends StatelessWidget {
                   title: context.tr('blog_3_title'),
                   snippet: context.tr('blog_3_snippet'),
                   slug: 'post-3',
-                  category: 'HERITAGE ARTICLE',
+                  category: context.tr('heritage_article'),
                   content: context.tr('blog_3_snippet'),
                   date: 'August 2025',
                   readTime: '4 min read',
