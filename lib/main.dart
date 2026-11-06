@@ -16,7 +16,6 @@ Future<void> main() async {
 
   // Pre-warm local heritage brand logo assets directly into memory
   AppCachedImage.prewarm('assets/images/pavan_putra_logo.png');
-  AppCachedImage.prewarm('assets/images/pavan_putra_logo.jpg');
 
   usePathUrlStrategy();
 

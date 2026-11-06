@@ -7,21 +7,25 @@ class WebGoogleTranslationEngine implements AppTranslationEngine {
   @override
   Future<String> translateToGujarati(String text) async {
     final trimmed = text.trim();
+
     if (trimmed.isEmpty) return text;
+
     try {
-      final url = Uri.parse(
-        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=gu&dt=t&q=${Uri.encodeComponent(trimmed)}',
-      );
+      final url = Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=gu&dt=t&q=${Uri.encodeComponent(trimmed)}');
       final response = await http.get(url);
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
+
         if (decoded is List && decoded.isNotEmpty && decoded[0] is List) {
           final buffer = StringBuffer();
+
           for (final segment in decoded[0]) {
             if (segment is List && segment.isNotEmpty && segment[0] != null) {
               buffer.write(segment[0].toString());
             }
           }
+
           final result = buffer.toString().trim();
           if (result.isNotEmpty) return result;
         }
@@ -37,19 +41,22 @@ class WebGoogleTranslationEngine implements AppTranslationEngine {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return text;
     try {
-      final url = Uri.parse(
-        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=gu&tl=en&dt=t&q=${Uri.encodeComponent(trimmed)}',
-      );
+      final url = Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=gu&tl=en&dt=t&q=${Uri.encodeComponent(trimmed)}');
+
       final response = await http.get(url);
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
+
         if (decoded is List && decoded.isNotEmpty && decoded[0] is List) {
           final buffer = StringBuffer();
+
           for (final segment in decoded[0]) {
             if (segment is List && segment.isNotEmpty && segment[0] != null) {
               buffer.write(segment[0].toString());
             }
           }
+
           final result = buffer.toString().trim();
           if (result.isNotEmpty) return result;
         }

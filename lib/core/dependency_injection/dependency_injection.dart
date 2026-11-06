@@ -9,15 +9,11 @@ final GetIt serviceLocator = GetIt.instance;
 
 Future<void> initDependencyInjection() async {
   // Navigation
-  serviceLocator.registerLazySingleton<NavigationManager>(
-    () => NavigationManager(),
-  );
+  serviceLocator.registerLazySingleton<NavigationManager>(() => NavigationManager());
 
   // Core Design System
   serviceLocator.registerLazySingleton<MyAppColors>(() => const MyAppColors());
-  serviceLocator.registerLazySingleton<MyAppTextStyles>(
-    () => MyAppTextStyles(),
-  );
+  serviceLocator.registerLazySingleton<MyAppTextStyles>(() => MyAppTextStyles());
 
   // Global Application Bloc
   serviceLocator.registerLazySingleton<MyAppBloc>(() => MyAppBloc());

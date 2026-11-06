@@ -80,10 +80,7 @@ class NotFoundScreen extends StatelessWidget {
     return MyAppScaffold(
       body: Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 16 : 24,
-            vertical: isMobile ? 36 : 64,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24, vertical: isMobile ? 36 : 64),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 580),
             child: CulturalFrameCard(
@@ -91,34 +88,18 @@ class NotFoundScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  HeritageBadge(
-                    label: isGujarati ? '૪૦૪ • પેજ મળ્યું નથી' : '404 • PAGE NOT FOUND',
-                  ),
+                  HeritageBadge(label: isGujarati ? '૪૦૪ • પેજ મળ્યું નથી' : '404 • PAGE NOT FOUND'),
                   const SizedBox(height: 20),
-                  Icon(
-                    Icons.explore_off_rounded,
-                    size: isMobile ? 64 : 80,
-                    color: colors.heritageGold,
-                  ),
+                  Icon(Icons.explore_off_rounded, size: isMobile ? 64 : 80, color: colors.heritageGold),
                   const SizedBox(height: 16),
                   Text(
                     '404',
-                    style: styles.editorialSerif(
-                      context,
-                      size: isMobile ? 38 : 48,
-                      fontWeight: FontWeight.w700,
-                      color: colors.getPrimaryTextColor(context),
-                    ),
+                    style: styles.editorialSerif(context, size: isMobile ? 38 : 48, fontWeight: FontWeight.w700, color: colors.getPrimaryTextColor(context)),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     isGujarati ? 'આ પૃષ્ઠ ઉપલબ્ધ નથી' : 'Page Not Found',
-                    style: styles.cleanSans(
-                      context,
-                      size: isMobile ? 18 : 22,
-                      fontWeight: FontWeight.w700,
-                      color: colors.getPrimaryTextColor(context),
-                    ),
+                    style: styles.cleanSans(context, size: isMobile ? 18 : 22, fontWeight: FontWeight.w700, color: colors.getPrimaryTextColor(context)),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -126,10 +107,7 @@ class NotFoundScreen extends StatelessWidget {
                         ? 'તમે જે પેજ શોધી રહ્યા છો તે અસ્તિત્વમાં નથી અથવા સ્થળાંતરિત થયેલ છે. કૃપા કરીને નીચેના મુખ્ય વિભાગોમાંથી પસંદ કરો.'
                         : 'The page you are looking for is currently not available or has been moved. Let us guide you back to our sacred archives.',
                     textAlign: TextAlign.center,
-                    style: styles.bodyText(context).copyWith(
-                          fontSize: isMobile ? 13.5 : 15,
-                          height: 1.6,
-                        ),
+                    style: styles.bodyText(context).copyWith(fontSize: isMobile ? 13.5 : 15, height: 1.6),
                   ),
                   const SizedBox(height: 28),
 
@@ -155,27 +133,15 @@ class NotFoundScreen extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor: colors.heritageMaroon,
                       foregroundColor: colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 28,
-                        vertical: 14,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
-                        side: BorderSide(
-                          color: colors.heritageGold.withValues(alpha: 0.5),
-                        ),
+                        side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.5)),
                       ),
                     ),
                     onPressed: () => context.go('/'),
                     icon: const Icon(Icons.home_rounded, size: 18),
-                    label: Text(
-                      isGujarati ? 'મુખ્ય પૃષ્ઠ પર પાછા જાઓ' : 'Return to Home',
-                      style: styles.cleanSans(
-                        context,
-                        size: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    label: Text(isGujarati ? 'મુખ્ય પૃષ્ઠ પર પાછા જાઓ' : 'Return to Home', style: styles.cleanSans(context, size: 14, fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),
@@ -186,20 +152,10 @@ class NotFoundScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickLink(
-    BuildContext context,
-    String id,
-    String label,
-    String route,
-    IconData icon,
-    MyAppColors colors,
-  ) {
+  Widget _buildQuickLink(BuildContext context, String id, String label, String route, IconData icon, MyAppColors colors) {
     return ActionChip(
       avatar: Icon(icon, size: 15, color: colors.heritageGold),
-      label: Text(
-        label,
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-      ),
+      label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
       backgroundColor: colors.getCardBackgroundColor(context),
       side: BorderSide(color: colors.getBorderColor(context)),
       onPressed: () => context.go(route),

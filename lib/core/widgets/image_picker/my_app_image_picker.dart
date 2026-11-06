@@ -63,12 +63,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
   Future<void> _pickFromDevice() async {
     try {
       setState(() => _isLoading = true);
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 1920, maxHeight: 1080, imageQuality: 85);
 
       if (image == null) {
         setState(() => _isLoading = false);
@@ -91,20 +86,12 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
       widget.onImageChanged(resolvedUrl);
 
       if (mounted) {
-        MyAppToastMessage.success(
-          context,
-          title: 'Image Selected',
-          description: 'Image loaded successfully.',
-        );
+        MyAppToastMessage.success(context, title: 'Image Selected', description: 'Image loaded successfully.');
       }
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        MyAppToastMessage.error(
-          context,
-          title: 'Image Selection Failed',
-          description: 'Could not process the selected image. Please try again with a JPG or PNG image.',
-        );
+        MyAppToastMessage.error(context, title: 'Image Selection Failed', description: 'Could not process the selected image. Please try again with a JPG or PNG image.');
       }
     }
   }
@@ -122,10 +109,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
         ),
-        title: Text(
-          'Enter Image URL',
-          style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700),
-        ),
+        title: Text('Enter Image URL', style: styles.editorialSerif(context, size: 20, fontWeight: FontWeight.w700)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,15 +133,9 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: colors.heritageMaroon,
-              foregroundColor: colors.white,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: colors.heritageMaroon, foregroundColor: colors.white),
             icon: const Icon(Icons.check_rounded, size: 18),
             label: const Text('Apply Image'),
             onPressed: () {
@@ -166,11 +144,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
                 setState(() => _currentUrl = newUrl);
                 widget.onImageChanged(newUrl);
                 Navigator.pop(ctx);
-                MyAppToastMessage.success(
-                  context,
-                  title: 'Image URL Updated',
-                  description: 'New image link applied successfully.',
-                );
+                MyAppToastMessage.success(context, title: 'Image URL Updated', description: 'New image link applied successfully.');
               } else {
                 Navigator.pop(ctx);
               }
@@ -185,11 +159,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
     setState(() => _currentUrl = '');
     widget.onImageRemoved?.call();
     widget.onImageChanged('');
-    MyAppToastMessage.warning(
-      context,
-      title: 'Image Removed',
-      description: 'Default placeholder will be displayed.',
-    );
+    MyAppToastMessage.warning(context, title: 'Image Removed', description: 'Default placeholder will be displayed.');
   }
 
   void _previewFullScreen() {
@@ -209,9 +179,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: colors.heritageGold, width: 2),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black54, blurRadius: 24, offset: Offset(0, 10)),
-                ],
+                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 24, offset: Offset(0, 10))],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
@@ -236,13 +204,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
   }
 
   Widget _buildImageWidget({BoxFit fit = BoxFit.cover}) {
-    return AppCachedImage(
-      imageUrl: _currentUrl,
-      fit: fit,
-      fallbackAsset: widget.defaultFallbackAsset,
-      memCacheWidth: 600,
-      memCacheHeight: 600,
-    );
+    return AppCachedImage(imageUrl: _currentUrl, fit: fit, fallbackAsset: widget.defaultFallbackAsset, memCacheWidth: 600, memCacheHeight: 600);
   }
 
   @override
@@ -257,10 +219,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
       decoration: BoxDecoration(
         color: colors.getCardBackgroundColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colors.heritageGold.withValues(alpha: 0.35),
-          width: 1.2,
-        ),
+        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.35), width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,33 +230,14 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
               Icon(Icons.photo_library_rounded, size: 18, color: colors.heritageGold),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  widget.label,
-                  style: styles.editorialSerif(
-                    context,
-                    size: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                child: Text(widget.label, style: styles.editorialSerif(context, size: 15, fontWeight: FontWeight.w700)),
               ),
               if (_currentUrl.isNotEmpty)
-                IconButton(
-                  tooltip: 'View Full Screen',
-                  icon: const Icon(Icons.zoom_in_rounded, size: 20),
-                  color: colors.heritageGold,
-                  onPressed: _previewFullScreen,
-                ),
+                IconButton(tooltip: 'View Full Screen', icon: const Icon(Icons.zoom_in_rounded, size: 20), color: colors.heritageGold, onPressed: _previewFullScreen),
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            widget.helperText,
-            style: styles.cleanSans(
-              context,
-              size: 11.5,
-              color: colors.getSecondaryTextColor(context),
-            ),
-          ),
+          Text(widget.helperText, style: styles.cleanSans(context, size: 11.5, color: colors.getSecondaryTextColor(context))),
           const SizedBox(height: 14),
 
           // Preview Area
@@ -313,25 +253,12 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
                     decoration: BoxDecoration(
                       shape: widget.isCircle ? BoxShape.circle : BoxShape.rectangle,
                       borderRadius: widget.isCircle ? null : BorderRadius.circular(14),
-                      border: Border.all(
-                        color: colors.heritageGold.withValues(alpha: 0.5),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      border: Border.all(color: colors.heritageGold.withValues(alpha: 0.5), width: 1.5),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 10, offset: const Offset(0, 4))],
                     ),
                     child: ClipRRect(
-                      borderRadius: widget.isCircle
-                          ? BorderRadius.circular(widget.height / 2)
-                          : BorderRadius.circular(12),
-                      child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : _buildImageWidget(),
+                      borderRadius: widget.isCircle ? BorderRadius.circular(widget.height / 2) : BorderRadius.circular(12),
+                      child: _isLoading ? const Center(child: CircularProgressIndicator()) : _buildImageWidget(),
                     ),
                   ),
                   if (_currentUrl.isEmpty)
@@ -370,10 +297,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
               OutlinedButton.icon(
                 onPressed: _isLoading ? null : _pickFromDevice,
                 icon: const Icon(Icons.file_upload_outlined, size: 16),
-                label: Text(
-                  'Pick from Device',
-                  style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w600),
-                ),
+                label: Text('Pick from Device', style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w600)),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.7)),
                   padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 14, vertical: 8),
@@ -382,10 +306,7 @@ class _MyAppImagePickerState extends State<MyAppImagePicker> {
               OutlinedButton.icon(
                 onPressed: _isLoading ? null : _openUrlInputDialog,
                 icon: const Icon(Icons.link_rounded, size: 16),
-                label: Text(
-                  'Enter URL',
-                  style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w600),
-                ),
+                label: Text('Enter URL', style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w600)),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: colors.getBorderColor(context)),
                   padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 14, vertical: 8),

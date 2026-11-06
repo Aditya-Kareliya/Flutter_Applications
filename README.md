@@ -85,8 +85,7 @@ pavan_putra_garbi/
 │       └── deploy.yml              # Production GitHub Actions CI/CD pipeline
 ├── assets/
 │   └── images/
-│       ├── pavan_putra_logo.png    # HD 512x512 transparent circular brand logo
-│       └── pavan_putra_logo.jpg    # High-quality fallback brand asset
+│       └── pavan_putra_logo.png    # HD 512x512 transparent circular brand logo
 ├── lib/
 │   ├── app.dart                    # Root MaterialApp, GoRouter & Theme configuration
 │   ├── main.dart                   # Application entrypoint & async bootstrap

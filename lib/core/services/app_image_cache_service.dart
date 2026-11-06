@@ -10,11 +10,7 @@ abstract final class AppImageCacheService {
 
   /// Pre-warms a list of image URLs in the background.
   /// Deduplicates calls to prevent unnecessary work.
-  static void precacheUrls(
-    Iterable<String?> urls, {
-    int? maxWidth,
-    int? maxHeight,
-  }) {
+  static void precacheUrls(Iterable<String?> urls, {int? maxWidth, int? maxHeight}) {
     for (final rawUrl in urls) {
       final url = rawUrl?.trim();
       if (url == null || url.isEmpty || _prewarmedUrls.contains(url)) {

@@ -10,6 +10,7 @@ import '../../modules/admin_module/dashboard/data/admin_data_store.dart';
 /// to guarantee actual inbox delivery without exposing private SMTP credentials.
 class EmailNotificationService {
   EmailNotificationService._();
+
   static final EmailNotificationService instance = EmailNotificationService._();
 
   /// Resolves the hosted brand logo HTTPS URL for public email rendering.
@@ -29,7 +30,7 @@ class EmailNotificationService {
 
   String _getMandalNameEn() {
     final val = AdminDataStore.instance.settings.mandalNameEn.trim();
-    return val.isNotEmpty ? val : 'SHREE PAVAN PUTRA GARBI MANDAL TRUST';
+    return val.isNotEmpty ? val : 'SHREE PAVAN PUTRA GARBI MANDAL';
   }
 
   String _getContactPhone() {
@@ -48,22 +49,13 @@ class EmailNotificationService {
   }
 
   /// Sends a real-time notification to all active administrative notification emails.
-  Future<bool> sendEnquiryNotification({
-    required AdminEnquiry enquiry,
-    required List<AdminNotificationEmail> recipients,
-    String? fallbackEmail,
-  }) async {
+  Future<bool> sendEnquiryNotification({required AdminEnquiry enquiry, required List<AdminNotificationEmail> recipients, String? fallbackEmail}) async {
     final activeRecipients = recipients.where((r) => r.isEnabled && r.email.trim().isNotEmpty).toList();
 
     // If no recipients configured, use fallback or default mandal email
     final targetEmails = activeRecipients.isNotEmpty
         ? activeRecipients.map((r) => r.email.trim()).toSet().toList()
-        : [
-            if (fallbackEmail != null && fallbackEmail.trim().isNotEmpty)
-              fallbackEmail.trim()
-            else
-              'pavanputragarbi@gmail.com',
-          ];
+        : [if (fallbackEmail != null && fallbackEmail.trim().isNotEmpty) fallbackEmail.trim() else 'pavanputragarbi@gmail.com'];
 
     bool anySuccess = false;
 
@@ -100,11 +92,7 @@ class EmailNotificationService {
             'message': {
               'subject': '[pavanputragarbi mandal] New Devotee Inquiry: ${enquiry.name}',
               'text': _buildPlainTextNotification(enquiry: enquiry, recipientEmail: email),
-              'html': _buildHtmlNotification(
-                enquiry: enquiry,
-                recipientEmail: email,
-                recipientName: recipientName,
-              ),
+              'html': _buildHtmlNotification(enquiry: enquiry, recipientEmail: email, recipientName: recipientName),
             },
             'createdAt': FieldValue.serverTimestamp(),
           });
@@ -123,7 +111,8 @@ class EmailNotificationService {
     if (email.isEmpty) return false;
 
     final now = DateTime.now();
-    final timestampStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    final timestampStr =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
     try {
       final success = await _dispatchEmailViaGateway(
@@ -143,10 +132,7 @@ class EmailNotificationService {
       try {
         await FirebaseFirestore.instance.collection('mail').add({
           'to': [email],
-          'message': {
-            'subject': '[pavanputragarbi mandal] Admin Notification System Active',
-            'html': _buildTestHtml(recipient: recipient, timestamp: timestampStr),
-          },
+          'message': {'subject': '[pavanputragarbi mandal] Admin Notification System Active', 'html': _buildTestHtml(recipient: recipient, timestamp: timestampStr)},
           'createdAt': FieldValue.serverTimestamp(),
         });
       } catch (_) {}
@@ -159,16 +145,11 @@ class EmailNotificationService {
   }
 
   /// Sends a Forgot Password recovery email matching the MedSaral-style card layout.
-  Future<bool> sendForgotPasswordEmail({
-    required String email,
-    String? resetLink,
-  }) async {
+  Future<bool> sendForgotPasswordEmail({required String email, String? resetLink}) async {
     final cleanEmail = email.trim();
     if (cleanEmail.isEmpty) return false;
 
-    final link = (resetLink != null && resetLink.isNotEmpty)
-        ? resetLink
-        : 'https://pavanputragarbi.firebaseapp.com/__/auth/action?mode=resetPassword';
+    final link = (resetLink != null && resetLink.isNotEmpty) ? resetLink : 'https://pavanputragarbi.firebaseapp.com/__/auth/action?mode=resetPassword';
 
     try {
       final success = await _dispatchEmailViaGateway(
@@ -187,10 +168,7 @@ class EmailNotificationService {
       try {
         await FirebaseFirestore.instance.collection('mail').add({
           'to': [cleanEmail],
-          'message': {
-            'subject': '[pavanputragarbi mandal] Forgot Password Recovery',
-            'html': _buildForgotPasswordHtml(email: cleanEmail, resetLink: link),
-          },
+          'message': {'subject': '[pavanputragarbi mandal] Forgot Password Recovery', 'html': _buildForgotPasswordHtml(email: cleanEmail, resetLink: link)},
           'createdAt': FieldValue.serverTimestamp(),
         });
       } catch (_) {}
@@ -216,9 +194,7 @@ class EmailNotificationService {
     try {
       final success = await _dispatchEmailViaGateway(
         toEmail: devoteeEmail,
-        subject: replySubject.isNotEmpty
-            ? replySubject
-            : 'Pranam ${enquiry.name} ji — Response from ${_getMandalNameGu()}',
+        subject: replySubject.isNotEmpty ? replySubject : 'Pranam ${enquiry.name} ji — Response from ${_getMandalNameGu()}',
         fields: {
           '🏛️ Mandal / સંસ્થા': '${_getMandalNameGu()} (${_getMandalNameEn()})',
           '🙏 Sacred Invocation': '|| શ્રી ગણેશાય નમઃ || || જય માતાજી || || જાગતી જોગમાયા ||',
@@ -238,15 +214,7 @@ class EmailNotificationService {
       try {
         await FirebaseFirestore.instance.collection('mail').add({
           'to': [devoteeEmail],
-          'message': {
-            'subject': replySubject,
-            'html': _buildResponseHtml(
-              enquiry: enquiry,
-              replyMessage: replyMessage,
-              senderName: senderName,
-              senderEmail: senderEmail,
-            ),
-          },
+          'message': {'subject': replySubject, 'html': _buildResponseHtml(enquiry: enquiry, replyMessage: replyMessage, senderName: senderName, senderEmail: senderEmail)},
           'createdAt': FieldValue.serverTimestamp(),
         });
       } catch (_) {}
@@ -259,36 +227,21 @@ class EmailNotificationService {
   }
 
   // --- HTTP Gateway Helper (FormSubmit AJAX API) ---
-  Future<bool> _dispatchEmailViaGateway({
-    required String toEmail,
-    required String subject,
-    required Map<String, String> fields,
-    String? replyTo,
-  }) async {
+  Future<bool> _dispatchEmailViaGateway({required String toEmail, required String subject, required Map<String, String> fields, String? replyTo}) async {
     final cleanEmail = toEmail.trim();
     if (cleanEmail.isEmpty) return false;
 
     final url = Uri.parse('https://formsubmit.co/ajax/$cleanEmail');
 
-    final payload = <String, dynamic>{
-      ...fields,
-      '_subject': subject,
-      '_template': 'table',
-      '_captcha': 'false',
-    };
+    final payload = <String, dynamic>{...fields, '_subject': subject, '_template': 'table', '_captcha': 'false'};
 
     if (replyTo != null && replyTo.trim().isNotEmpty) {
       payload['_replyto'] = replyTo.trim();
     }
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: jsonEncode(payload),
-    ).timeout(const Duration(seconds: 12));
+    final response = await http
+        .post(url, headers: {'Content-Type': 'application/json', 'Accept': 'application/json'}, body: jsonEncode(payload))
+        .timeout(const Duration(seconds: 12));
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return true;
@@ -915,12 +868,7 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
 ''';
   }
 
-  String _buildResponseHtml({
-    required AdminEnquiry enquiry,
-    required String replyMessage,
-    required String senderName,
-    required String senderEmail,
-  }) {
+  String _buildResponseHtml({required AdminEnquiry enquiry, required String replyMessage, required String senderName, required String senderEmail}) {
     final logoUrl = _getLogoUrl();
     final mandalGu = _getMandalNameGu();
     final mandalEn = _getMandalNameEn();
@@ -986,5 +934,3 @@ Portal Link: https://pavanputragarbi.web.app/#/admin
 ''';
   }
 }
-
-

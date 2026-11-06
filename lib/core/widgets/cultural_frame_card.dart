@@ -13,16 +13,7 @@ class CulturalFrameCard extends StatelessWidget {
   final double borderRadius;
   final bool hasGlow;
 
-  const CulturalFrameCard({
-    super.key,
-    required this.child,
-    this.padding,
-    this.onTap,
-    this.backgroundColor,
-    this.borderColor,
-    this.borderRadius = 16,
-    this.hasGlow = false,
-  });
+  const CulturalFrameCard({super.key, required this.child, this.padding, this.onTap, this.backgroundColor, this.borderColor, this.borderRadius = 16, this.hasGlow = false});
 
   @override
   Widget build(BuildContext context) {
@@ -51,15 +42,9 @@ class CulturalFrameCard extends StatelessWidget {
           child: onTap != null
               ? InkWell(
                   onTap: onTap,
-                  child: Padding(
-                    padding: padding ?? const EdgeInsets.all(22),
-                    child: child,
-                  ),
+                  child: Padding(padding: padding ?? const EdgeInsets.all(22), child: child),
                 )
-              : Padding(
-                  padding: padding ?? const EdgeInsets.all(22),
-                  child: child,
-                ),
+              : Padding(padding: padding ?? const EdgeInsets.all(22), child: child),
         ),
       ),
     );

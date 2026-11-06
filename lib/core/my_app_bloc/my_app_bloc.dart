@@ -13,10 +13,7 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
   MyAppBloc() : super(const MyAppState()) {
     on<MyAppInitEvent>((event, emit) async {
       // 1. Rapidly check if all essential home data is already cached in local storage (<5ms)
-      final localResults = await Future.wait([
-        AdminDataStore.instance.loadFromLocalStorage(),
-        GoogleTranslationService.instance.loadFromLocalStorage(),
-      ]);
+      final localResults = await Future.wait([AdminDataStore.instance.loadFromLocalStorage(), GoogleTranslationService.instance.loadFromLocalStorage()]);
       final hasLocalCache = localResults[0] == true;
       final hasEssentialData = AdminDataStore.instance.hasEssentialHomeData;
 
@@ -30,10 +27,7 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
         // Check for incremental remote updates in the background
         unawaited(() async {
           try {
-            await Future.wait([
-              AdminDataStore.instance.initializeEssentialFirstViewport(forceRefresh: false),
-              GoogleTranslationService.instance.initFromFirestore(),
-            ]);
+            await Future.wait([AdminDataStore.instance.initializeEssentialFirstViewport(forceRefresh: false), GoogleTranslationService.instance.initFromFirestore()]);
             await AdminDataStore.instance.startGentleBackgroundLoading(forceRefresh: false);
           } catch (e) {
             debugPrint('Background sync notice: $e');
@@ -42,17 +36,10 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
       } else {
         // Cold start / First-time visit:
         // Immediately start the loader so the user never sees empty cards or unpopulated sections
-        emit(state.copyWith(
-          isInitialized: true,
-          isBlurredLoading: true,
-          loadingMessage: 'શ્રી પવનપુત્ર ગરબી મંડળ\nમાહિતી લોડ થઈ રહી છે...',
-        ));
+        emit(state.copyWith(isInitialized: true, isBlurredLoading: true, loadingMessage: 'શ્રી પવનપુત્ર ગરબી મંડળ\nમાહિતી લોડ થઈ રહી છે...'));
 
         try {
-          await Future.wait([
-            AdminDataStore.instance.initializeEssentialFirstViewport(forceRefresh: true),
-            GoogleTranslationService.instance.initFromFirestore(),
-          ]);
+          await Future.wait([AdminDataStore.instance.initializeEssentialFirstViewport(forceRefresh: true), GoogleTranslationService.instance.initFromFirestore()]);
 
           AppImageCacheService.precacheEssentialDatabaseImages(AdminDataStore.instance);
 
@@ -72,15 +59,9 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
 
     on<MyAppChangeLanguageEvent>((event, emit) async {
       final isGu = event.locale.languageCode == 'gu';
-      emit(
-        state.copyWith(
-          isBlurredLoading: true,
-          loadingMessage: isGu
-              ? 'ગુજરાતી ભાષા લોડ થઈ રહી છે...'
-              : 'Switching language to English...',
-        ),
-      );
+      emit(state.copyWith(isBlurredLoading: true, loadingMessage: isGu ? 'ગુજરાતી ભાષા લોડ થઈ રહી છે...' : 'Switching language to English...'));
       final stopwatch = Stopwatch()..start();
+
       try {
         await MyAppTextStyles.preloadAllFonts();
         if (isGu) {
@@ -97,12 +78,7 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
     });
 
     on<MyAppSetBlurredLoadingEvent>((event, emit) {
-      emit(
-        state.copyWith(
-          isBlurredLoading: event.isLoading,
-          loadingMessage: event.message,
-        ),
-      );
+      emit(state.copyWith(isBlurredLoading: event.isLoading, loadingMessage: event.message));
     });
   }
 }

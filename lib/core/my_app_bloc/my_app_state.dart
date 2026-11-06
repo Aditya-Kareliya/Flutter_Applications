@@ -18,14 +18,7 @@ class MyAppState extends Equatable {
     this.errorMessage,
   });
 
-  MyAppState copyWith({
-    ThemeMode? themeMode,
-    Locale? locale,
-    bool? isBlurredLoading,
-    String? loadingMessage,
-    bool? isInitialized,
-    String? errorMessage,
-  }) {
+  MyAppState copyWith({ThemeMode? themeMode, Locale? locale, bool? isBlurredLoading, String? loadingMessage, bool? isInitialized, String? errorMessage}) {
     return MyAppState(
       themeMode: themeMode ?? this.themeMode,
       locale: locale ?? this.locale,
@@ -37,12 +30,5 @@ class MyAppState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-    themeMode,
-    locale,
-    isBlurredLoading,
-    loadingMessage,
-    isInitialized,
-    errorMessage,
-  ];
+  List<Object?> get props => [themeMode, locale, isBlurredLoading, loadingMessage, isInitialized, errorMessage];
 }

@@ -69,8 +69,8 @@ class MyAppTextAreaField extends StatefulWidget {
 
 class _MyAppTextAreaFieldState extends State<MyAppTextAreaField> {
   TextEditingController? _internalController;
-  TextEditingController get _effectiveController =>
-      widget.controller ?? (_internalController ??= TextEditingController(text: widget.initialValue));
+
+  TextEditingController get _effectiveController => widget.controller ?? (_internalController ??= TextEditingController(text: widget.initialValue));
 
   bool _isTranslating = false;
   String? _lastErrorAnnounced;
@@ -119,11 +119,7 @@ class _MyAppTextAreaFieldState extends State<MyAppTextAreaField> {
 
     final sourceText = _effectiveController.text.trim();
     if (sourceText.isEmpty) {
-      MyAppToastMessage.warning(
-        context,
-        title: 'Translation Empty',
-        description: 'Please type some text to translate.',
-      );
+      MyAppToastMessage.warning(context, title: 'Translation Empty', description: 'Please type some text to translate.');
       return;
     }
 
@@ -132,19 +128,11 @@ class _MyAppTextAreaFieldState extends State<MyAppTextAreaField> {
       final translated = await GoogleTranslationService.instance.translateToGujarati(sourceText);
       targetCtrl.text = translated;
       if (mounted) {
-        MyAppToastMessage.success(
-          context,
-          title: 'Auto-Translated',
-          description: translated,
-        );
+        MyAppToastMessage.success(context, title: 'Auto-Translated', description: translated);
       }
     } catch (e) {
       if (mounted) {
-        MyAppToastMessage.error(
-          context,
-          title: 'Translation Failed',
-          description: 'Could not connect to translation service: $e',
-        );
+        MyAppToastMessage.error(context, title: 'Translation Failed', description: 'Could not connect to translation service: $e');
       }
     } finally {
       if (mounted) setState(() => _isTranslating = false);
@@ -182,23 +170,12 @@ class _MyAppTextAreaFieldState extends State<MyAppTextAreaField> {
               if (_isTranslating)
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
+                  child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
                 )
               else
-                MyAppIconButton.translate(
-                  onPressed: _handleAutoTranslate,
-                  tooltip: 'Auto-translate to Gujarati',
-                ),
+                MyAppIconButton.translate(onPressed: _handleAutoTranslate, tooltip: 'Auto-translate to Gujarati'),
             ],
-            if (canClear)
-              MyAppIconButton.clear(
-                onPressed: _handleClear,
-                tooltip: 'Clear text',
-              ),
+            if (canClear) MyAppIconButton.clear(onPressed: _handleClear, tooltip: 'Clear text'),
           ],
         ),
       );
@@ -209,17 +186,13 @@ class _MyAppTextAreaFieldState extends State<MyAppTextAreaField> {
       focusNode: widget.focusNode,
       keyboardType: TextInputType.multiline,
       minLines: widget.minLines,
-      maxLines: widget.maxLines, // Dynamic auto-height
+      maxLines: widget.maxLines,
+      // Dynamic auto-height
       scrollPadding: widget.scrollPadding,
       readOnly: widget.readOnly,
       enabled: widget.enabled,
       onChanged: widget.onChanged,
-      style: styles.cleanSans(
-        context,
-        size: isMobile ? 16 : 14,
-        fontWeight: FontWeight.w500,
-        color: colors.getPrimaryTextColor(context),
-      ),
+      style: styles.cleanSans(context, size: isMobile ? 16 : 14, fontWeight: FontWeight.w500, color: colors.getPrimaryTextColor(context)),
       validator: (val) {
         if (widget.validator == null) return null;
         final error = widget.validator!(val);
@@ -228,11 +201,7 @@ class _MyAppTextAreaFieldState extends State<MyAppTextAreaField> {
             _lastErrorAnnounced = error;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (context.mounted) {
-                MyAppToastMessage.warning(
-                  context,
-                  title: widget.labelText ?? 'Validation Required',
-                  description: error,
-                );
+                MyAppToastMessage.warning(context, title: widget.labelText ?? 'Validation Required', description: error);
               }
             });
           }
@@ -250,23 +219,9 @@ class _MyAppTextAreaFieldState extends State<MyAppTextAreaField> {
         fillColor: isDark ? const Color(0xFF1E1B1B) : Colors.white,
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         alignLabelWithHint: true,
-        labelStyle: styles.cleanSans(
-          context,
-          size: 13,
-          fontWeight: FontWeight.w500,
-          color: colors.getSecondaryTextColor(context),
-        ),
-        hintStyle: styles.cleanSans(
-          context,
-          size: 13,
-          color: colors.getMutedTextColor(context),
-        ),
-        prefixIcon: widget.prefixIcon != null
-            ? Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                child: widget.prefixIcon,
-              )
-            : null,
+        labelStyle: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w500, color: colors.getSecondaryTextColor(context)),
+        hintStyle: styles.cleanSans(context, size: 13, color: colors.getMutedTextColor(context)),
+        prefixIcon: widget.prefixIcon != null ? Padding(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12), child: widget.prefixIcon) : null,
         suffixIcon: builtSuffix,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         // Error text style is 0 height to prevent vertical layout shift
@@ -281,24 +236,15 @@ class _MyAppTextAreaFieldState extends State<MyAppTextAreaField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: isDark ? colors.lightGold : colors.heritageMaroon,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: isDark ? colors.lightGold : colors.heritageMaroon, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: colors.sacredRed,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: colors.sacredRed, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: colors.sacredRed,
-            width: 2.0,
-          ),
+          borderSide: BorderSide(color: colors.sacredRed, width: 2.0),
         ),
       ),
     );

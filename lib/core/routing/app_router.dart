@@ -15,12 +15,9 @@ import '../widgets/not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-CustomTransitionPage<T> _buildPageWithDefaultTransition<T>({
-  required BuildContext context,
-  required GoRouterState state,
-  required Widget child,
-}) {
+CustomTransitionPage<T> _buildPageWithDefaultTransition<T>({required BuildContext context, required GoRouterState state, required Widget child}) {
   AppSeoManager.instance.updatePath(state.uri.path);
+
   return CustomTransitionPage<T>(
     key: state.pageKey,
     child: child,

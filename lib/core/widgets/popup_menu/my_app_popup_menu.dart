@@ -12,13 +12,8 @@ class MyAppPopupMenuItem<T> {
   final Widget? child;
   final bool enabled;
 
-  const MyAppPopupMenuItem({
-    required this.value,
-    this.icon,
-    this.label,
-    this.child,
-    this.enabled = true,
-  }) : assert(label != null || child != null, 'Either label or child must be provided');
+  const MyAppPopupMenuItem({required this.value, this.icon, this.label, this.child, this.enabled = true})
+    : assert(label != null || child != null, 'Either label or child must be provided');
 }
 
 /// A heritage popup menu button that displays menu items anchored to the button
@@ -90,20 +85,9 @@ class _MyAppPopupMenuButtonState<T> extends State<MyAppPopupMenuButton<T>> {
   Widget build(BuildContext context) {
     Widget content;
     if (widget.child != null) {
-      content = InkWell(
-        key: _triggerKey,
-        borderRadius: BorderRadius.circular(10),
-        onTap: widget.enabled ? _showMenu : null,
-        child: widget.child,
-      );
+      content = InkWell(key: _triggerKey, borderRadius: BorderRadius.circular(10), onTap: widget.enabled ? _showMenu : null, child: widget.child);
     } else {
-      content = IconButton(
-        key: _triggerKey,
-        onPressed: widget.enabled ? _showMenu : null,
-        icon: widget.icon!,
-        tooltip: widget.tooltip,
-        splashRadius: 20,
-      );
+      content = IconButton(key: _triggerKey, onPressed: widget.enabled ? _showMenu : null, icon: widget.icon!, tooltip: widget.tooltip, splashRadius: 20);
     }
 
     return content;
@@ -128,51 +112,34 @@ Future<T?> showMyAppPopupMenu<T>({
 
   final bool isMobile = screenSize.width < 600;
   // Responsive width: on mobile screens it dynamically sizes cleanly (~48% width), on tablet/desktop it uses minWidth
-  final double effectiveWidth = isMobile
-      ? (screenSize.width * 0.48).clamp(165.0, 205.0)
-      : minWidth.clamp(170.0, 260.0);
+  final double effectiveWidth = isMobile ? (screenSize.width * 0.48).clamp(165.0, 205.0) : minWidth.clamp(170.0, 260.0);
 
   final double targetY = triggerOffset.dy + triggerSize.height + offset.dy + 6;
   final double estimatedMenuHeight = (items.length * 48.0) + 16.0;
   final bool showAbove = (targetY + estimatedMenuHeight > screenSize.height - 16) && (triggerOffset.dy > estimatedMenuHeight);
-  final double menuTop = showAbove
-      ? (triggerOffset.dy - estimatedMenuHeight - 6 + offset.dy).clamp(16.0, screenSize.height - 60)
-      : targetY.clamp(16.0, screenSize.height - 60);
+  final double menuTop = showAbove ? (triggerOffset.dy - estimatedMenuHeight - 6 + offset.dy).clamp(16.0, screenSize.height - 60) : targetY.clamp(16.0, screenSize.height - 60);
 
   // If placing to the right overflows screen, or trigger is on the right half, anchor from the right:
-  final bool isAlignRight = (triggerOffset.dx + effectiveWidth > screenSize.width - 16) ||
-      ((triggerOffset.dx + triggerSize.width / 2) >= screenSize.width / 2);
+  final bool isAlignRight = (triggerOffset.dx + effectiveWidth > screenSize.width - 16) || ((triggerOffset.dx + triggerSize.width / 2) >= screenSize.width / 2);
 
   final double? menuRight = isAlignRight
-      ? (screenSize.width - (triggerOffset.dx + triggerSize.width) - offset.dx)
-          .clamp(12.0, (screenSize.width - effectiveWidth - 12).clamp(12.0, screenSize.width))
+      ? (screenSize.width - (triggerOffset.dx + triggerSize.width) - offset.dx).clamp(12.0, (screenSize.width - effectiveWidth - 12).clamp(12.0, screenSize.width))
       : null;
-  final double? menuLeft = !isAlignRight
-      ? (triggerOffset.dx + offset.dx)
-          .clamp(12.0, (screenSize.width - effectiveWidth - 12).clamp(12.0, screenSize.width))
-      : null;
+  final double? menuLeft = !isAlignRight ? (triggerOffset.dx + offset.dx).clamp(12.0, (screenSize.width - effectiveWidth - 12).clamp(12.0, screenSize.width)) : null;
 
-  final Alignment transformAlignment = showAbove
-      ? (isAlignRight ? Alignment.bottomRight : Alignment.bottomLeft)
-      : (isAlignRight ? Alignment.topRight : Alignment.topLeft);
+  final Alignment transformAlignment = showAbove ? (isAlignRight ? Alignment.bottomRight : Alignment.bottomLeft) : (isAlignRight ? Alignment.topRight : Alignment.topLeft);
 
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: true,
     barrierLabel: 'Dismiss Popup Menu',
-    barrierColor: isDark
-        ? Colors.black.withValues(alpha: 0.45)
-        : Colors.black.withValues(alpha: 0.20),
+    barrierColor: isDark ? Colors.black.withValues(alpha: 0.45) : Colors.black.withValues(alpha: 0.20),
     transitionDuration: const Duration(milliseconds: 240),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
       return const SizedBox.shrink();
     },
     transitionBuilder: (dialogContext, animation, secondaryAnimation, child) {
-      final curve = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      );
+      final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
 
       return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -184,11 +151,7 @@ Future<T?> showMyAppPopupMenu<T>({
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => Navigator.of(dialogContext).pop(),
-                    child: const SizedBox.expand(),
-                  ),
+                  child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(dialogContext).pop(), child: const SizedBox.expand()),
                 ),
                 Positioned(
                   top: menuTop,
@@ -198,17 +161,11 @@ Future<T?> showMyAppPopupMenu<T>({
                     color: Colors.transparent,
                     child: Container(
                       width: effectiveWidth,
-                      constraints: BoxConstraints(
-                        maxWidth: (screenSize.width - 24).clamp(140.0, 320.0),
-                        maxHeight: (screenSize.height * 0.7).clamp(140.0, 480.0),
-                      ),
+                      constraints: BoxConstraints(maxWidth: (screenSize.width - 24).clamp(140.0, 320.0), maxHeight: (screenSize.height * 0.7).clamp(140.0, 480.0)),
                       decoration: BoxDecoration(
                         color: colors.getCardBackgroundColor(dialogContext),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: colors.heritageGold.withValues(alpha: 0.55),
-                          width: 1.2,
-                        ),
+                        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.55), width: 1.2),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.22),
@@ -226,14 +183,7 @@ Future<T?> showMyAppPopupMenu<T>({
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               for (int i = 0; i < items.length; i++) ...[
-                                if (i > 0)
-                                  Divider(
-                                    height: 1,
-                                    thickness: 0.8,
-                                    indent: 14,
-                                    endIndent: 14,
-                                    color: colors.getBorderColor(dialogContext).withValues(alpha: 0.35),
-                                  ),
+                                if (i > 0) Divider(height: 1, thickness: 0.8, indent: 14, endIndent: 14, color: colors.getBorderColor(dialogContext).withValues(alpha: 0.35)),
                                 _buildItemRow<T>(
                                   dialogContext: dialogContext,
                                   rootContext: context,
@@ -284,49 +234,27 @@ Widget _buildItemRow<T>({
           }
         : null,
     child: Container(
-      color: isSelected
-          ? (isDark
-              ? colors.heritageMaroon.withValues(alpha: 0.3)
-              : colors.heritageGold.withValues(alpha: 0.12))
-          : Colors.transparent,
+      color: isSelected ? (isDark ? colors.heritageMaroon.withValues(alpha: 0.3) : colors.heritageGold.withValues(alpha: 0.12)) : Colors.transparent,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (item.icon != null) ...[
             IconTheme(
-              data: IconThemeData(
-                size: 18,
-                color: isSelected
-                    ? accentColor
-                    : (isDark ? colors.lightGold : colors.heritageMaroon),
-              ),
+              data: IconThemeData(size: 18, color: isSelected ? accentColor : (isDark ? colors.lightGold : colors.heritageMaroon)),
               child: item.icon!,
             ),
             const SizedBox(width: 10),
           ],
           Expanded(
-            child: item.child ??
+            child:
+                item.child ??
                 Text(
                   item.label ?? '',
-                  style: styles.cleanSans(
-                    rootContext,
-                    size: 13.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected
-                        ? accentColor
-                        : primaryTextColor,
-                  ),
+                  style: styles.cleanSans(rootContext, size: 13.5, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? accentColor : primaryTextColor),
                 ),
           ),
-          if (isSelected) ...[
-            const SizedBox(width: 8),
-            Icon(
-              Icons.check_rounded,
-              size: 17,
-              color: accentColor,
-            ),
-          ],
+          if (isSelected) ...[const SizedBox(width: 8), Icon(Icons.check_rounded, size: 17, color: accentColor)],
         ],
       ),
     ),

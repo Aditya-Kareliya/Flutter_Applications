@@ -2813,7 +2813,7 @@ class _AdminVideosPageViewState extends State<AdminVideosPageView> {
               ),
               clipBehavior: Clip.antiAlias,
               child: Image.asset(
-                'assets/images/pavan_putra_logo.jpg',
+                'assets/images/pavan_putra_logo.png',
                 fit: BoxFit.cover,
               ),
             ),
@@ -3333,7 +3333,7 @@ class _AdminVideosPageViewState extends State<AdminVideosPageView> {
               ),
               clipBehavior: Clip.antiAlias,
               child: Image.asset(
-                'assets/images/pavan_putra_logo.jpg',
+                'assets/images/pavan_putra_logo.png',
                 fit: BoxFit.cover,
               ),
             ),

@@ -47,95 +47,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   void _handleForgotPassword() {
-    final colors = serviceLocator<MyAppColors>();
-    final styles = serviceLocator<MyAppTextStyles>();
-    final resetEmailCtrl = TextEditingController(text: _emailController.text.trim());
-
     showMyAppDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: colors.getCardBackgroundColor(context),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.lock_reset_rounded, color: colors.heritageGold),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Reset Admin Password',
-                style: styles.editorialSerif(
-                  context,
-                  size: 19,
-                  fontWeight: FontWeight.w700,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Enter your registered administrator email to receive a secure password recovery link via Firebase Authentication.',
-              style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
-            ),
-            const SizedBox(height: 16),
-            MyAppTextFormField(
-              controller: resetEmailCtrl,
-              labelText: 'Administrator Email',
-              prefixIcon: const Icon(Icons.email_rounded),
-              keyboardType: TextInputType.emailAddress,
-            ),
-          ],
-        ),
-        actionsOverflowButtonSpacing: 8,
-        actions: [
-          MyAppTextButton(
-            onPressed: () => Navigator.pop(ctx),
-            label: 'Cancel',
-          ),
-          MyAppFillButton(
-            onPressed: () async {
-              final email = resetEmailCtrl.text.trim();
-              if (email.isEmpty || !email.contains('@')) {
-                MyAppToastMessage.warning(
-                  context,
-                  title: 'Email Required',
-                  description: 'Please enter a valid administrator email address.',
-                );
-                return;
-              }
-              Navigator.pop(ctx);
-              try {
-                await context.read<AdminAuthCubit>().sendPasswordReset(email);
-                if (mounted) {
-                  MyAppToastMessage.success(
-                    context,
-                    title: 'Password Reset Sent',
-                    description: 'A password reset link has been dispatched to $email. Please check your inbox.',
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  final msg = e.toString().replaceFirst('Exception: ', '');
-                  MyAppToastMessage.error(
-                    context,
-                    title: 'Reset Failed',
-                    description: msg,
-                  );
-                }
-              }
-            },
-            label: 'Send Reset Link',
-          ),
-        ],
+      builder: (ctx) => _AdminResetPasswordDialog(
+        initialEmail: _emailController.text.trim(),
       ),
     );
   }
@@ -303,6 +218,135 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         ),
       ),
       ),
+    );
+  }
+}
+
+class _AdminResetPasswordDialog extends StatefulWidget {
+  const _AdminResetPasswordDialog({required this.initialEmail});
+
+  final String initialEmail;
+
+  @override
+  State<_AdminResetPasswordDialog> createState() => _AdminResetPasswordDialogState();
+}
+
+class _AdminResetPasswordDialogState extends State<_AdminResetPasswordDialog> {
+  late final TextEditingController _emailCtrl;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailCtrl = TextEditingController(text: widget.initialEmail);
+  }
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSendResetLink() async {
+    final email = _emailCtrl.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      MyAppToastMessage.warning(
+        context,
+        title: 'Email Required',
+        description: 'Please enter a valid administrator email address.',
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await serviceLocator<AdminAuthCubit>().sendPasswordReset(email);
+      if (mounted) {
+        Navigator.pop(context);
+        MyAppToastMessage.success(
+          context,
+          title: 'Password Reset Link Sent',
+          description:
+              'A password reset link has been dispatched to $email. Please check your primary inbox.',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        final msg = e.toString().replaceFirst('Exception: ', '');
+        MyAppToastMessage.error(
+          context,
+          title: 'Reset Failed',
+          description: msg,
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = serviceLocator<MyAppColors>();
+    final styles = serviceLocator<MyAppTextStyles>();
+
+    return AlertDialog(
+      backgroundColor: colors.getCardBackgroundColor(context),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
+      ),
+      title: Row(
+        children: [
+          Icon(Icons.lock_reset_rounded, color: colors.heritageGold),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Reset Admin Password',
+              style: styles.editorialSerif(
+                context,
+                size: 19,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter your registered administrator email to receive a secure password recovery link via Firebase Authentication.',
+              style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
+            ),
+            const SizedBox(height: 16),
+            MyAppTextFormField(
+              controller: _emailCtrl,
+              labelText: 'Administrator Email',
+              prefixIcon: const Icon(Icons.email_rounded),
+              keyboardType: TextInputType.emailAddress,
+              showClearIcon: true,
+              onFieldSubmitted: (_) => _isLoading ? null : _handleSendResetLink(),
+            ),
+          ],
+        ),
+      ),
+      actionsOverflowButtonSpacing: 8,
+      actions: [
+        MyAppTextButton(
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          label: 'Cancel',
+        ),
+        MyAppFillButton(
+          onPressed: _isLoading ? null : _handleSendResetLink,
+          label: 'Send Reset Link',
+          isLoading: _isLoading,
+        ),
+      ],
     );
   }
 }

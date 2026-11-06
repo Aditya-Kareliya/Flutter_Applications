@@ -24,9 +24,7 @@ Future<T?> showMyAppDialog<T>({
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel ?? 'Dismiss',
-    barrierColor: isDark
-        ? Colors.black.withValues(alpha: 0.65)
-        : Colors.black.withValues(alpha: 0.35),
+    barrierColor: isDark ? Colors.black.withValues(alpha: 0.65) : Colors.black.withValues(alpha: 0.35),
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
     transitionDuration: transitionDuration,
@@ -34,11 +32,7 @@ Future<T?> showMyAppDialog<T>({
       return const SizedBox.shrink();
     },
     transitionBuilder: (dialogContext, animation, secondaryAnimation, child) {
-      final curve = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      );
+      final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
 
       return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -51,11 +45,7 @@ Future<T?> showMyAppDialog<T>({
               children: [
                 if (barrierDismissible)
                   Positioned.fill(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => Navigator.of(dialogContext).pop(),
-                      child: const SizedBox.expand(),
-                    ),
+                    child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(dialogContext).pop(), child: const SizedBox.expand()),
                   ),
                 SafeArea(
                   child: Center(
@@ -73,22 +63,10 @@ Future<T?> showMyAppDialog<T>({
                               shadowColor: Colors.black.withValues(alpha: isDark ? 0.5 : 0.22),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
-                                side: BorderSide(
-                                  color: colors.heritageGold.withValues(alpha: 0.5),
-                                  width: 1.2,
-                                ),
+                                side: BorderSide(color: colors.heritageGold.withValues(alpha: 0.5), width: 1.2),
                               ),
-                              titleTextStyle: styles.editorialSerif(
-                                dialogContext,
-                                size: 20,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              contentTextStyle: styles.bodyText(
-                                dialogContext,
-                              ).copyWith(
-                                fontSize: 14.5,
-                                height: 1.55,
-                              ),
+                              titleTextStyle: styles.editorialSerif(dialogContext, size: 20, fontWeight: FontWeight.w700),
+                              contentTextStyle: styles.bodyText(dialogContext).copyWith(fontSize: 14.5, height: 1.55),
                               actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                             ),
                           ),
@@ -138,23 +116,16 @@ class MyAppDialog extends StatelessWidget {
     final styles = serviceLocator<MyAppTextStyles>();
     final isDark = colors.isDarkMode(context);
     final screenSize = MediaQuery.sizeOf(context);
-    final effectiveMaxWidth = screenSize.width < (maxWidth + 32)
-        ? (screenSize.width - 24)
-        : maxWidth;
+    final effectiveMaxWidth = screenSize.width < (maxWidth + 32) ? (screenSize.width - 24) : maxWidth;
 
     return Container(
       width: effectiveMaxWidth,
-      constraints: BoxConstraints(
-        maxHeight: screenSize.height * 0.90,
-      ),
+      constraints: BoxConstraints(maxHeight: screenSize.height * 0.90),
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       decoration: BoxDecoration(
         color: colors.getCardBackgroundColor(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colors.heritageGold.withValues(alpha: 0.5),
-          width: 1.2,
-        ),
+        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.5), width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.22),
@@ -174,12 +145,7 @@ class MyAppDialog extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                 decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: colors.getBorderColor(context).withValues(alpha: 0.4),
-                      width: 1,
-                    ),
-                  ),
+                  border: Border(bottom: BorderSide(color: colors.getBorderColor(context).withValues(alpha: 0.4), width: 1)),
                 ),
                 child: Row(
                   children: [
@@ -187,21 +153,8 @@ class MyAppDialog extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (titleWidget != null)
-                            titleWidget!
-                          else if (title != null)
-                            Text(
-                              title!,
-                              style: styles.editorialSerif(
-                                context,
-                                size: 19,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          if (subtitle != null) ...[
-                            const SizedBox(height: 3),
-                            subtitle!,
-                          ],
+                          if (titleWidget != null) titleWidget! else if (title != null) Text(title!, style: styles.editorialSerif(context, size: 19, fontWeight: FontWeight.w700)),
+                          if (subtitle != null) ...[const SizedBox(height: 3), subtitle!],
                         ],
                       ),
                     ),
@@ -220,11 +173,7 @@ class MyAppDialog extends StatelessWidget {
 
             // Scrollable Content
             Flexible(
-              child: SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                padding: padding ?? const EdgeInsets.all(20),
-                child: content,
-              ),
+              child: SingleChildScrollView(physics: const ClampingScrollPhysics(), padding: padding ?? const EdgeInsets.all(20), child: content),
             ),
 
             // Actions Footer
@@ -232,23 +181,10 @@ class MyAppDialog extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.black.withValues(alpha: 0.15)
-                      : colors.heritageGold.withValues(alpha: 0.05),
-                  border: Border(
-                    top: BorderSide(
-                      color: colors.getBorderColor(context).withValues(alpha: 0.4),
-                      width: 1,
-                    ),
-                  ),
+                  color: isDark ? Colors.black.withValues(alpha: 0.15) : colors.heritageGold.withValues(alpha: 0.05),
+                  border: Border(top: BorderSide(color: colors.getBorderColor(context).withValues(alpha: 0.4), width: 1)),
                 ),
-                child: Wrap(
-                  alignment: WrapAlignment.end,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 10,
-                  runSpacing: 8,
-                  children: actions!,
-                ),
+                child: Wrap(alignment: WrapAlignment.end, crossAxisAlignment: WrapCrossAlignment.center, spacing: 10, runSpacing: 8, children: actions!),
               ),
           ],
         ),
@@ -276,40 +212,16 @@ Future<bool?> showMyAppConfirmDialog({
       maxWidth: 440,
       titleWidget: Row(
         children: [
-          if (icon != null) ...[
-            Icon(
-              icon,
-              size: 20,
-              color: isDanger ? colors.sacredRed : colors.heritageGold,
-            ),
-            const SizedBox(width: 8),
-          ],
+          if (icon != null) ...[Icon(icon, size: 20, color: isDanger ? colors.sacredRed : colors.heritageGold), const SizedBox(width: 8)],
           Expanded(
-            child: Text(
-              title,
-              style: styles.editorialSerif(
-                dialogContext,
-                size: 19,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            child: Text(title, style: styles.editorialSerif(dialogContext, size: 19, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
-      content: Text(
-        message,
-        style: styles.bodyText(dialogContext),
-      ),
+      content: Text(message, style: styles.bodyText(dialogContext)),
       actions: [
-        MyAppTextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(false),
-          label: cancelLabel,
-        ),
-        MyAppFillButton(
-          isDanger: isDanger,
-          label: confirmLabel,
-          onPressed: () => Navigator.of(dialogContext).pop(true),
-        ),
+        MyAppTextButton(onPressed: () => Navigator.of(dialogContext).pop(false), label: cancelLabel),
+        MyAppFillButton(isDanger: isDanger, label: confirmLabel, onPressed: () => Navigator.of(dialogContext).pop(true)),
       ],
     ),
   );

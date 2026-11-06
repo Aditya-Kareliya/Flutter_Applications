@@ -9,22 +9,13 @@ class HeritageDivider extends StatelessWidget {
   final double? width;
   final Color? color;
 
-  const HeritageDivider({
-    super.key,
-    this.verticalPadding = 24,
-    this.width,
-    this.color,
-  });
+  const HeritageDivider({super.key, this.verticalPadding = 24, this.width, this.color});
 
   @override
   Widget build(BuildContext context) {
     final colors = serviceLocator<MyAppColors>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dividerColor =
-        color ??
-        (isDark
-            ? colors.stone.withValues(alpha: 0.25)
-            : const Color(0xFFDDD7CB));
+    final dividerColor = color ?? (isDark ? colors.stone.withValues(alpha: 0.25) : const Color(0xFFDDD7CB));
     final emblemColor = isDark ? colors.heritageGold : colors.heritageMaroon;
 
     return Padding(
@@ -38,14 +29,7 @@ class HeritageDivider extends StatelessWidget {
               Expanded(
                 child: Container(
                   height: 1,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        dividerColor.withValues(alpha: 0.0),
-                        dividerColor,
-                      ],
-                    ),
-                  ),
+                  decoration: BoxDecoration(gradient: LinearGradient(colors: [dividerColor.withValues(alpha: 0.0), dividerColor])),
                 ),
               ),
               Padding(
@@ -57,10 +41,7 @@ class HeritageDivider extends StatelessWidget {
                       width: 5,
                       height: 5,
                       transform: Matrix4.rotationZ(0.785398),
-                      decoration: BoxDecoration(
-                        color: emblemColor.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(1),
-                      ),
+                      decoration: BoxDecoration(color: emblemColor.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(1)),
                     ),
                     const SizedBox(width: 6),
                     Container(
@@ -70,12 +51,7 @@ class HeritageDivider extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: emblemColor,
                         borderRadius: BorderRadius.circular(1.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: emblemColor.withValues(alpha: 0.3),
-                            blurRadius: 4,
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: emblemColor.withValues(alpha: 0.3), blurRadius: 4)],
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -83,10 +59,7 @@ class HeritageDivider extends StatelessWidget {
                       width: 5,
                       height: 5,
                       transform: Matrix4.rotationZ(0.785398),
-                      decoration: BoxDecoration(
-                        color: emblemColor.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(1),
-                      ),
+                      decoration: BoxDecoration(color: emblemColor.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(1)),
                     ),
                   ],
                 ),
@@ -94,14 +67,7 @@ class HeritageDivider extends StatelessWidget {
               Expanded(
                 child: Container(
                   height: 1,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        dividerColor,
-                        dividerColor.withValues(alpha: 0.0),
-                      ],
-                    ),
-                  ),
+                  decoration: BoxDecoration(gradient: LinearGradient(colors: [dividerColor, dividerColor.withValues(alpha: 0.0)])),
                 ),
               ),
             ],

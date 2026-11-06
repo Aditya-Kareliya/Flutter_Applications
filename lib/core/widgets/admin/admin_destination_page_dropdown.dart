@@ -11,63 +11,18 @@ class AdminPageDestination {
   final String labelGu;
   final IconData icon;
 
-  const AdminPageDestination({
-    required this.path,
-    required this.labelEn,
-    required this.labelGu,
-    required this.icon,
-  });
+  const AdminPageDestination({required this.path, required this.labelEn, required this.labelGu, required this.icon});
 }
 
 const List<AdminPageDestination> kAdminPublicPages = [
-  AdminPageDestination(
-    path: '/archive',
-    labelEn: 'Archive Records & Photos',
-    labelGu: 'આર્કાઇવ અને ફોટો સંગ્રહ',
-    icon: Icons.calendar_month_rounded,
-  ),
-  AdminPageDestination(
-    path: '/about',
-    labelEn: 'About Mandali & Traditions',
-    labelGu: 'મંડળ પરિચય અને પરંપરા',
-    icon: Icons.info_outline_rounded,
-  ),
-  AdminPageDestination(
-    path: '/history',
-    labelEn: 'History & Heritage Timeline',
-    labelGu: 'ઇતિહાસ અને સીમાચિહ્નો',
-    icon: Icons.history_edu_rounded,
-  ),
-  AdminPageDestination(
-    path: '/gallery',
-    labelEn: 'Photo Gallery',
-    labelGu: 'ફોટો ગેલેરી',
-    icon: Icons.photo_library_rounded,
-  ),
-  AdminPageDestination(
-    path: '/videos',
-    labelEn: 'Sacred Garba Videos',
-    labelGu: 'ગરબી વિડિયો દર્શન',
-    icon: Icons.play_circle_outline_rounded,
-  ),
-  AdminPageDestination(
-    path: '/blog',
-    labelEn: 'Cultural Articles & Stories',
-    labelGu: 'સાંસ્કૃતિક લેખો અને વાતો',
-    icon: Icons.article_outlined,
-  ),
-  AdminPageDestination(
-    path: '/contact',
-    labelEn: 'Contact & Location Map',
-    labelGu: 'સંપર્ક અને સ્થળ માહિતી',
-    icon: Icons.location_on_outlined,
-  ),
-  AdminPageDestination(
-    path: '/',
-    labelEn: 'Home Page',
-    labelGu: 'મુખ્ય હોમ પેજ',
-    icon: Icons.home_rounded,
-  ),
+  AdminPageDestination(path: '/archive', labelEn: 'Archive Records & Photos', labelGu: 'આર્કાઇવ અને ફોટો સંગ્રહ', icon: Icons.calendar_month_rounded),
+  AdminPageDestination(path: '/about', labelEn: 'About Mandal & Traditions', labelGu: 'મંડળ પરિચય અને પરંપરા', icon: Icons.info_outline_rounded),
+  AdminPageDestination(path: '/history', labelEn: 'History & Heritage Timeline', labelGu: 'ઇતિહાસ અને સીમાચિહ્નો', icon: Icons.history_edu_rounded),
+  AdminPageDestination(path: '/gallery', labelEn: 'Photo Gallery', labelGu: 'ફોટો ગેલેરી', icon: Icons.photo_library_rounded),
+  AdminPageDestination(path: '/videos', labelEn: 'Sacred Garba Videos', labelGu: 'ગરબી વિડિયો દર્શન', icon: Icons.play_circle_outline_rounded),
+  AdminPageDestination(path: '/blog', labelEn: 'Cultural Articles & Stories', labelGu: 'સાંસ્કૃતિક લેખો અને વાતો', icon: Icons.article_outlined),
+  AdminPageDestination(path: '/contact', labelEn: 'Contact & Location Map', labelGu: 'સંપર્ક અને સ્થળ માહિતી', icon: Icons.location_on_outlined),
+  AdminPageDestination(path: '/', labelEn: 'Home Page', labelGu: 'મુખ્ય હોમ પેજ', icon: Icons.home_rounded),
 ];
 
 /// Reusable, responsive destination page selector dropdown for all Admin panels.
@@ -142,11 +97,7 @@ class _AdminDestinationPageDropdownState extends State<AdminDestinationPageDropd
           elevation: 4,
           icon: Icon(Icons.arrow_drop_down_circle_outlined, size: 20, color: colors.heritageGold),
           selectedItemBuilder: (BuildContext context) {
-            final allValues = [
-              ...kAdminPublicPages.map((p) => p.path),
-              if (isCustom) effectiveRoute,
-              '__custom__',
-            ];
+            final allValues = [...kAdminPublicPages.map((p) => p.path), if (isCustom) effectiveRoute, '__custom__'];
             return allValues.map((val) {
               final page = kAdminPublicPages.where((p) => p.path == val).firstOrNull;
               if (page != null) {
@@ -206,9 +157,7 @@ class _AdminDestinationPageDropdownState extends State<AdminDestinationPageDropd
                     Container(
                       padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                        color: effectiveRoute == page.path
-                            ? colors.heritageGold.withValues(alpha: 0.2)
-                            : colors.heritageGold.withValues(alpha: 0.08),
+                        color: effectiveRoute == page.path ? colors.heritageGold.withValues(alpha: 0.2) : colors.heritageGold.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Icon(page.icon, size: 16, color: colors.heritageGold),
@@ -217,11 +166,7 @@ class _AdminDestinationPageDropdownState extends State<AdminDestinationPageDropd
                     Expanded(
                       child: Text(
                         '${page.labelEn} (${page.labelGu})',
-                        style: styles.cleanSans(
-                          context,
-                          size: 13,
-                          fontWeight: effectiveRoute == page.path ? FontWeight.w700 : FontWeight.w500,
-                        ),
+                        style: styles.cleanSans(context, size: 13, fontWeight: effectiveRoute == page.path ? FontWeight.w700 : FontWeight.w500),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -236,18 +181,10 @@ class _AdminDestinationPageDropdownState extends State<AdminDestinationPageDropd
                       ),
                       child: Text(
                         page.path,
-                        style: styles.cleanSans(
-                          context,
-                          size: 10,
-                          fontWeight: FontWeight.w600,
-                          color: colors.heritageGold,
-                        ),
+                        style: styles.cleanSans(context, size: 10, fontWeight: FontWeight.w600, color: colors.heritageGold),
                       ),
                     ),
-                    if (effectiveRoute == page.path) ...[
-                      const SizedBox(width: 6),
-                      Icon(Icons.check_circle_rounded, size: 16, color: colors.heritageGold),
-                    ],
+                    if (effectiveRoute == page.path) ...[const SizedBox(width: 6), Icon(Icons.check_circle_rounded, size: 16, color: colors.heritageGold)],
                   ],
                 ),
               ),
@@ -258,10 +195,7 @@ class _AdminDestinationPageDropdownState extends State<AdminDestinationPageDropd
                   children: [
                     Container(
                       padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+                      decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
                       child: const Icon(Icons.link_rounded, size: 16, color: Colors.blue),
                     ),
                     const SizedBox(width: 10),
@@ -284,22 +218,14 @@ class _AdminDestinationPageDropdownState extends State<AdminDestinationPageDropd
                 children: [
                   Container(
                     padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
+                    decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
                     child: const Icon(Icons.edit_note_rounded, size: 16, color: Colors.blue),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Other Custom URL / Link...',
-                      style: styles.cleanSans(
-                        context,
-                        size: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blue.shade700,
-                      ),
+                      style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w600, color: Colors.blue.shade700),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -345,10 +271,7 @@ class _AdminDestinationPageDropdownState extends State<AdminDestinationPageDropd
                     ],
                   ),
                   actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogCtx),
-                      child: const Text('Cancel'),
-                    ),
+                    TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('Cancel')),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.heritageGold,
@@ -392,12 +315,7 @@ class _AdminDestinationPageDropdownState extends State<AdminDestinationPageDropd
                 Flexible(
                   child: Text(
                     'Button opens: ${matchingPage != null ? "${matchingPage.labelEn} (${matchingPage.path})" : effectiveRoute}',
-                    style: styles.cleanSans(
-                      context,
-                      size: 11,
-                      fontWeight: FontWeight.w600,
-                      color: colors.getPrimaryTextColor(context),
-                    ),
+                    style: styles.cleanSans(context, size: 11, fontWeight: FontWeight.w600, color: colors.getPrimaryTextColor(context)),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

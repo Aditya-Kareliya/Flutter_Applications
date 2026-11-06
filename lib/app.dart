@@ -13,6 +13,7 @@ import 'core/my_app_bloc/my_app_state.dart';
 import 'core/routing/app_router.dart';
 import 'core/seo/app_seo_manager.dart';
 import 'core/theme/app_theme.dart';
+import 'modules/admin_module/dashboard/data/admin_data_store.dart';
 
 class PavanPutraApp extends StatelessWidget {
   const PavanPutraApp({super.key});
@@ -27,20 +28,32 @@ class PavanPutraApp extends StatelessWidget {
           AppSeoManager.instance.updateLanguage(state.locale.languageCode);
           return Sizer(
             builder: (context, orientation, deviceType) {
-              return MaterialApp.router(
-                title: state.locale.languageCode == 'gu' ? 'પવનપુત્ર ગરબી મંડળ — રાજકોટ' : 'Pavan Putra Garbi Mandal — Rajkot',
-                debugShowCheckedModeBanner: false,
-                theme: AppTheme.light(),
-                darkTheme: AppTheme.dark(),
-                themeMode: state.themeMode,
-                themeAnimationDuration: AppTheme.animationDuration,
-                themeAnimationCurve: AppTheme.animationCurve,
-                routerConfig: appRouter,
-                scrollBehavior: const MyAppGlobalScrollBehavior(),
-                locale: state.locale,
-                supportedLocales: const [Locale('en'), Locale('gu')],
-                localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
-                builder: (context, child) => ToastificationWrapper(child: child ?? const SizedBox.shrink()),
+              return ListenableBuilder(
+                listenable: AdminDataStore.instance,
+                builder: (context, _) {
+                  final lang = state.locale.languageCode;
+                  final dynamicTitle = AdminDataStore.instance.getTextOverride(lang, 'app_title') ??
+                      AdminDataStore.instance.settings.getMandalName(lang);
+                  return MaterialApp.router(
+                    title: dynamicTitle,
+                    debugShowCheckedModeBanner: false,
+                    theme: AppTheme.light(),
+                    darkTheme: AppTheme.dark(),
+                    themeMode: state.themeMode,
+                    themeAnimationDuration: AppTheme.animationDuration,
+                    themeAnimationCurve: AppTheme.animationCurve,
+                    routerConfig: appRouter,
+                    scrollBehavior: const MyAppGlobalScrollBehavior(),
+                    locale: state.locale,
+                    supportedLocales: const [Locale('en'), Locale('gu')],
+                    localizationsDelegates: const [
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    builder: (context, child) => ToastificationWrapper(child: child ?? const SizedBox.shrink()),
+                  );
+                },
               );
             },
           );

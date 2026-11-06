@@ -12,12 +12,7 @@ class AdminWebsiteContextBanner extends StatelessWidget {
   final String websiteRoute;
   final String explanation;
 
-  const AdminWebsiteContextBanner({
-    super.key,
-    required this.websitePageTitle,
-    required this.websiteRoute,
-    required this.explanation,
-  });
+  const AdminWebsiteContextBanner({super.key, required this.websitePageTitle, required this.websiteRoute, required this.explanation});
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +30,7 @@ class AdminWebsiteContextBanner extends StatelessWidget {
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF221517) : const Color(0xFFFBF6EE),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? const Color(0xFF452B2F) : const Color(0xFFE5D5BA),
-              width: 1,
-            ),
+            border: Border.all(color: isDark ? const Color(0xFF452B2F) : const Color(0xFFE5D5BA), width: 1),
           ),
           child: isCompact
               ? Column(
@@ -46,43 +38,25 @@ class AdminWebsiteContextBanner extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.language_rounded,
-                          size: 18,
-                          color: isDark ? colors.heritageGold : colors.heritageMaroon,
-                        ),
+                        Icon(Icons.language_rounded, size: 18, color: isDark ? colors.heritageGold : colors.heritageMaroon),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             websitePageTitle,
-                            style: styles.cleanSans(
-                              context,
-                              size: 12.5,
-                              fontWeight: FontWeight.w800,
-                              color: isDark ? colors.heritageGold : colors.heritageMaroon,
-                            ),
+                            style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w800, color: isDark ? colors.heritageGold : colors.heritageMaroon),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Text(
-                      explanation,
-                      style: styles.cleanSans(
-                        context,
-                        size: 11,
-                        color: colors.getMutedTextColor(context),
-                      ),
-                    ),
+                    Text(explanation, style: styles.cleanSans(context, size: 11, color: colors.getMutedTextColor(context))),
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 8),
-                          side: BorderSide(
-                            color: isDark ? colors.heritageGold.withValues(alpha: 0.6) : colors.heritageMaroon.withValues(alpha: 0.6),
-                          ),
+                          side: BorderSide(color: isDark ? colors.heritageGold.withValues(alpha: 0.6) : colors.heritageMaroon.withValues(alpha: 0.6)),
                           foregroundColor: isDark ? colors.heritageGold : colors.heritageMaroon,
                         ),
                         onPressed: () => context.go(websiteRoute),
@@ -97,16 +71,10 @@ class AdminWebsiteContextBanner extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? colors.heritageGold.withValues(alpha: 0.15)
-                            : colors.heritageMaroon.withValues(alpha: 0.08),
+                        color: isDark ? colors.heritageGold.withValues(alpha: 0.15) : colors.heritageMaroon.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        Icons.language_rounded,
-                        size: 20,
-                        color: isDark ? colors.heritageGold : colors.heritageMaroon,
-                      ),
+                      child: Icon(Icons.language_rounded, size: 20, color: isDark ? colors.heritageGold : colors.heritageMaroon),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -118,34 +86,17 @@ class AdminWebsiteContextBanner extends StatelessWidget {
                               children: [
                                 TextSpan(
                                   text: 'Controls Website Page: ',
-                                  style: styles.cleanSans(
-                                    context,
-                                    size: 11.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: colors.getSecondaryTextColor(context),
-                                  ),
+                                  style: styles.cleanSans(context, size: 11.5, fontWeight: FontWeight.w600, color: colors.getSecondaryTextColor(context)),
                                 ),
                                 TextSpan(
                                   text: websitePageTitle,
-                                  style: styles.cleanSans(
-                                    context,
-                                    size: 12.5,
-                                    fontWeight: FontWeight.w800,
-                                    color: isDark ? colors.heritageGold : colors.heritageMaroon,
-                                  ),
+                                  style: styles.cleanSans(context, size: 12.5, fontWeight: FontWeight.w800, color: isDark ? colors.heritageGold : colors.heritageMaroon),
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            explanation,
-                            style: styles.cleanSans(
-                              context,
-                              size: 11,
-                              color: colors.getMutedTextColor(context),
-                            ),
-                          ),
+                          Text(explanation, style: styles.cleanSans(context, size: 11, color: colors.getMutedTextColor(context))),
                         ],
                       ),
                     ),
@@ -153,9 +104,7 @@ class AdminWebsiteContextBanner extends StatelessWidget {
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                        side: BorderSide(
-                          color: isDark ? colors.heritageGold.withValues(alpha: 0.6) : colors.heritageMaroon.withValues(alpha: 0.6),
-                        ),
+                        side: BorderSide(color: isDark ? colors.heritageGold.withValues(alpha: 0.6) : colors.heritageMaroon.withValues(alpha: 0.6)),
                         foregroundColor: isDark ? colors.heritageGold : colors.heritageMaroon,
                       ),
                       onPressed: () => context.go(websiteRoute),

@@ -388,8 +388,7 @@ class _AlbumCard extends StatelessWidget {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
     final hasCoverImage = coverImageUrl.isNotEmpty &&
-        coverImageUrl != 'assets/images/pavan_putra_logo.jpg' &&
-        coverImageUrl != 'assets/images/pavan_putra_logo.png';
+        !coverImageUrl.contains('pavan_putra_logo');
 
     return CulturalFrameCard(
       onTap: () =>

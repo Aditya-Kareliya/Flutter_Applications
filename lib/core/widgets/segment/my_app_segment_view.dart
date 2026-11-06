@@ -10,11 +10,7 @@ class MyAppSegmentItem<T> {
   final String label;
   final IconData? icon;
 
-  const MyAppSegmentItem({
-    required this.value,
-    required this.label,
-    this.icon,
-  });
+  const MyAppSegmentItem({required this.value, required this.label, this.icon});
 }
 
 /// --------------------------------------------------------------------------
@@ -33,14 +29,7 @@ class MyAppSegmentView<T> extends StatelessWidget {
   final bool showCheckmark;
   final bool isCompact;
 
-  const MyAppSegmentView({
-    super.key,
-    required this.selectedValue,
-    required this.segments,
-    required this.onValueChanged,
-    this.showCheckmark = true,
-    this.isCompact = true,
-  });
+  const MyAppSegmentView({super.key, required this.selectedValue, required this.segments, required this.onValueChanged, this.showCheckmark = true, this.isCompact = true});
 
   /// Factory helper for bilingual language toggles (Gujarati / English)
   static Widget language({
@@ -76,27 +65,18 @@ class MyAppSegmentView<T> extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E1B1B) : colors.getSurfaceColor(context),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: colors.getBorderColor(context),
-            width: 1,
-          ),
+          border: Border.all(color: colors.getBorderColor(context), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: segments.map((item) {
             final isSelected = item.value == selectedValue;
 
-            final activeBg = isDark
-                ? colors.heritageMaroon
-                : colors.heritageGold.withValues(alpha: 0.18);
+            final activeBg = isDark ? colors.heritageMaroon : colors.heritageGold.withValues(alpha: 0.18);
 
-            final activeTextColor = isDark
-                ? Colors.white
-                : colors.heritageMaroon;
+            final activeTextColor = isDark ? Colors.white : colors.heritageMaroon;
 
-            final activeIconColor = isDark
-                ? colors.lightGold
-                : colors.heritageMaroon;
+            final activeIconColor = isDark ? colors.lightGold : colors.heritageMaroon;
 
             return InkWell(
               onTap: () => onValueChanged(item.value),
@@ -104,41 +84,20 @@ class MyAppSegmentView<T> extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeInOut,
-                padding: EdgeInsets.symmetric(
-                  horizontal: isCompact ? 10 : 14,
-                  vertical: isCompact ? 5 : 7,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: isCompact ? 10 : 14, vertical: isCompact ? 5 : 7),
                 decoration: BoxDecoration(
                   color: isSelected ? activeBg : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: isSelected && isDark
-                      ? [
-                          BoxShadow(
-                            color: colors.heritageMaroon.withValues(alpha: 0.35),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          )
-                        ]
-                      : null,
+                  boxShadow: isSelected && isDark ? [BoxShadow(color: colors.heritageMaroon.withValues(alpha: 0.35), blurRadius: 4, offset: const Offset(0, 1))] : null,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (isSelected && showCheckmark) ...[
-                      Icon(
-                        Icons.check_rounded,
-                        size: isCompact ? 13 : 15,
-                        color: activeIconColor,
-                      ),
+                      Icon(Icons.check_rounded, size: isCompact ? 13 : 15, color: activeIconColor),
                       const SizedBox(width: 5),
                     ] else if (item.icon != null) ...[
-                      Icon(
-                        item.icon,
-                        size: isCompact ? 13 : 15,
-                        color: isSelected
-                            ? activeIconColor
-                            : colors.getMutedTextColor(context),
-                      ),
+                      Icon(item.icon, size: isCompact ? 13 : 15, color: isSelected ? activeIconColor : colors.getMutedTextColor(context)),
                       const SizedBox(width: 5),
                     ],
                     Text(
@@ -147,9 +106,7 @@ class MyAppSegmentView<T> extends StatelessWidget {
                         context,
                         size: isCompact ? 11 : 12.5,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isSelected
-                            ? activeTextColor
-                            : colors.getMutedTextColor(context),
+                        color: isSelected ? activeTextColor : colors.getMutedTextColor(context),
                       ),
                     ),
                   ],

@@ -27,15 +27,10 @@ class AppStartupGate extends StatelessWidget {
           body: Stack(
             fit: StackFit.expand,
             children: [
-              Container(
-                color: colors.getBackgroundColor(context),
-              ),
+              Container(color: colors.getBackgroundColor(context)),
               Center(
                 child: MyAppBlurredLoader(
-                  message: state.loadingMessage ??
-                      (isGu
-                          ? 'સ્વાગત છે...\nમાહિતી લોડ થઈ રહી છે...'
-                          : 'Welcome...\nPlease wait a moment...'),
+                  message: state.loadingMessage ?? (isGu ? 'સ્વાગત છે...\nમાહિતી લોડ થઈ રહી છે...' : 'Welcome...\nPlease wait a moment...'),
                   isFullScreen: false,
                 ),
               ),

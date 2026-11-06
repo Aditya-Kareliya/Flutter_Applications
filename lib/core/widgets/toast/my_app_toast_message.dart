@@ -11,12 +11,7 @@ class MyAppToastMessage {
   MyAppToastMessage._();
 
   /// Displays a Success Toast Notification
-  static ToastificationItem success(
-    BuildContext context, {
-    required String title,
-    String? description,
-    Duration duration = const Duration(seconds: 4),
-  }) {
+  static ToastificationItem success(BuildContext context, {required String title, String? description, Duration duration = const Duration(seconds: 4)}) {
     return _showToast(
       context: context,
       type: ToastificationType.success,
@@ -29,27 +24,12 @@ class MyAppToastMessage {
   }
 
   /// Alias for success matching spelling variations
-  static ToastificationItem sucess(
-    BuildContext context, {
-    required String title,
-    String? description,
-    Duration duration = const Duration(seconds: 4),
-  }) {
-    return success(
-      context,
-      title: title,
-      description: description,
-      duration: duration,
-    );
+  static ToastificationItem sucess(BuildContext context, {required String title, String? description, Duration duration = const Duration(seconds: 4)}) {
+    return success(context, title: title, description: description, duration: duration);
   }
 
   /// Displays an Error Toast Notification
-  static ToastificationItem error(
-    BuildContext context, {
-    required String title,
-    String? description,
-    Duration duration = const Duration(seconds: 5),
-  }) {
+  static ToastificationItem error(BuildContext context, {required String title, String? description, Duration duration = const Duration(seconds: 5)}) {
     return _showToast(
       context: context,
       type: ToastificationType.error,
@@ -62,12 +42,7 @@ class MyAppToastMessage {
   }
 
   /// Displays a Warning Toast Notification
-  static ToastificationItem warning(
-    BuildContext context, {
-    required String title,
-    String? description,
-    Duration duration = const Duration(seconds: 4),
-  }) {
+  static ToastificationItem warning(BuildContext context, {required String title, String? description, Duration duration = const Duration(seconds: 4)}) {
     return _showToast(
       context: context,
       type: ToastificationType.warning,
@@ -80,12 +55,7 @@ class MyAppToastMessage {
   }
 
   /// Displays an Informational Toast Notification
-  static ToastificationItem info(
-    BuildContext context, {
-    required String title,
-    String? description,
-    Duration duration = const Duration(seconds: 4),
-  }) {
+  static ToastificationItem info(BuildContext context, {required String title, String? description, Duration duration = const Duration(seconds: 4)}) {
     final colors = serviceLocator<MyAppColors>();
     final isDark = colors.isDarkMode(context);
 
@@ -130,10 +100,7 @@ class MyAppToastMessage {
       borderRadius: BorderRadius.circular(12),
       backgroundColor: bgColor,
       foregroundColor: titleColor,
-      borderSide: BorderSide(
-        color: borderColor,
-        width: 1.0,
-      ),
+      borderSide: BorderSide(color: borderColor, width: 1.0),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
@@ -152,34 +119,20 @@ class MyAppToastMessage {
       ),
       title: Text(
         title,
-        style: styles.cleanSans(
-          context,
-          size: 13.5,
-          fontWeight: FontWeight.w700,
-          color: titleColor,
-        ),
+        style: styles.cleanSans(context, size: 13.5, fontWeight: FontWeight.w700, color: titleColor),
       ),
       description: description != null && description.isNotEmpty
           ? Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text(
                 description,
-                style: styles.cleanSans(
-                  context,
-                  size: 12,
-                  fontWeight: FontWeight.w400,
-                  color: descColor,
-                  height: 1.35,
-                ),
+                style: styles.cleanSans(context, size: 12, fontWeight: FontWeight.w400, color: descColor, height: 1.35),
               ),
             )
           : null,
       primaryColor: accentColor,
       showProgressBar: true,
-      progressBarTheme: ProgressIndicatorThemeData(
-        color: accentColor,
-        linearTrackColor: accentColor.withValues(alpha: 0.12),
-      ),
+      progressBarTheme: ProgressIndicatorThemeData(color: accentColor, linearTrackColor: accentColor.withValues(alpha: 0.12)),
       closeButton: const ToastCloseButton(showType: CloseButtonShowType.always),
       dragToClose: true,
       closeOnClick: false,

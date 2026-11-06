@@ -19,6 +19,7 @@ class GoogleTranslationService extends ChangeNotifier {
   late final AppTranslationEngine _engine;
   final Map<String, String> _cache = {};
   bool _isInitialized = false;
+
   bool get isInitialized => _isInitialized;
 
   FirebaseFirestore? get _firestore {
@@ -35,13 +36,16 @@ class GoogleTranslationService extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final cachedJson = prefs.getString('ppg_cache_translations');
+
       if (cachedJson != null && cachedJson.isNotEmpty) {
         final Map<String, dynamic> decoded = jsonDecode(cachedJson);
+
         for (final entry in decoded.entries) {
           if (entry.value is String) {
             _cache[entry.key] = entry.value as String;
           }
         }
+
         if (_cache.isNotEmpty) {
           _isInitialized = true;
           notifyListeners();
@@ -74,26 +78,33 @@ class GoogleTranslationService extends ChangeNotifier {
 
     try {
       final snap = await db.collection('translations_cache').get();
+
       for (final doc in snap.docs) {
         final data = doc.data();
+
         final orig = data['original'] as String? ?? '';
         final trans = data['translated'] as String? ?? '';
+
         if (orig.isNotEmpty && trans.isNotEmpty) {
           _cache[orig] = trans;
         }
       }
+
       _saveToLocalStorage();
 
       // Attach real-time Firestore listener
       db.collection('translations_cache').snapshots().listen((snap) {
         for (final doc in snap.docs) {
           final data = doc.data();
+
           final orig = data['original'] as String? ?? '';
           final trans = data['translated'] as String? ?? '';
+
           if (orig.isNotEmpty && trans.isNotEmpty) {
             _cache[orig] = trans;
           }
         }
+
         _saveToLocalStorage();
         notifyListeners();
       }, onError: (e) => debugPrint('Translations cache stream notice: $e'));
@@ -135,11 +146,7 @@ class GoogleTranslationService extends ChangeNotifier {
 
   /// Prewarm a list of texts into Gujarati cache concurrently in batches of 10
   Future<void> prewarmBatch(List<String> texts) async {
-    final unCached = texts
-        .map((t) => t.trim())
-        .where((t) => t.isNotEmpty && !_cache.containsKey(t))
-        .toSet()
-        .toList();
+    final unCached = texts.map((t) => t.trim()).where((t) => t.isNotEmpty && !_cache.containsKey(t)).toSet().toList();
     if (unCached.isEmpty) return;
 
     for (var i = 0; i < unCached.length; i += 10) {
@@ -210,10 +217,12 @@ class GoogleTranslationService extends ChangeNotifier {
   String _generateDocId(String input) {
     // Generate safe alphanumeric Firestore document ID
     final clean = input.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+
     if (clean.length > 40) {
       final hash = base64Url.encode(utf8.encode(input)).replaceAll('=', '');
       return '${clean.substring(0, 30)}_$hash'.substring(0, 48);
     }
+
     return clean.isEmpty ? 'item_${DateTime.now().millisecondsSinceEpoch}' : clean;
   }
 

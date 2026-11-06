@@ -1263,7 +1263,7 @@ class _AdminArchivePageViewState extends State<AdminArchivePageView> {
     final descCtrl = TextEditingController(text: album?.description ?? '');
     final descGuCtrl = TextEditingController(text: album?.descriptionGu ?? '');
     String coverUrl =
-        album?.coverImageUrl ?? 'assets/images/pavan_putra_logo.jpg';
+        album?.coverImageUrl ?? 'assets/images/pavan_putra_logo.png';
 
     showMyAppDialog(
       context: context,
@@ -2061,7 +2061,7 @@ class _AdminArchivePageViewState extends State<AdminArchivePageView> {
     final titleGuCtrl = TextEditingController(text: photo?.titleGu ?? '');
     final dayCtrl = TextEditingController(text: photo?.day ?? album.dayTag);
     final captionCtrl = TextEditingController(text: photo?.caption ?? '');
-    String imgUrl = photo?.imageUrl ?? 'assets/images/pavan_putra_logo.jpg';
+    String imgUrl = photo?.imageUrl ?? 'assets/images/pavan_putra_logo.png';
 
     showMyAppDialog(
       context: context,
@@ -2610,7 +2610,7 @@ class _AdminArchivePageViewState extends State<AdminArchivePageView> {
         ? 'પાવન પુત્ર ગરબી મહોત્સવ ઈતિહાસ'
         : 'Garbi Festival Years Archive';
     final fallbackDesc = _headerPreviewLang == 'gu'
-        ? '૧૯૭૭ થી આજ સુધીની પાવન પરંપરા, આયોજન અને સ્મૃતિઓનો અમૂલ્ય સંગ્રહ.'
+        ? '૧૯૮૯ થી આજ સુધીની પાવન પરંપરા, આયોજન અને સ્મૃતિઓનો અમૂલ્ય સંગ્રહ.'
         : 'Explore our historical journey and sacred Navratri editions through archival photo albums, videos, and milestones spanning over 45+ years.';
 
     final rawTag = _resolvePreviewText(

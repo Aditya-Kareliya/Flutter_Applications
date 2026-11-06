@@ -1209,11 +1209,11 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                     MyAppTextFormField(
                       controller: yearCtrl,
                       labelText: 'Festival Era / Year',
-                      hintText: 'e.g. ૧૯૭૭ / 1977',
+                      hintText: 'e.g. ૧૯૮૯ / 1989',
                       prefixIcon: const Icon(Icons.event_note_rounded, size: 18),
                       suffixIcon: MyAppIconButton(
                         icon: const Icon(Icons.g_translate_rounded, size: 18),
-                        tooltip: 'Convert numerals to Gujarati (e.g. ૧૯૭૭)',
+                        tooltip: 'Convert numerals to Gujarati (e.g. ૧૯૮૯)',
                         onPressed: () {
                           final val = yearCtrl.text.trim();
                           if (val.isNotEmpty) {
@@ -1252,11 +1252,11 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                           child: MyAppTextFormField(
                             controller: yearCtrl,
                             labelText: 'Festival Era / Year',
-                            hintText: 'e.g. ૧૯૭૭ / 1977',
+                            hintText: 'e.g. ૧૯૮૯ / 1989',
                             prefixIcon: const Icon(Icons.event_note_rounded, size: 18),
                             suffixIcon: MyAppIconButton(
                               icon: const Icon(Icons.g_translate_rounded, size: 18),
-                              tooltip: 'Convert numerals to Gujarati (e.g. ૧૯૭૭)',
+                              tooltip: 'Convert numerals to Gujarati (e.g. ૧૯૮૯)',
                               onPressed: () {
                                 final val = yearCtrl.text.trim();
                                 if (val.isNotEmpty) {
@@ -1643,7 +1643,7 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Manage the sacred journey, milestones, and archival records from 1977 to the modern era.',
+                    'Manage the sacred journey, milestones, and archival records from 1989 to the modern era.',
                     style: styles.cleanSans(context, size: 12.5, color: colors.getSecondaryTextColor(context)),
                   ),
                 ],
@@ -1746,7 +1746,7 @@ class _AdminHistoryPageViewState extends State<AdminHistoryPageView> {
                   icon: Icons.timeline_rounded,
                   title: '2. Timeline Milestones (${widget.store.historyMilestones.length})',
                   subtitle:
-                      'Chronological milestone eras detailing the sacred journey and cultural achievements of the Mandal from 1977 onward.',
+                      'Chronological milestone eras detailing the sacred journey and cultural achievements of the Mandal from 1989 onward.',
                   actions: [
                     MyAppFillButton.icon(
                       onPressed: () => _openMilestoneDialog(),

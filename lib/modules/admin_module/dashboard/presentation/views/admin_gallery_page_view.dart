@@ -278,7 +278,7 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
     final descCtrl = TextEditingController(text: album?.description ?? '');
     final descGuCtrl = TextEditingController(text: album?.descriptionGu ?? '');
     String coverUrl =
-        album?.coverImageUrl ?? 'assets/images/pavan_putra_logo.jpg';
+        album?.coverImageUrl ?? 'assets/images/pavan_putra_logo.png';
 
     showMyAppDialog(
       context: context,
@@ -596,7 +596,7 @@ class _AdminGalleryPageViewState extends State<AdminGalleryPageView> {
         photo?.albumId ??
         targetAlbum?.id ??
         (widget.store.albums.isNotEmpty ? widget.store.albums.first.id : '');
-    String imgUrl = photo?.imageUrl ?? 'assets/images/pavan_putra_logo.jpg';
+    String imgUrl = photo?.imageUrl ?? 'assets/images/pavan_putra_logo.png';
 
     showMyAppDialog(
       context: context,

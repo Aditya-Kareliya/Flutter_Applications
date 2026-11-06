@@ -50,9 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
               height: MediaQuery.sizeOf(context).height * 0.75,
               child: Center(
                 child: MyAppBlurredLoader(
-                  message: isGu
-                      ? 'શ્રી પવનપુત્ર ગરબી મંડળ\nમાહિતી લોડ થઈ રહી છે...'
-                      : 'PAVAN PUTRA GARBI MANDAL\nLoading sacred heritage data...',
+                  message: isGu ? 'શ્રી પવનપુત્ર ગરબી મંડળ\nમાહિતી લોડ થઈ રહી છે...' : 'PAVAN PUTRA GARBI MANDAL\nLoading sacred heritage data...',
                   isFullScreen: false,
                 ),
               ),
@@ -321,10 +319,7 @@ class _HeritageHeroSection extends StatelessWidget {
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (showImage) ...[
-                                    Center(child: _buildEmblem(colors, hero.imageUrl, size: 190.0)),
-                                    const SizedBox(height: 28),
-                                  ],
+                                  if (showImage) ...[Center(child: _buildEmblem(colors, hero.imageUrl, size: 190.0)), const SizedBox(height: 28)],
                                   _buildHeroTextContent(context, colors, styles, hero, lang, isMobile: true, hasImage: showImage),
                                 ],
                               )
@@ -367,30 +362,14 @@ class _HeritageHeroSection extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
-        border: Border.all(
-          color: colors.heritageGold.withValues(alpha: 0.65),
-          width: 2.0,
-        ),
+        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.65), width: 2.0),
         boxShadow: [
-          BoxShadow(
-            color: colors.deepMaroon.withValues(alpha: 0.50),
-            blurRadius: 36,
-            spreadRadius: 4,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: colors.heritageGold.withValues(alpha: 0.22),
-            blurRadius: 18,
-            spreadRadius: 1,
-          ),
+          BoxShadow(color: colors.deepMaroon.withValues(alpha: 0.50), blurRadius: 36, spreadRadius: 4, offset: const Offset(0, 8)),
+          BoxShadow(color: colors.heritageGold.withValues(alpha: 0.22), blurRadius: 18, spreadRadius: 1),
         ],
       ),
       child: ClipOval(
-        child: BrandLogoWidget(
-          size: size,
-          isCircular: true,
-          fit: BoxFit.cover,
-        ),
+        child: BrandLogoWidget(size: size, isCircular: true, fit: BoxFit.cover),
       ),
     );
   }
@@ -881,12 +860,8 @@ class _PillarsOfGarbiSection extends StatelessWidget {
     final lang = isGujarati ? 'gu' : 'en';
 
     final header = AdminDataStore.instance.homePillarsHeader;
-    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true
-        ? (isGujarati ? header['tagGu']! : header['tagEn']!)
-        : (header['tagEn'] ?? '');
-    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true
-        ? (isGujarati ? header['titleGu']! : header['titleEn']!)
-        : (header['titleEn'] ?? '');
+    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true ? (isGujarati ? header['tagGu']! : header['tagEn']!) : (header['tagEn'] ?? '');
+    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true ? (isGujarati ? header['titleGu']! : header['titleEn']!) : (header['titleEn'] ?? '');
 
     final pillars = AdminDataStore.instance.pillars;
 
@@ -1006,15 +981,9 @@ class _SingerBannerCarousel extends StatelessWidget {
     }
 
     final header = AdminDataStore.instance.homeSingersHeader;
-    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true
-        ? (isGujarati ? header['tagGu']! : header['tagEn']!)
-        : (header['tagEn'] ?? '');
-    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true
-        ? (isGujarati ? header['titleGu']! : header['titleEn']!)
-        : (header['titleEn'] ?? '');
-    final desc = (isGujarati ? header['descGu'] : header['descEn'])?.isNotEmpty == true
-        ? (isGujarati ? header['descGu']! : header['descEn']!)
-        : (header['descEn'] ?? '');
+    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true ? (isGujarati ? header['tagGu']! : header['tagEn']!) : (header['tagEn'] ?? '');
+    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true ? (isGujarati ? header['titleGu']! : header['titleEn']!) : (header['titleEn'] ?? '');
+    final desc = (isGujarati ? header['descGu'] : header['descEn'])?.isNotEmpty == true ? (isGujarati ? header['descGu']! : header['descEn']!) : (header['descEn'] ?? '');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1075,12 +1044,7 @@ class _SingerBannerCarousel extends StatelessWidget {
                                     width: double.infinity,
                                     child: ClipRRect(
                                       borderRadius: const BorderRadius.only(topLeft: Radius.circular(22), topRight: Radius.circular(22)),
-                                      child: AppCachedImage(
-                                        imageUrl: singer.imageUrl,
-                                        fit: BoxFit.cover,
-                                        memCacheWidth: 400,
-                                        memCacheHeight: 400,
-                                      ),
+                                      child: AppCachedImage(imageUrl: singer.imageUrl, fit: BoxFit.cover, memCacheWidth: 400, memCacheHeight: 400),
                                     ),
                                   ),
                                 ),
@@ -1179,12 +1143,6 @@ class _SingerBannerCarousel extends StatelessWidget {
       width: size,
       height: size,
       fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => Image.asset(
-        'assets/images/pavan_putra_logo.jpg',
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-      ),
     );
 
     final imageWidget = AppCachedImage(
@@ -1223,12 +1181,8 @@ class _EldersBlessingsSection extends StatelessWidget {
     final lang = isGujarati ? 'gu' : 'en';
 
     final header = AdminDataStore.instance.homeBlessingsHeader;
-    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true
-        ? (isGujarati ? header['tagGu']! : header['tagEn']!)
-        : (header['tagEn'] ?? '');
-    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true
-        ? (isGujarati ? header['titleGu']! : header['titleEn']!)
-        : (header['titleEn'] ?? '');
+    final tag = (isGujarati ? header['tagGu'] : header['tagEn'])?.isNotEmpty == true ? (isGujarati ? header['tagGu']! : header['tagEn']!) : (header['tagEn'] ?? '');
+    final title = (isGujarati ? header['titleGu'] : header['titleEn'])?.isNotEmpty == true ? (isGujarati ? header['titleGu']! : header['titleEn']!) : (header['titleEn'] ?? '');
 
     final blessings = AdminDataStore.instance.blessings;
 
@@ -1275,9 +1229,7 @@ class _EldersBlessingsSection extends StatelessWidget {
                         height: 400,
                         child: _QuoteCard(
                           quote: b.getQuote(lang),
-                          author: b.getDesignation(lang).isNotEmpty
-                              ? '${b.getAuthor(lang)} (${b.getDesignation(lang)})'
-                              : b.getAuthor(lang),
+                          author: b.getDesignation(lang).isNotEmpty ? '${b.getAuthor(lang)} (${b.getDesignation(lang)})' : b.getAuthor(lang),
                           imagePath: b.photoUrl,
                         ),
                       ),
@@ -1353,12 +1305,7 @@ class _QuoteCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
         child: imagePath != null && imagePath!.isNotEmpty
-            ? AppCachedImage(
-                imageUrl: imagePath,
-                fit: BoxFit.cover,
-                memCacheWidth: 400,
-                memCacheHeight: 400,
-              )
+            ? AppCachedImage(imageUrl: imagePath, fit: BoxFit.cover, memCacheWidth: 400, memCacheHeight: 400)
             : Icon(Icons.person_rounded, size: 60, color: colors.getAccentColor(context).withValues(alpha: 0.3)),
       ),
     );
@@ -1451,10 +1398,7 @@ class _YearArchiveSection extends StatelessWidget {
                   final years = AdminDataStore.instance.years.where((y) => y.isPublished).toList();
                   if (years.isEmpty) {
                     if (!AdminDataStore.instance.isInitialized) {
-                      return const SizedBox(
-                        height: 126,
-                        child: Center(child: CircularProgressIndicator.adaptive()),
-                      );
+                      return const SizedBox(height: 126, child: Center(child: CircularProgressIndicator.adaptive()));
                     }
                     return CulturalFrameCard(
                       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
@@ -1710,15 +1654,19 @@ class _BlogSectionPreview extends StatelessWidget {
         }
 
         final List<({String title, String snippet, String slug, String category, String content, String date, String readTime})> displayArticles = publishedBlogs.isNotEmpty
-            ? publishedBlogs.map((b) => (
-                title: b.getTitle(isGu ? 'gu' : 'en'),
-                snippet: b.getSnippet(isGu ? 'gu' : 'en'),
-                slug: b.slug,
-                category: isGu ? context.trDynamic(b.category) : b.category,
-                content: b.getContent(isGu ? 'gu' : 'en'),
-                date: b.date,
-                readTime: b.readTime,
-              )).toList()
+            ? publishedBlogs
+                  .map(
+                    (b) => (
+                      title: b.getTitle(isGu ? 'gu' : 'en'),
+                      snippet: b.getSnippet(isGu ? 'gu' : 'en'),
+                      slug: b.slug,
+                      category: isGu ? context.trDynamic(b.category) : b.category,
+                      content: b.getContent(isGu ? 'gu' : 'en'),
+                      date: b.date,
+                      readTime: b.readTime,
+                    ),
+                  )
+                  .toList()
             : [
                 (
                   title: context.tr('blog_1_title'),
@@ -1811,15 +1759,7 @@ class _ArticleCard extends StatelessWidget {
   final String date;
   final String readTime;
 
-  const _ArticleCard({
-    required this.title,
-    required this.snippet,
-    required this.slug,
-    this.category = 'HERITAGE ARTICLE',
-    this.content = '',
-    this.date = '',
-    this.readTime = '',
-  });
+  const _ArticleCard({required this.title, required this.snippet, required this.slug, this.category = 'HERITAGE ARTICLE', this.content = '', this.date = '', this.readTime = ''});
 
   @override
   Widget build(BuildContext context) {
@@ -1828,15 +1768,8 @@ class _ArticleCard extends StatelessWidget {
     final isMobile = MediaQuery.sizeOf(context).width < 768;
 
     return _InteractiveHoverCard(
-      onTap: () => showArticleDetailModal(
-        context,
-        title: title,
-        category: category,
-        content: content.isNotEmpty ? content : snippet,
-        snippet: snippet,
-        date: date,
-        readTime: readTime,
-      ),
+      onTap: () =>
+          showArticleDetailModal(context, title: title, category: category, content: content.isNotEmpty ? content : snippet, snippet: snippet, date: date, readTime: readTime),
       child: Container(
         height: isMobile ? null : 240,
         constraints: const BoxConstraints(minHeight: 225),
@@ -1854,11 +1787,7 @@ class _ArticleCard extends StatelessWidget {
                       Icon(Icons.menu_book_rounded, size: 16, color: colors.getAccentColor(context)),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          category.isNotEmpty ? category.toUpperCase() : 'HERITAGE ARTICLE',
-                          style: styles.eyebrow(context),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        child: Text(category.isNotEmpty ? category.toUpperCase() : 'HERITAGE ARTICLE', style: styles.eyebrow(context), overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ),
@@ -1874,10 +1803,7 @@ class _ArticleCard extends StatelessWidget {
                     snippet,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: styles.bodySmall(context).copyWith(
-                      color: colors.getSecondaryTextColor(context),
-                      height: 1.5,
-                    ),
+                    style: styles.bodySmall(context).copyWith(color: colors.getSecondaryTextColor(context), height: 1.5),
                   ),
                 ],
               ),
@@ -1886,12 +1812,7 @@ class _ArticleCard extends StatelessWidget {
                 children: [
                   Text(
                     context.tr('blog_read_more'),
-                    style: styles.cleanSans(
-                      context,
-                      color: colors.getAccentColor(context),
-                      size: 11.5,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: styles.cleanSans(context, color: colors.getAccentColor(context), size: 11.5, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

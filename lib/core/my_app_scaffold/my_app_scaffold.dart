@@ -26,8 +26,10 @@ class MyAppScaffold extends StatefulWidget {
 
 class _MyAppScaffoldState extends State<MyAppScaffold> {
   bool _isRefreshing = false;
+  double _currentOverscroll = 0.0;
+  static const double _refreshTriggerThreshold = 75.0;
 
-  Future<void> _handleRefresh() async {
+  Future<void> _triggerRefresh() async {
     if (_isRefreshing) return;
     setState(() => _isRefreshing = true);
     final stopwatch = Stopwatch()..start();
@@ -37,16 +39,42 @@ class _MyAppScaffoldState extends State<MyAppScaffold> {
       } else {
         await AdminDataStore.instance.refreshAllData(forceRefresh: true);
       }
+    } catch (e) {
+      debugPrint('Scaffold refresh notice: $e');
     } finally {
-      // Ensure smooth visual continuity for the blurred loader
       final elapsed = stopwatch.elapsedMilliseconds;
-      if (elapsed < 800) {
-        await Future.delayed(Duration(milliseconds: 800 - elapsed));
+      if (elapsed < 600) {
+        await Future.delayed(Duration(milliseconds: 600 - elapsed));
       }
       if (mounted) {
-        setState(() => _isRefreshing = false);
+        setState(() {
+          _isRefreshing = false;
+          _currentOverscroll = 0.0;
+        });
       }
     }
+  }
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
+
+    if (notification is ScrollUpdateNotification) {
+      if (notification.metrics.pixels < 0) {
+        _currentOverscroll = -notification.metrics.pixels;
+      } else {
+        _currentOverscroll = 0.0;
+      }
+    } else if (notification is OverscrollNotification) {
+      if (notification.overscroll < 0) {
+        _currentOverscroll += -notification.overscroll;
+      }
+    } else if (notification is ScrollEndNotification) {
+      if (_currentOverscroll >= _refreshTriggerThreshold && !_isRefreshing) {
+        _triggerRefresh();
+      }
+      _currentOverscroll = 0.0;
+    }
+    return false;
   }
 
   @override
@@ -56,20 +84,17 @@ class _MyAppScaffoldState extends State<MyAppScaffold> {
     return Scaffold(
       backgroundColor: colors.getBackgroundColor(context),
       endDrawer: const MyAppDrawer(),
+      endDrawerEnableOpenDragGesture: false,
       body: Stack(
         children: [
           ScrollConfiguration(
-            behavior: const _DesktopScrollBehavior(),
-            child: RefreshIndicator(
-              color: Colors.transparent,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              strokeWidth: 0,
-              edgeOffset: 88,
-              displacement: 20,
-              onRefresh: _handleRefresh,
+            behavior: const _AppScrollBehavior(),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: _handleScrollNotification,
               child: CustomScrollView(
-                physics: const TopBouncingBottomClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                physics: const TopBouncingBottomClampingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
                 slivers: [
                   const SliverToBoxAdapter(child: SizedBox(height: 88)),
                   SliverToBoxAdapter(child: widget.body),
@@ -79,14 +104,27 @@ class _MyAppScaffoldState extends State<MyAppScaffold> {
             ),
           ),
           const Positioned(top: 0, left: 0, right: 0, child: MyAppHeader()),
-          if (_isRefreshing) Positioned.fill(child: MyAppBlurredLoader(message: context.tr('refresh_loading'), isFullScreen: true)),
+          if (_isRefreshing)
+            Positioned.fill(
+              child: MyAppBlurredLoader(
+                message: context.tr('refresh_loading'),
+                isFullScreen: true,
+              ),
+            ),
           BlocBuilder<MyAppBloc, MyAppState>(
-            buildWhen: (prev, curr) => prev.isBlurredLoading != curr.isBlurredLoading || prev.loadingMessage != curr.loadingMessage,
+            buildWhen: (prev, curr) =>
+                prev.isBlurredLoading != curr.isBlurredLoading ||
+                prev.loadingMessage != curr.loadingMessage,
             builder: (context, state) {
               if (!state.isBlurredLoading || _isRefreshing) {
                 return const SizedBox.shrink();
               }
-              return Positioned.fill(child: MyAppBlurredLoader(message: state.loadingMessage, isFullScreen: true));
+              return Positioned.fill(
+                child: MyAppBlurredLoader(
+                  message: state.loadingMessage,
+                  isFullScreen: true,
+                ),
+              );
             },
           ),
         ],
@@ -95,16 +133,24 @@ class _MyAppScaffoldState extends State<MyAppScaffold> {
   }
 }
 
-class _DesktopScrollBehavior extends MaterialScrollBehavior {
-  const _DesktopScrollBehavior();
+class _AppScrollBehavior extends MaterialScrollBehavior {
+  const _AppScrollBehavior();
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
-    return const TopBouncingBottomClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+    return const TopBouncingBottomClampingScrollPhysics(
+      parent: AlwaysScrollableScrollPhysics(),
+    );
   }
 
   @override
-  Set<PointerDeviceKind> get dragDevices => {PointerDeviceKind.touch, PointerDeviceKind.mouse, PointerDeviceKind.trackpad, PointerDeviceKind.stylus, PointerDeviceKind.unknown};
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.unknown,
+      };
 }
 
 /// Custom scroll physics that provides bouncing overscroll behavior at the top
@@ -171,7 +217,13 @@ class TopBouncingBottomClampingScrollPhysics extends ScrollPhysics {
 
     // Bottom out of range: clamp back immediately
     if (position.pixels > position.maxScrollExtent) {
-      return ScrollSpringSimulation(spring, position.pixels, position.maxScrollExtent, math.min(0.0, velocity), tolerance: tolerance);
+      return ScrollSpringSimulation(
+        spring,
+        position.pixels,
+        position.maxScrollExtent,
+        math.min(0.0, velocity),
+        tolerance: tolerance,
+      );
     }
 
     if (velocity.abs() < tolerance.velocity) {

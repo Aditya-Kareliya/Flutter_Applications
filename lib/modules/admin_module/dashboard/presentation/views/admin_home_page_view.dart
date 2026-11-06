@@ -27,6 +27,10 @@ class AdminHomePageView extends StatefulWidget {
 }
 
 class _AdminHomePageViewState extends State<AdminHomePageView> {
+  // Brand & Global Site Title Controllers
+  late final TextEditingController _appTitleEnCtrl;
+  late final TextEditingController _appTitleGuCtrl;
+
   // 10 Hero Elements Controllers
   late final TextEditingController _sacredInvocationEnCtrl;
   late final TextEditingController _sacredInvocationGuCtrl;
@@ -126,6 +130,10 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
   void initState() {
     super.initState();
     final store = widget.store;
+    final s = store.settings;
+    _appTitleEnCtrl = TextEditingController(text: store.getTextOverride('en', 'app_title') ?? s.mandalNameEn);
+    _appTitleGuCtrl = TextEditingController(text: store.getTextOverride('gu', 'app_title') ?? s.mandalNameGu);
+
     final hero = store.heroData;
 
     _sacredInvocationEnCtrl = TextEditingController(text: hero.sacredInvocationEn);
@@ -225,6 +233,8 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
 
   @override
   void dispose() {
+    _appTitleEnCtrl.dispose();
+    _appTitleGuCtrl.dispose();
     _sacredInvocationEnCtrl.dispose();
     _sacredInvocationGuCtrl.dispose();
     _heroTagBadgeEnCtrl.dispose();
@@ -364,6 +374,23 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
         bottomGu = await GoogleTranslationService.instance.translateToGujarati(_heroBottomBadgeEnCtrl.text.trim());
         _heroBottomBadgeGuCtrl.text = bottomGu;
       } catch (_) {}
+    }
+
+    String appTitleGu = _appTitleGuCtrl.text.trim();
+    if (appTitleGu.isEmpty && _appTitleEnCtrl.text.trim().isNotEmpty) {
+      try {
+        appTitleGu = await GoogleTranslationService.instance.translateToGujarati(_appTitleEnCtrl.text.trim());
+        _appTitleGuCtrl.text = appTitleGu;
+      } catch (_) {}
+    }
+    final newTitleEn = _appTitleEnCtrl.text.trim();
+    if (newTitleEn.isNotEmpty || appTitleGu.isNotEmpty) {
+      widget.store.updateSiteContentField('app_title', valueEn: newTitleEn, valueGu: appTitleGu);
+      final curSettings = widget.store.settings;
+      widget.store.updateSettings(curSettings.copyWith(
+        mandalNameEn: newTitleEn.isNotEmpty ? newTitleEn : curSettings.mandalNameEn,
+        mandalNameGu: appTitleGu.isNotEmpty ? appTitleGu : curSettings.mandalNameGu,
+      ));
     }
 
     final hero = AdminHeroData(
@@ -4343,6 +4370,16 @@ class _AdminHomePageViewState extends State<AdminHomePageView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 0. Website & Mandal Title (Global Brand Header & Meta)
+        _buildDualLanguageField(
+          title: '0. Mandal Name / Website Title (Global Brand Header & Meta)',
+          enLabel: 'Mandal Brand Name (English)',
+          enCtrl: _appTitleEnCtrl,
+          guLabel: 'મંડળનું સત્તાવાર નામ (ગુજરાતી)',
+          guCtrl: _appTitleGuCtrl,
+          hintText: 'Pavan Putra Garbi Mandal',
+        ),
+
         // 1. Sacred Invocation Badge (Top Left Pill)
         _buildDualLanguageField(
           title: '1. Sacred Invocation Badge (Top Left Pill)',

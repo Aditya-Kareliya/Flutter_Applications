@@ -260,7 +260,7 @@ class _AdminBlogPageViewState extends State<AdminBlogPageView> {
     final snippetGuCtrl = TextEditingController(text: blog?.snippetGu ?? '');
     final contentCtrl = TextEditingController(text: blog?.content ?? '');
     final contentGuCtrl = TextEditingController(text: blog?.contentGu ?? '');
-    String imgUrl = blog?.imageUrl ?? 'assets/images/pavan_putra_logo.jpg';
+    String imgUrl = blog?.imageUrl ?? 'assets/images/pavan_putra_logo.png';
     bool isPublished = blog?.isPublished ?? true;
 
     showMyAppDialog(

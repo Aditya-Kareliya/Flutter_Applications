@@ -85,10 +85,10 @@ class _AdminFooterViewState extends State<AdminFooterView> {
       text: widget.store.getTextOverride('gu', 'app_title') ?? s.mandalNameGu,
     );
     _appSubtitleEnCtrl = TextEditingController(
-      text: widget.store.getTextOverride('en', 'app_subtitle') ?? 'RAJKOT • GUJARAT • EST. 1977',
+      text: widget.store.getTextOverride('en', 'app_subtitle') ?? 'RAJKOT • GUJARAT • EST. 1989',
     );
     _appSubtitleGuCtrl = TextEditingController(
-      text: widget.store.getTextOverride('gu', 'app_subtitle') ?? 'રાજકોટ • ગુજરાત • સ્થાપના ૧૯૭૭',
+      text: widget.store.getTextOverride('gu', 'app_subtitle') ?? 'રાજકોટ • ગુજરાત • સ્થાપના ૧૯૮૯',
     );
 
     _col1TitleEnCtrl = TextEditingController(

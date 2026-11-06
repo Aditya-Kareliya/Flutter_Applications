@@ -13,14 +13,7 @@ class MyAppBottomSheetItem<T> {
   final Color? iconColor;
   final bool isDestructive;
 
-  const MyAppBottomSheetItem({
-    required this.value,
-    required this.label,
-    this.subtitle,
-    this.icon,
-    this.iconColor,
-    this.isDestructive = false,
-  });
+  const MyAppBottomSheetItem({required this.value, required this.label, this.subtitle, this.icon, this.iconColor, this.isDestructive = false});
 }
 
 /// Displays a polished, modern mobile bottom sheet with:
@@ -48,19 +41,13 @@ Future<T?> showMyAppBottomSheet<T>({
     context: context,
     barrierDismissible: true,
     barrierLabel: 'Dismiss Bottom Sheet',
-    barrierColor: isDark
-        ? Colors.black.withValues(alpha: 0.45)
-        : Colors.black.withValues(alpha: 0.22),
+    barrierColor: isDark ? Colors.black.withValues(alpha: 0.45) : Colors.black.withValues(alpha: 0.22),
     transitionDuration: const Duration(milliseconds: 240),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
       return const SizedBox.shrink();
     },
     transitionBuilder: (dialogContext, animation, secondaryAnimation, child) {
-      final curve = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      );
+      final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
 
       return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -68,21 +55,14 @@ Future<T?> showMyAppBottomSheet<T>({
           children: [
             // Tap outside to dismiss
             Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => Navigator.of(dialogContext).pop(),
-                child: const SizedBox.expand(),
-              ),
+              child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(dialogContext).pop(), child: const SizedBox.expand()),
             ),
 
             // Bottom sheet floating card sliding up smoothly from bottom
             Align(
               alignment: Alignment.bottomCenter,
               child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.0, 1.0),
-                  end: Offset.zero,
-                ).animate(curve),
+                position: Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero).animate(curve),
                 child: SafeArea(
                   top: false,
                   child: Container(
@@ -149,13 +129,8 @@ Future<T?> showMyAppBottomSheet<T>({
                                 physics: const ClampingScrollPhysics(),
                                 padding: const EdgeInsets.only(top: 8, bottom: 4),
                                 itemCount: items.length,
-                                separatorBuilder: (context, index) => Divider(
-                                  height: 4,
-                                  thickness: 0.6,
-                                  indent: 8,
-                                  endIndent: 8,
-                                  color: colors.getBorderColor(context).withValues(alpha: 0.35),
-                                ),
+                                separatorBuilder: (context, index) =>
+                                    Divider(height: 4, thickness: 0.6, indent: 8, endIndent: 8, color: colors.getBorderColor(context).withValues(alpha: 0.35)),
                                 itemBuilder: (context, index) {
                                   final item = items[index];
                                   final isSelected = item.value == selectedValue;
@@ -167,7 +142,9 @@ Future<T?> showMyAppBottomSheet<T>({
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: isSelected ? (isDark ? colors.heritageMaroon.withValues(alpha: 0.25) : colors.heritageGold.withValues(alpha: 0.12)) : Colors.transparent,
+                                        color: isSelected
+                                            ? (isDark ? colors.heritageMaroon.withValues(alpha: 0.25) : colors.heritageGold.withValues(alpha: 0.12))
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

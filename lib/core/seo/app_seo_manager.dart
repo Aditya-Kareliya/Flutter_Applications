@@ -45,16 +45,16 @@ class AppSeoManager {
       route: '/',
       titleGu: 'શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ — રાજકોટ | ૪૫+ વર્ષની અખંડ ભક્તિ પરંપરા',
       titleEn: 'Pavan Putra Garbi Mandal — Rajkot | Official Prachin Garbi & Navratri Heritage',
-      descGu: 'ઈ.સ. ૧૯૭૭ થી રાજકોટમાં મા અંબેની અખંડ ભક્તિ સાથે ધબકતું શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ — પ્રાચીન રાસ, જીવંત વાદ્ય સંગીત, છંદ અને પરંપરાગત સંસ્કૃતિનું પવિત્ર મંચ.',
+      descGu: 'ઈ.સ. ૧૯૮૯ થી રાજકોટમાં મા અંબેની અખંડ ભક્તિ સાથે ધબકતું શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ — પ્રાચીન રાસ, જીવંત વાદ્ય સંગીત, છંદ અને પરંપરાગત સંસ્કૃતિનું પવિત્ર મંચ.',
       descEn:
-          'Official web portal of Shree Pavan Putra Garbi Mandal, Rajkot (Est. 1977). Celebrating authentic Prachin Garbi, traditional Raas, live acoustic folk music, and sacred Navratri devotion to Maa Ambe.',
+          'Official web portal of Shree Pavan Putra Garbi Mandal, Rajkot (Est. 1989). Celebrating authentic Prachin Garbi, traditional Raas, live acoustic folk music, and sacred Navratri devotion to Maa Ambe.',
       canonical: 'https://pavanputragarbi.web.app/',
     ),
     '/about': AppSeoData(
       route: '/about',
-      titleGu: 'મંડળ પરિચય — શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ રાજકોટ | ૧૯૭૭ થી અખંડ પરંપરા',
-      titleEn: 'About Us — Pavan Putra Garbi Mandal Rajkot | Sacred Heritage Since 1977',
-      descGu: 'શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ રાજકોટનો ઇતિહાસ, સિદ્ધાંતો અને સાંસ્કૃતિક ઉદ્દેશ્યો. ૧૯૭૭ થી વ્યાવસાયિકતા વિના શુદ્ધ પરંપરાગત ગરબી અને મા અંબેની ઉપાસના.',
+      titleGu: 'મંડળ પરિચય — શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ રાજકોટ | ૧૯૮૯ થી અખંડ પરંપરા',
+      titleEn: 'About Us — Pavan Putra Garbi Mandal Rajkot | Sacred Heritage Since 1989',
+      descGu: 'શ્રી પવનપુત્ર પ્રાચીન ગરબી મંડળ રાજકોટનો ઇતિહાસ, સિદ્ધાંતો અને સાંસ્કૃતિક ઉદ્દેશ્યો. ૧૯૮૯ થી વ્યાવસાયિકતા વિના શુદ્ધ પરંપરાગત ગરબી અને મા અંબેની ઉપાસના.',
       descEn:
           'Discover the history, core values, and cultural mission of Shree Pavan Putra Garbi Mandal, Rajkot. Preserving pure Prachin Garbi and traditional Saurashtra folk heritage without commercialization.',
       canonical: 'https://pavanputragarbi.web.app/about',
@@ -63,9 +63,9 @@ class AppSeoManager {
       route: '/history',
       titleGu: 'ઇતિહાસ અને સીમાચિહ્નો — શ્રી પવનપુત્ર ગરબી મંડળ રાજકોટ | ચાર દાયકાની ભક્તિ યાત્રા',
       titleEn: 'History & Milestones — Pavan Putra Garbi Mandal Rajkot | 45+ Years Journey',
-      descGu: '૧૯૭૭ માં પ્રથમ માટીના ગરબાથી લઈને જીવંત વાદ્ય વૃંદ, દુર્લભ છંદ સાધના અને ડિજિટલ આર્કાઇવ સુધીની શ્રી પવનપુત્ર ગરબી મંડળ રાજકોટની સાડા ચાર દાયકાની ગૌરવપૂર્ણ યાત્રા.',
+      descGu: '૧૯૮૯ માં પ્રથમ માટીના ગરબાથી લઈને જીવંત વાદ્ય વૃંદ, દુર્લભ છંદ સાધના અને ડિજિટલ આર્કાઇવ સુધીની શ્રી પવનપુત્ર ગરબી મંડળ રાજકોટની સાડા ચાર દાયકાની ગૌરવપૂર્ણ યાત્રા.',
       descEn:
-          'Chronicle of Shree Pavan Putra Garbi Mandal from 1977 to present: the first earthen Garbo, growth of acoustic live orchestras, preservation of medieval Gujarati chhand, and digital heritage archive.',
+          'Chronicle of Shree Pavan Putra Garbi Mandal from 1989 to present: the first earthen Garbo, growth of acoustic live orchestras, preservation of medieval Gujarati chhand, and digital heritage archive.',
       canonical: 'https://pavanputragarbi.web.app/history',
     ),
     '/archive': AppSeoData(

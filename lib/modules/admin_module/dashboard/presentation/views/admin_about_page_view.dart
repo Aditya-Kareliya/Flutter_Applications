@@ -2208,7 +2208,7 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                 guLabel: 'History Story (Gujarati)',
                 guCtrl: _historyBodyGuCtrl,
                 maxLines: 4,
-                hintText: 'Full devotional chronicle of the Mandal since 1977...',
+                hintText: 'Full devotional chronicle of the Mandal since 1989...',
               ),
               _buildDualLanguageField(
                 title: 'Devotional Sacred Motto',
@@ -2654,7 +2654,7 @@ class _AdminAboutPageViewState extends State<AdminAboutPageView> {
                 guLabel: 'Subtitle (Gujarati)',
                 guCtrl: _ctaDescGuCtrl,
                 maxLines: 2,
-                hintText: 'Discover photos, sacred documents, founders, and moments since 1977...',
+                hintText: 'Discover photos, sacred documents, founders, and moments since 1989...',
               ),
               _buildDualLanguageField(
                 title: 'Callout Button Label',

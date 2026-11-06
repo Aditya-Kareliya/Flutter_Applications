@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class FirebaseAuthService {
@@ -30,52 +31,13 @@ class FirebaseAuthService {
 
   Future<void> sendPasswordResetEmail(String email) async {
     final cleanEmail = email.trim();
-    final apiKey = _auth.app.options.apiKey;
-
-    // 1. Ensure user is provisioned in Firebase Auth so Google's Identity Platform will actually send the email
-    try {
-      final signUpUri = Uri.parse(
-        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$apiKey',
-      );
-      await http.post(
-        signUpUri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': cleanEmail,
-          'password': 'TempAdminPassword@1212',
-          'returnSecureToken': true,
-        }),
-      );
-    } catch (_) {
-      // If user already exists (EMAIL_EXISTS), ignore and proceed to password reset
-    }
-
-    // 2. Dispatch official Firebase password reset email containing the secure reset link
     try {
       await _auth.sendPasswordResetEmail(email: cleanEmail);
+    } on FirebaseAuthException catch (e) {
+      debugPrint('FirebaseAuth sendPasswordResetEmail error: ${e.code} - ${e.message}');
+      rethrow;
     } catch (e) {
-      // Direct Firebase Identity Toolkit REST fallback to guarantee password reset dispatch
-      final uri = Uri.parse(
-        'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=$apiKey',
-      );
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'requestType': 'PASSWORD_RESET',
-          'email': cleanEmail,
-        }),
-      );
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return;
-      }
-      try {
-        final errorData = jsonDecode(response.body);
-        final errorMsg = errorData['error']?['message'];
-        if (errorMsg != null) {
-          throw Exception(errorMsg);
-        }
-      } catch (_) {}
+      debugPrint('sendPasswordResetEmail unexpected error: $e');
       rethrow;
     }
   }

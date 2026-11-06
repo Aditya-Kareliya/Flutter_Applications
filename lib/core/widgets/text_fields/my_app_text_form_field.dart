@@ -81,8 +81,8 @@ class MyAppTextFormField extends StatefulWidget {
 
 class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
   TextEditingController? _internalController;
-  TextEditingController get _effectiveController =>
-      widget.controller ?? (_internalController ??= TextEditingController(text: widget.initialValue));
+
+  TextEditingController get _effectiveController => widget.controller ?? (_internalController ??= TextEditingController(text: widget.initialValue));
 
   bool _isTranslating = false;
   String? _lastErrorAnnounced;
@@ -136,11 +136,7 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
 
     final sourceText = _effectiveController.text.trim();
     if (sourceText.isEmpty) {
-      MyAppToastMessage.warning(
-        context,
-        title: 'Translation Empty',
-        description: 'Please type some text to translate.',
-      );
+      MyAppToastMessage.warning(context, title: 'Translation Empty', description: 'Please type some text to translate.');
       return;
     }
 
@@ -149,19 +145,11 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
       final translated = await GoogleTranslationService.instance.translateToGujarati(sourceText);
       targetCtrl.text = translated;
       if (mounted) {
-        MyAppToastMessage.success(
-          context,
-          title: 'Auto-Translated',
-          description: translated,
-        );
+        MyAppToastMessage.success(context, title: 'Auto-Translated', description: translated);
       }
     } catch (e) {
       if (mounted) {
-        MyAppToastMessage.error(
-          context,
-          title: 'Translation Failed',
-          description: 'Could not connect to translation service: $e',
-        );
+        MyAppToastMessage.error(context, title: 'Translation Failed', description: 'Could not connect to translation service: $e');
       }
     } finally {
       if (mounted) setState(() => _isTranslating = false);
@@ -218,30 +206,15 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
             if (_isTranslating)
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
-                child: SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
+                child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
               )
             else
-              MyAppIconButton.translate(
-                onPressed: _handleAutoTranslate,
-                tooltip: 'Auto-translate to Gujarati',
-              ),
+              MyAppIconButton.translate(onPressed: _handleAutoTranslate, tooltip: 'Auto-translate to Gujarati'),
           ],
-          if (canClear)
-            MyAppIconButton.clear(
-              onPressed: _handleClear,
-              tooltip: 'Clear text',
-            ),
+          if (canClear) MyAppIconButton.clear(onPressed: _handleClear, tooltip: 'Clear text'),
           if (canToggleVisibility)
             IconButton(
-              icon: Icon(
-                _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                size: 20,
-                color: colors.getSecondaryTextColor(context),
-              ),
+              icon: Icon(_obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20, color: colors.getSecondaryTextColor(context)),
               splashRadius: 18,
               padding: const EdgeInsets.symmetric(horizontal: 6),
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -269,12 +242,7 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
       inputFormatters: widget.inputFormatters,
       onChanged: widget.onChanged,
       onFieldSubmitted: widget.onFieldSubmitted,
-      style: styles.cleanSans(
-        context,
-        size: isMobile ? 15 : 14,
-        fontWeight: FontWeight.w500,
-        color: colors.getPrimaryTextColor(context),
-      ),
+      style: styles.cleanSans(context, size: isMobile ? 15 : 14, fontWeight: FontWeight.w500, color: colors.getPrimaryTextColor(context)),
       validator: (val) {
         if (widget.validator == null) return null;
         final error = widget.validator!(val);
@@ -283,11 +251,7 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
             _lastErrorAnnounced = error;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (context.mounted) {
-                MyAppToastMessage.warning(
-                  context,
-                  title: widget.labelText ?? 'Validation Required',
-                  description: error,
-                );
+                MyAppToastMessage.warning(context, title: widget.labelText ?? 'Validation Required', description: error);
               }
             });
           }
@@ -304,34 +268,13 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
         filled: true,
         fillColor: isDark ? const Color(0xFF1E1B1B) : Colors.white,
         floatingLabelBehavior: FloatingLabelBehavior.auto,
-        labelStyle: styles.cleanSans(
-          context,
-          size: 13,
-          fontWeight: FontWeight.w500,
-          color: colors.getSecondaryTextColor(context),
-        ),
-        hintStyle: styles.cleanSans(
-          context,
-          size: 13,
-          color: colors.getMutedTextColor(context),
-        ),
-        prefixIcon: widget.prefixIcon != null
-            ? Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: widget.prefixIcon,
-              )
-            : null,
-        prefixIconConstraints: isMobileOrTablet
-            ? const BoxConstraints(minWidth: 42, minHeight: 42)
-            : const BoxConstraints(minWidth: 38, minHeight: 38),
+        labelStyle: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w500, color: colors.getSecondaryTextColor(context)),
+        hintStyle: styles.cleanSans(context, size: 13, color: colors.getMutedTextColor(context)),
+        prefixIcon: widget.prefixIcon != null ? Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: widget.prefixIcon) : null,
+        prefixIconConstraints: isMobileOrTablet ? const BoxConstraints(minWidth: 42, minHeight: 42) : const BoxConstraints(minWidth: 38, minHeight: 38),
         suffixIcon: builtSuffix,
-        suffixIconConstraints: isMobileOrTablet
-            ? const BoxConstraints(minWidth: 42, minHeight: 42)
-            : const BoxConstraints(minHeight: 38),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: isMobileOrTablet ? 14 : 12,
-        ),
+        suffixIconConstraints: isMobileOrTablet ? const BoxConstraints(minWidth: 42, minHeight: 42) : const BoxConstraints(minHeight: 38),
+        contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: isMobileOrTablet ? 14 : 12),
         // Error text style is 0 height to prevent vertical layout shift
         errorStyle: const TextStyle(fontSize: 0, height: 0),
         border: OutlineInputBorder(
@@ -344,24 +287,15 @@ class _MyAppTextFormFieldState extends State<MyAppTextFormField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: isDark ? colors.lightGold : colors.heritageMaroon,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: isDark ? colors.lightGold : colors.heritageMaroon, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: colors.sacredRed,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: colors.sacredRed, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: colors.sacredRed,
-            width: 2.0,
-          ),
+          borderSide: BorderSide(color: colors.sacredRed, width: 2.0),
         ),
       ),
     );

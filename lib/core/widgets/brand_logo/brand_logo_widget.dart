@@ -31,7 +31,6 @@ class BrandLogoWidget extends StatelessWidget {
   });
 
   static const String defaultAssetPng = AppCachedImage.defaultLogoAssetPng;
-  static const String defaultAssetJpg = AppCachedImage.defaultLogoAssetJpg;
 
   @override
   Widget build(BuildContext context) {
@@ -43,21 +42,14 @@ class BrandLogoWidget extends StatelessWidget {
       width: effectiveWidth,
       height: effectiveHeight,
       fit: fit,
-      errorBuilder: (_, _, _) => Image.asset(
-        defaultAssetJpg,
-        width: effectiveWidth,
-        height: effectiveHeight,
-        fit: fit,
-      ),
+      errorBuilder: (_, _, _) => fallbackWidget ?? const SizedBox.shrink(),
     );
 
     return ListenableBuilder(
       listenable: AdminDataStore.instance,
       builder: (context, _) {
         final logoUrl = AdminDataStore.instance.settings.logoImageUrl.trim();
-        final isCustomRemote = logoUrl.isNotEmpty &&
-            logoUrl != defaultAssetPng &&
-            logoUrl != defaultAssetJpg;
+        final isCustomRemote = logoUrl.isNotEmpty && logoUrl != defaultAssetPng && !logoUrl.contains('pavan_putra_logo');
 
         Widget content;
         if (isCustomRemote) {

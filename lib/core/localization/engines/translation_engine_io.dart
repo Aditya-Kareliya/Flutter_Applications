@@ -14,14 +14,8 @@ class MLKitTranslationEngine implements AppTranslationEngine {
 
   void _initTranslators() {
     try {
-      _enToGuTranslator = OnDeviceTranslator(
-        sourceLanguage: TranslateLanguage.english,
-        targetLanguage: TranslateLanguage.gujarati,
-      );
-      _guToEnTranslator = OnDeviceTranslator(
-        sourceLanguage: TranslateLanguage.gujarati,
-        targetLanguage: TranslateLanguage.english,
-      );
+      _enToGuTranslator = OnDeviceTranslator(sourceLanguage: TranslateLanguage.english, targetLanguage: TranslateLanguage.gujarati);
+      _guToEnTranslator = OnDeviceTranslator(sourceLanguage: TranslateLanguage.gujarati, targetLanguage: TranslateLanguage.english);
     } catch (e) {
       debugPrint('MLKitTranslationEngine init note: $e');
     }
@@ -30,7 +24,9 @@ class MLKitTranslationEngine implements AppTranslationEngine {
   @override
   Future<String> translateToGujarati(String text) async {
     final trimmed = text.trim();
+
     if (trimmed.isEmpty) return text;
+
     try {
       if (_enToGuTranslator != null) {
         final result = await _enToGuTranslator!.translateText(trimmed);
@@ -39,13 +35,16 @@ class MLKitTranslationEngine implements AppTranslationEngine {
     } catch (e) {
       debugPrint('MLKit translation note, falling back to Google Cloud endpoint: $e');
     }
+
     return _fallbackEngine.translateToGujarati(text);
   }
 
   @override
   Future<String> translateToEnglish(String text) async {
     final trimmed = text.trim();
+
     if (trimmed.isEmpty) return text;
+
     try {
       if (_guToEnTranslator != null) {
         final result = await _guToEnTranslator!.translateText(trimmed);
@@ -54,6 +53,7 @@ class MLKitTranslationEngine implements AppTranslationEngine {
     } catch (e) {
       debugPrint('MLKit reverse translation note: $e');
     }
+
     return _fallbackEngine.translateToEnglish(text);
   }
 

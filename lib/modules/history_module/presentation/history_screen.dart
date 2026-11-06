@@ -83,10 +83,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 }).toList()
               : [
                   _MilestoneItem(
-                    year: '૧૯૭૭ / 1977',
+                    year: '૧૯૮૯ / 1989',
                     badge: isGujarati ? 'સ્થાપના' : 'FOUNDATION',
-                    title: context.tr('history_milestone_1977_title'),
-                    desc: context.tr('history_milestone_1977_desc'),
+                    title: context.tr('history_milestone_1989_title'),
+                    desc: context.tr('history_milestone_1989_desc'),
                     icon: Icons.local_fire_department_rounded,
                   ),
                   _MilestoneItem(

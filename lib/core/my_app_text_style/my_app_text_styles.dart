@@ -31,6 +31,7 @@ class MyAppTextStyles {
   static final TextStyle _baseInter = GoogleFonts.inter(textStyle: const TextStyle(fontFamilyFallback: gujaratiFallback));
 
   static bool _fontsLoaded = false;
+
   static bool get areFontsLoaded => _fontsLoaded;
 
   /// Preload all Gujarati & English fonts into Flutter's FontLoader to eliminate tofu glyph boxes

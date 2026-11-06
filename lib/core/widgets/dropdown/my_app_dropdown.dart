@@ -15,63 +15,18 @@ class AdminPageDestination {
   final String labelGu;
   final IconData icon;
 
-  const AdminPageDestination({
-    required this.path,
-    required this.labelEn,
-    required this.labelGu,
-    required this.icon,
-  });
+  const AdminPageDestination({required this.path, required this.labelEn, required this.labelGu, required this.icon});
 }
 
 const List<AdminPageDestination> kAdminPublicPages = [
-  AdminPageDestination(
-    path: '/archive',
-    labelEn: 'Archive Records & Photos',
-    labelGu: 'આર્કાઇવ અને ફોટો સંગ્રહ',
-    icon: Icons.calendar_month_rounded,
-  ),
-  AdminPageDestination(
-    path: '/about',
-    labelEn: 'About Mandali & Traditions',
-    labelGu: 'મંડળ પરિચય અને પરંપરા',
-    icon: Icons.info_outline_rounded,
-  ),
-  AdminPageDestination(
-    path: '/history',
-    labelEn: 'History & Heritage Timeline',
-    labelGu: 'ઇતિહાસ અને સીમાચિહ્નો',
-    icon: Icons.history_edu_rounded,
-  ),
-  AdminPageDestination(
-    path: '/gallery',
-    labelEn: 'Photo Gallery',
-    labelGu: 'ફોટો ગેલેરી',
-    icon: Icons.photo_library_rounded,
-  ),
-  AdminPageDestination(
-    path: '/videos',
-    labelEn: 'Sacred Garba Videos',
-    labelGu: 'ગરબી વિડિયો દર્શન',
-    icon: Icons.play_circle_outline_rounded,
-  ),
-  AdminPageDestination(
-    path: '/blog',
-    labelEn: 'Cultural Articles & Stories',
-    labelGu: 'સાંસ્કૃતિક લેખો અને વાતો',
-    icon: Icons.article_outlined,
-  ),
-  AdminPageDestination(
-    path: '/contact',
-    labelEn: 'Contact & Location Map',
-    labelGu: 'સંપર્ક અને સ્થળ માહિતી',
-    icon: Icons.location_on_outlined,
-  ),
-  AdminPageDestination(
-    path: '/',
-    labelEn: 'Home Page',
-    labelGu: 'મુખ્ય હોમ પેજ',
-    icon: Icons.home_rounded,
-  ),
+  AdminPageDestination(path: '/archive', labelEn: 'Archive Records & Photos', labelGu: 'આર્કાઇવ અને ફોટો સંગ્રહ', icon: Icons.calendar_month_rounded),
+  AdminPageDestination(path: '/about', labelEn: 'About Mandal & Traditions', labelGu: 'મંડળ પરિચય અને પરંપરા', icon: Icons.info_outline_rounded),
+  AdminPageDestination(path: '/history', labelEn: 'History & Heritage Timeline', labelGu: 'ઇતિહાસ અને સીમાચિહ્નો', icon: Icons.history_edu_rounded),
+  AdminPageDestination(path: '/gallery', labelEn: 'Photo Gallery', labelGu: 'ફોટો ગેલેરી', icon: Icons.photo_library_rounded),
+  AdminPageDestination(path: '/videos', labelEn: 'Sacred Garba Videos', labelGu: 'ગરબી વિડિયો દર્શન', icon: Icons.play_circle_outline_rounded),
+  AdminPageDestination(path: '/blog', labelEn: 'Cultural Articles & Stories', labelGu: 'સાંસ્કૃતિક લેખો અને વાતો', icon: Icons.article_outlined),
+  AdminPageDestination(path: '/contact', labelEn: 'Contact & Location Map', labelGu: 'સંપર્ક અને સ્થળ માહિતી', icon: Icons.location_on_outlined),
+  AdminPageDestination(path: '/', labelEn: 'Home Page', labelGu: 'મુખ્ય હોમ પેજ', icon: Icons.home_rounded),
 ];
 
 /// Item definition for MyAppDropdown
@@ -81,12 +36,7 @@ class MyAppDropdownItem<T> {
   final String? subtitle;
   final IconData? icon;
 
-  const MyAppDropdownItem({
-    required this.value,
-    required this.label,
-    this.subtitle,
-    this.icon,
-  });
+  const MyAppDropdownItem({required this.value, required this.label, this.subtitle, this.icon});
 }
 
 /// --------------------------------------------------------------------------
@@ -109,16 +59,7 @@ class MyAppDropdown<T> extends StatefulWidget {
   final Widget? prefixIcon;
   final bool enabled;
 
-  const MyAppDropdown({
-    super.key,
-    required this.labelText,
-    this.hintText,
-    required this.value,
-    required this.items,
-    required this.onChanged,
-    this.prefixIcon,
-    this.enabled = true,
-  });
+  const MyAppDropdown({super.key, required this.labelText, this.hintText, required this.value, required this.items, required this.onChanged, this.prefixIcon, this.enabled = true});
 
   /// Factory constructor specifically for choosing destination pages across all admin screens
   static Widget pageDestination({
@@ -133,12 +74,7 @@ class MyAppDropdown<T> extends StatefulWidget {
     final effectiveRoute = currentRoute.isEmpty ? defaultRoute : currentRoute;
 
     final items = kAdminPublicPages.map((page) {
-      return MyAppDropdownItem<String>(
-        value: page.path,
-        label: page.labelEn,
-        subtitle: page.labelGu,
-        icon: page.icon,
-      );
+      return MyAppDropdownItem<String>(value: page.path, label: page.labelEn, subtitle: page.labelGu, icon: page.icon);
     }).toList();
 
     return MyAppDropdown<String>(
@@ -182,21 +118,14 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
   }
 
   void _openMobileBottomSheet(BuildContext context) async {
-    final title = widget.labelText.isNotEmpty
-        ? widget.labelText
-        : (widget.hintText ?? 'Select Option');
+    final title = widget.labelText.isNotEmpty ? widget.labelText : (widget.hintText ?? 'Select Option');
 
     final selected = await showMyAppBottomSheet<T>(
       context: context,
       title: title,
       selectedValue: widget.value,
       items: widget.items.map((item) {
-        return MyAppBottomSheetItem<T>(
-          value: item.value,
-          label: item.label,
-          subtitle: item.subtitle,
-          icon: item.icon,
-        );
+        return MyAppBottomSheetItem<T>(value: item.value, label: item.label, subtitle: item.subtitle, icon: item.icon);
       }).toList(),
     );
 
@@ -229,19 +158,13 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Dismiss Dropdown',
-      barrierColor: isDark
-          ? Colors.black.withValues(alpha: 0.45)
-          : Colors.black.withValues(alpha: 0.20),
+      barrierColor: isDark ? Colors.black.withValues(alpha: 0.45) : Colors.black.withValues(alpha: 0.20),
       transitionDuration: const Duration(milliseconds: 240),
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
         return const SizedBox.shrink();
       },
       transitionBuilder: (dialogContext, animation, secondaryAnimation, child) {
-        final curve = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutCubic,
-          reverseCurve: Curves.easeInCubic,
-        );
+        final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
 
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -249,105 +172,86 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
             children: [
               // Tap outside to dismiss
               Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => Navigator.of(dialogContext).pop(),
-                  child: const SizedBox.expand(),
-                ),
+                child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(dialogContext).pop(), child: const SizedBox.expand()),
               ),
 
               // Positioned Active Trigger Field + Dropdown Menu
               Positioned(
                 top: showAbove ? null : triggerOffset.dy,
-              bottom: showAbove ? bottomDistance : null,
-              left: triggerOffset.dx,
-              width: exactWidth,
-              child: Material(
-                color: Colors.transparent,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (showAbove) ...[
-                      FadeTransition(
-                        opacity: curve,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.0, 0.20), // slides smoothly up from bottom to top
-                            end: Offset.zero,
-                          ).animate(curve),
-                          child: ScaleTransition(
-                            alignment: Alignment.bottomCenter,
-                            scale: Tween<double>(begin: 0.92, end: 1.0).animate(curve),
-                            child: _buildMenuCard(dialogContext, colors, styles, isDark, maxMenuHeight),
+                bottom: showAbove ? bottomDistance : null,
+                left: triggerOffset.dx,
+                width: exactWidth,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (showAbove) ...[
+                        FadeTransition(
+                          opacity: curve,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0.0, 0.20), // slides smoothly up from bottom to top
+                              end: Offset.zero,
+                            ).animate(curve),
+                            child: ScaleTransition(
+                              alignment: Alignment.bottomCenter,
+                              scale: Tween<double>(begin: 0.92, end: 1.0).animate(curve),
+                              child: _buildMenuCard(dialogContext, colors, styles, isDark, maxMenuHeight),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      FadeTransition(
-                        opacity: curve,
-                        child: _buildTriggerWidget(
-                          isOpen: true,
-                          onTap: () => Navigator.of(dialogContext).pop(),
+                        const SizedBox(height: 6),
+                        FadeTransition(
+                          opacity: curve,
+                          child: _buildTriggerWidget(isOpen: true, onTap: () => Navigator.of(dialogContext).pop()),
                         ),
-                      ),
-                    ] else ...[
-                      FadeTransition(
-                        opacity: curve,
-                        child: _buildTriggerWidget(
-                          isOpen: true,
-                          onTap: () => Navigator.of(dialogContext).pop(),
+                      ] else ...[
+                        FadeTransition(
+                          opacity: curve,
+                          child: _buildTriggerWidget(isOpen: true, onTap: () => Navigator.of(dialogContext).pop()),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      FadeTransition(
-                        opacity: curve,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.0, -0.20), // slides smoothly down from top to bottom
-                            end: Offset.zero,
-                          ).animate(curve),
-                          child: ScaleTransition(
-                            alignment: Alignment.topCenter,
-                            scale: Tween<double>(begin: 0.92, end: 1.0).animate(curve),
-                            child: _buildMenuCard(dialogContext, colors, styles, isDark, maxMenuHeight),
+                        const SizedBox(height: 6),
+                        FadeTransition(
+                          opacity: curve,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0.0, -0.20), // slides smoothly down from top to bottom
+                              end: Offset.zero,
+                            ).animate(curve),
+                            child: ScaleTransition(
+                              alignment: Alignment.topCenter,
+                              scale: Tween<double>(begin: 0.92, end: 1.0).animate(curve),
+                              child: _buildMenuCard(dialogContext, colors, styles, isDark, maxMenuHeight),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    },
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildMenuCard(
-    BuildContext dialogContext,
-    MyAppColors colors,
-    MyAppTextStyles styles,
-    bool isDark,
-    double maxMenuHeight,
-  ) {
+  Widget _buildMenuCard(BuildContext dialogContext, MyAppColors colors, MyAppTextStyles styles, bool isDark, double maxMenuHeight) {
     return Container(
       constraints: BoxConstraints(maxHeight: maxMenuHeight),
       decoration: BoxDecoration(
         color: colors.getCardBackgroundColor(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colors.heritageGold.withValues(alpha: 0.6),
-          width: 1.2,
-        ),
+        border: Border.all(color: colors.heritageGold.withValues(alpha: 0.6), width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.2),
             blurRadius: 20,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       child: ClipRRect(
@@ -357,12 +261,7 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
           physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.symmetric(vertical: 6),
           itemCount: widget.items.length,
-          separatorBuilder: (context, index) => Divider(
-            height: 1,
-            indent: 48,
-            endIndent: 12,
-            color: colors.getBorderColor(context).withValues(alpha: 0.4),
-          ),
+          separatorBuilder: (context, index) => Divider(height: 1, indent: 48, endIndent: 12, color: colors.getBorderColor(context).withValues(alpha: 0.4)),
           itemBuilder: (context, index) {
             final item = widget.items[index];
             final isSelected = item.value == widget.value;
@@ -373,22 +272,12 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
                 widget.onChanged(item.value);
               },
               child: Container(
-                color: isSelected
-                    ? (isDark
-                        ? colors.heritageMaroon.withValues(alpha: 0.4)
-                        : colors.heritageGold.withValues(alpha: 0.12))
-                    : Colors.transparent,
+                color: isSelected ? (isDark ? colors.heritageMaroon.withValues(alpha: 0.4) : colors.heritageGold.withValues(alpha: 0.12)) : Colors.transparent,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                 child: Row(
                   children: [
                     if (item.icon != null) ...[
-                      Icon(
-                        item.icon,
-                        size: 18,
-                        color: isSelected
-                            ? (isDark ? colors.lightGold : colors.heritageMaroon)
-                            : colors.getAccentColor(context),
-                      ),
+                      Icon(item.icon, size: 18, color: isSelected ? (isDark ? colors.lightGold : colors.heritageMaroon) : colors.getAccentColor(context)),
                       const SizedBox(width: 12),
                     ],
                     Expanded(
@@ -402,31 +291,17 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
                               context,
                               size: 13,
                               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                              color: isSelected
-                                  ? (isDark ? colors.lightGold : colors.heritageMaroon)
-                                  : colors.getPrimaryTextColor(context),
+                              color: isSelected ? (isDark ? colors.lightGold : colors.heritageMaroon) : colors.getPrimaryTextColor(context),
                             ),
                           ),
                           if (item.subtitle != null) ...[
                             const SizedBox(height: 2),
-                            Text(
-                              item.subtitle!,
-                              style: styles.cleanSans(
-                                context,
-                                size: 11,
-                                color: colors.getMutedTextColor(context),
-                              ),
-                            ),
+                            Text(item.subtitle!, style: styles.cleanSans(context, size: 11, color: colors.getMutedTextColor(context))),
                           ],
                         ],
                       ),
                     ),
-                    if (isSelected)
-                      Icon(
-                        Icons.check_rounded,
-                        size: 18,
-                        color: isDark ? colors.lightGold : colors.heritageMaroon,
-                      ),
+                    if (isSelected) Icon(Icons.check_rounded, size: 18, color: isDark ? colors.lightGold : colors.heritageMaroon),
                   ],
                 ),
               ),
@@ -437,11 +312,7 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
     );
   }
 
-  Widget _buildTriggerWidget({
-    Key? key,
-    bool isOpen = false,
-    VoidCallback? onTap,
-  }) {
+  Widget _buildTriggerWidget({Key? key, bool isOpen = false, VoidCallback? onTap}) {
     final colors = serviceLocator<MyAppColors>();
     final styles = serviceLocator<MyAppTextStyles>();
     final isDark = colors.isDarkMode(context);
@@ -454,41 +325,21 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: isDark
-              ? (isOpen ? const Color(0xFF262222) : const Color(0xFF1E1B1B))
-              : Colors.white,
+          color: isDark ? (isOpen ? const Color(0xFF262222) : const Color(0xFF1E1B1B)) : Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isOpen ? colors.heritageGold : colors.getBorderColor(context),
-            width: isOpen ? 1.4 : 1.0,
-          ),
-          boxShadow: isOpen
-              ? [
-                  BoxShadow(
-                    color: colors.heritageGold.withValues(alpha: 0.25),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  )
-                ]
-              : null,
+          border: Border.all(color: isOpen ? colors.heritageGold : colors.getBorderColor(context), width: isOpen ? 1.4 : 1.0),
+          boxShadow: isOpen ? [BoxShadow(color: colors.heritageGold.withValues(alpha: 0.25), blurRadius: 10, offset: const Offset(0, 2))] : null,
         ),
         child: Row(
           children: [
             if (widget.prefixIcon != null) ...[
               IconTheme(
-                data: IconThemeData(
-                  size: 18,
-                  color: isOpen ? colors.heritageGold : colors.getAccentColor(context),
-                ),
+                data: IconThemeData(size: 18, color: isOpen ? colors.heritageGold : colors.getAccentColor(context)),
                 child: widget.prefixIcon!,
               ),
               const SizedBox(width: 10),
             ] else if (selected?.icon != null) ...[
-              Icon(
-                selected!.icon,
-                size: 18,
-                color: isOpen ? colors.heritageGold : colors.getAccentColor(context),
-              ),
+              Icon(selected!.icon, size: 18, color: isOpen ? colors.heritageGold : colors.getAccentColor(context)),
               const SizedBox(width: 10),
             ],
             Expanded(
@@ -498,25 +349,16 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
                 children: [
                   Text(
                     widget.labelText,
-                    style: styles.cleanSans(
-                      context,
-                      size: 10.5,
-                      fontWeight: FontWeight.w600,
-                      color: isOpen ? colors.heritageGold : colors.getSecondaryTextColor(context),
-                    ),
+                    style: styles.cleanSans(context, size: 10.5, fontWeight: FontWeight.w600, color: isOpen ? colors.heritageGold : colors.getSecondaryTextColor(context)),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    selected != null
-                        ? '${selected.label}${selected.subtitle != null ? " (${selected.subtitle})" : ""}'
-                        : (widget.hintText ?? 'Select...'),
+                    selected != null ? '${selected.label}${selected.subtitle != null ? " (${selected.subtitle})" : ""}' : (widget.hintText ?? 'Select...'),
                     style: styles.cleanSans(
                       context,
                       size: 13,
                       fontWeight: FontWeight.w600,
-                      color: selected != null
-                          ? colors.getPrimaryTextColor(context)
-                          : colors.getMutedTextColor(context),
+                      color: selected != null ? colors.getPrimaryTextColor(context) : colors.getMutedTextColor(context),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -525,11 +367,7 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(
-              isOpen ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-              size: 20,
-              color: isOpen ? colors.heritageGold : colors.getAccentColor(context),
-            ),
+            Icon(isOpen ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, size: 20, color: isOpen ? colors.heritageGold : colors.getAccentColor(context)),
           ],
         ),
       ),
@@ -538,10 +376,6 @@ class _MyAppDropdownState<T> extends State<MyAppDropdown<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildTriggerWidget(
-      key: _triggerKey,
-      isOpen: false,
-      onTap: widget.enabled ? () => _handleOpenPicker(context) : null,
-    );
+    return _buildTriggerWidget(key: _triggerKey, isOpen: false, onTap: widget.enabled ? () => _handleOpenPicker(context) : null);
   }
 }

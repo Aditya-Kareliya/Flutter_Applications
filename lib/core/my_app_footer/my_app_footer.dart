@@ -27,322 +27,219 @@ class MyAppFooter extends StatelessWidget {
         child: Container(
           width: 100.w,
           color: colors.getFooterBackgroundColor(context),
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 20 : 36,
-        vertical: isMobile ? 32 : 48,
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1240),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Mandal Row
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.start,
-                runSpacing: 28,
-                spacing: 36,
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 36, vertical: isMobile ? 32 : 48),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1240),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Mandal Branding
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: isMobile ? 100.w : 420,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  // Top Mandal Row
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.start,
+                    runSpacing: 28,
+                    spacing: 36,
+                    children: [
+                      // Mandal Branding
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: isMobile ? 100.w : 420),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            BrandLogoWidget(
-                              size: 44,
-                              isCircular: true,
-                              border: Border.all(
-                                color: colors.heritageGold,
-                                width: 1.5,
-                              ),
+                            Row(
+                              children: [
+                                BrandLogoWidget(size: 44, isCircular: true, border: Border.all(color: colors.heritageGold, width: 1.5)),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (context.tr('app_title').isNotEmpty)
+                                        Text(context.tr('app_title'), style: styles.editorialSerif(context, size: 16, fontWeight: FontWeight.w700)),
+                                      if (context.tr('app_subtitle').isNotEmpty)
+                                        Text(
+                                          context.tr('app_subtitle'),
+                                          style: styles.cleanSans(context, size: 10, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: colors.getAccentColor(context)),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (context.tr('app_title').isNotEmpty)
-                                    Text(
-                                      context.tr('app_title'),
-                                      style: styles.editorialSerif(
-                                        context,
-                                        size: 16,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  if (context.tr('app_subtitle').isNotEmpty)
-                                    Text(
-                                      context.tr('app_subtitle'),
-                                      style: styles.cleanSans(
-                                        context,
-                                        size: 10,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 1.0,
-                                        color: colors.getAccentColor(context),
-                                      ),
-                                    ),
-                                ],
+                            if (context.tr('footer_tagline').isNotEmpty) ...[
+                              const SizedBox(height: 14),
+                              Text(
+                                context.tr('footer_tagline'),
+                                style: styles.bodyText(context).copyWith(color: colors.getSecondaryTextColor(context), height: 1.55, fontSize: 13.5),
                               ),
-                            ),
+                            ],
+                            if (context.tr('footer_motto').isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              Text(context.tr('footer_motto'), style: styles.devotionalMotto(context, size: 16, color: colors.getAccentColor(context))),
+                            ],
                           ],
                         ),
-                        if (context.tr('footer_tagline').isNotEmpty) ...[
-                          const SizedBox(height: 14),
-                          Text(
-                            context.tr('footer_tagline'),
-                            style: styles
-                                .bodyText(context)
-                                .copyWith(
-                                  color: colors.getSecondaryTextColor(context),
-                                  height: 1.55,
-                                  fontSize: 13.5,
-                                ),
-                          ),
-                        ],
-                        if (context.tr('footer_motto').isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          Text(
-                            context.tr('footer_motto'),
-                            style: styles.devotionalMotto(
-                              context,
-                              size: 16,
-                              color: colors.getAccentColor(context),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                      ),
 
-                  // Quick Links Column 1: Archive & Media
-                  Builder(builder: (context) {
-                    final store = AdminDataStore.instance;
-                    final isGu = Localizations.localeOf(context).languageCode == 'gu';
-                    final col1 = store.footerLinks.where((p) => p.column == 'col1' && p.isEnabled).toList();
-                    final title = context.tr('footer_links_title');
-
-                    if (title.isEmpty && col1.isEmpty) return const SizedBox.shrink();
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (title.isNotEmpty)
-                          Text(
-                            title,
-                            style: styles.eyebrow(context),
-                          ),
-                        if (title.isNotEmpty && col1.isNotEmpty) const SizedBox(height: 14),
-                        for (final p in col1)
-                          _FooterLink(
-                            label: isGu ? (p.titleGu.isNotEmpty ? p.titleGu : p.titleEn) : (p.titleEn.isNotEmpty ? p.titleEn : p.titleGu),
-                            onTap: () => _handleLinkClick(context, p.url, p.isExternal),
-                          ),
-                      ],
-                    );
-                  }),
-
-                  // Quick Links Column 2: Mandal & Contact
-                  Builder(builder: (context) {
-                    final store = AdminDataStore.instance;
-                    final isGu = Localizations.localeOf(context).languageCode == 'gu';
-                    final col2 = store.footerLinks.where((p) => p.column == 'col2' && p.isEnabled).toList();
-
-                    final col2Title = context.tr('footer_links2_title');
-
-                    if (col2Title.isEmpty && col2.isEmpty) return const SizedBox.shrink();
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (col2Title.isNotEmpty)
-                          Text(
-                            col2Title,
-                            style: styles.eyebrow(context),
-                          ),
-                        if (col2Title.isNotEmpty && col2.isNotEmpty) const SizedBox(height: 14),
-                        for (final p in col2)
-                          _FooterLink(
-                            label: isGu ? (p.titleGu.isNotEmpty ? p.titleGu : p.titleEn) : (p.titleEn.isNotEmpty ? p.titleEn : p.titleGu),
-                            onTap: () => _handleLinkClick(context, p.url, p.isExternal),
-                          ),
-                      ],
-                    );
-                  }),
-
-                  // Social & Contact Information
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: isMobile ? 100.w : 280,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (context.tr('footer_social').isNotEmpty) ...[
-                          Text(
-                            context.tr('footer_social'),
-                            style: styles.eyebrow(context),
-                          ),
-                          const SizedBox(height: 14),
-                        ],
-                        Builder(builder: (context) {
+                      // Quick Links Column 1: Archive & Media
+                      Builder(
+                        builder: (context) {
                           final store = AdminDataStore.instance;
-                          final activeSocials = store.footerSocialLinks.where((s) => s.isEnabled).toList();
+                          final isGu = Localizations.localeOf(context).languageCode == 'gu';
+                          final col1 = store.footerLinks.where((p) => p.column == 'col1' && p.isEnabled).toList();
+                          final title = context.tr('footer_links_title');
 
-                          if (activeSocials.isNotEmpty) {
-                            return Wrap(
-                              spacing: 12,
-                              runSpacing: 8,
-                              children: [
-                                for (final soc in activeSocials)
-                                  _SocialPill(
-                                    label: soc.platform,
-                                    icon: _getSocialIcon(soc.iconKey),
-                                    url: soc.url,
-                                  ),
-                              ],
-                            );
-                          }
+                          if (title.isEmpty && col1.isEmpty) return const SizedBox.shrink();
 
-                          return Wrap(
-                            spacing: 12,
-                            runSpacing: 8,
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (store.settings.youtubeChannel.isNotEmpty)
-                                _SocialPill(
-                                  label: 'YouTube',
-                                  icon: Icons.play_arrow_rounded,
-                                  url: store.settings.youtubeChannel,
-                                ),
-                              if (store.settings.instagramHandle.isNotEmpty)
-                                _SocialPill(
-                                  label: 'Instagram',
-                                  icon: Icons.camera_alt_outlined,
-                                  url: store.settings.instagramHandle,
-                                ),
-                              if (store.settings.facebookUrl.isNotEmpty)
-                                _SocialPill(
-                                  label: 'Facebook',
-                                  icon: Icons.public_rounded,
-                                  url: store.settings.facebookUrl,
+                              if (title.isNotEmpty) Text(title, style: styles.eyebrow(context)),
+                              if (title.isNotEmpty && col1.isNotEmpty) const SizedBox(height: 14),
+                              for (final p in col1)
+                                _FooterLink(
+                                  label: isGu ? (p.titleGu.isNotEmpty ? p.titleGu : p.titleEn) : (p.titleEn.isNotEmpty ? p.titleEn : p.titleGu),
+                                  onTap: () => _handleLinkClick(context, p.url, p.isExternal),
                                 ),
                             ],
                           );
-                        }),
-                        if (context.tr('footer_location').isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.location_on_outlined,
-                                size: 16,
-                                color: colors.getAccentColor(context),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  context.tr('footer_location'),
-                                  style: styles.cleanSans(
-                                    context,
-                                    size: 12,
-                                    color: colors.getSecondaryTextColor(context),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                        if (AdminDataStore.instance.settings.contactPhone.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.phone_outlined,
-                                size: 15,
-                                color: colors.getAccentColor(context),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  AdminDataStore.instance.settings.contactPhone,
-                                  style: styles.cleanSans(
-                                    context,
-                                    size: 12,
-                                    color: colors.getSecondaryTextColor(context),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                        if (AdminDataStore.instance.settings.contactEmail.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.email_outlined,
-                                size: 15,
-                                color: colors.getAccentColor(context),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  AdminDataStore.instance.settings.contactEmail,
-                                  style: styles.cleanSans(
-                                    context,
-                                    size: 12,
-                                    color: colors.getSecondaryTextColor(context),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                        },
+                      ),
 
-              if (context.tr('footer_copyright').isNotEmpty) ...[
-                const HeritageDivider(verticalPadding: 24),
-                // Bottom Copyright
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.tr('footer_copyright'),
-                        style: styles.cleanSans(
-                          context,
-                          size: 11.5,
-                          color: colors.getMutedTextColor(context),
-                          height: 1.4,
+                      // Quick Links Column 2: Mandal & Contact
+                      Builder(
+                        builder: (context) {
+                          final store = AdminDataStore.instance;
+                          final isGu = Localizations.localeOf(context).languageCode == 'gu';
+                          final col2 = store.footerLinks.where((p) => p.column == 'col2' && p.isEnabled).toList();
+
+                          final col2Title = context.tr('footer_links2_title');
+
+                          if (col2Title.isEmpty && col2.isEmpty) return const SizedBox.shrink();
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (col2Title.isNotEmpty) Text(col2Title, style: styles.eyebrow(context)),
+                              if (col2Title.isNotEmpty && col2.isNotEmpty) const SizedBox(height: 14),
+                              for (final p in col2)
+                                _FooterLink(
+                                  label: isGu ? (p.titleGu.isNotEmpty ? p.titleGu : p.titleEn) : (p.titleEn.isNotEmpty ? p.titleEn : p.titleGu),
+                                  onTap: () => _handleLinkClick(context, p.url, p.isExternal),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+
+                      // Social & Contact Information
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: isMobile ? 100.w : 280),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (context.tr('footer_social').isNotEmpty) ...[Text(context.tr('footer_social'), style: styles.eyebrow(context)), const SizedBox(height: 14)],
+                            Builder(
+                              builder: (context) {
+                                final store = AdminDataStore.instance;
+                                final activeSocials = store.footerSocialLinks.where((s) => s.isEnabled).toList();
+
+                                if (activeSocials.isNotEmpty) {
+                                  return Wrap(
+                                    spacing: 12,
+                                    runSpacing: 8,
+                                    children: [for (final soc in activeSocials) _SocialPill(label: soc.platform, icon: _getSocialIcon(soc.iconKey), url: soc.url)],
+                                  );
+                                }
+
+                                return Wrap(
+                                  spacing: 12,
+                                  runSpacing: 8,
+                                  children: [
+                                    if (store.settings.youtubeChannel.isNotEmpty) _SocialPill(label: 'YouTube', icon: Icons.play_arrow_rounded, url: store.settings.youtubeChannel),
+                                    if (store.settings.instagramHandle.isNotEmpty)
+                                      _SocialPill(label: 'Instagram', icon: Icons.camera_alt_outlined, url: store.settings.instagramHandle),
+                                    if (store.settings.facebookUrl.isNotEmpty) _SocialPill(label: 'Facebook', icon: Icons.public_rounded, url: store.settings.facebookUrl),
+                                  ],
+                                );
+                              },
+                            ),
+                            if (context.tr('footer_location').isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.location_on_outlined, size: 16, color: colors.getAccentColor(context)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(context.tr('footer_location'), style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context))),
+                                  ),
+                                ],
+                              ),
+                            ],
+                            if (AdminDataStore.instance.settings.contactPhone.isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.phone_outlined, size: 15, color: colors.getAccentColor(context)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      AdminDataStore.instance.settings.contactPhone,
+                                      style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                            if (AdminDataStore.instance.settings.contactEmail.isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.email_outlined, size: 15, color: colors.getAccentColor(context)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      AdminDataStore.instance.settings.contactEmail,
+                                      style: styles.cleanSans(context, size: 12, color: colors.getSecondaryTextColor(context)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
                         ),
                       ),
+                    ],
+                  ),
+
+                  if (context.tr('footer_copyright').isNotEmpty) ...[
+                    const HeritageDivider(verticalPadding: 24),
+                    // Bottom Copyright
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(context.tr('footer_copyright'), style: styles.cleanSans(context, size: 11.5, color: colors.getMutedTextColor(context), height: 1.4)),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 
   void _handleLinkClick(BuildContext context, String url, bool isExternal) {
     if (url.isEmpty) return;
+
     if (isExternal || url.startsWith('http://') || url.startsWith('https://')) {
       launchUrl(Uri.parse(url));
     } else if (url == '/admin' || url == 'admin') {
@@ -395,12 +292,7 @@ class _FooterLink extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 2),
           child: Text(
             label,
-            style: styles.cleanSans(
-              context,
-              size: 13,
-              fontWeight: FontWeight.w500,
-              color: colors.getPrimaryTextColor(context),
-            ),
+            style: styles.cleanSans(context, size: 13, fontWeight: FontWeight.w500, color: colors.getPrimaryTextColor(context)),
           ),
         ),
       ),
@@ -433,29 +325,21 @@ class _SocialPill extends StatelessWidget {
         }
       },
       child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: colors.getCardBackgroundColor(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.getBorderColor(context)),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: colors.getCardBackgroundColor(context),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colors.getBorderColor(context)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: colors.getAccentColor(context)),
+            const SizedBox(width: 6),
+            Text(label, style: styles.cleanSans(context, size: 11.5, fontWeight: FontWeight.w600)),
+          ],
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: colors.getAccentColor(context)),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: styles.cleanSans(
-              context,
-              size: 11.5,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+    );
+  }
 }
-}
-

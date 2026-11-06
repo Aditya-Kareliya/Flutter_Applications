@@ -54,8 +54,6 @@ class AppCachedImage extends StatelessWidget {
 
   static const String defaultLogoAssetPng =
       'assets/images/pavan_putra_logo.png';
-  static const String defaultLogoAssetJpg =
-      'assets/images/pavan_putra_logo.jpg';
 
   /// Resolves an [ImageProvider] for any given URL (Network, Base64, or Asset).
   static ImageProvider provider(
@@ -135,22 +133,15 @@ class AppCachedImage extends StatelessWidget {
       height: height,
       fit: fit,
       alignment: alignment,
-      errorBuilder: (_, _, _) => Image.asset(
-        defaultLogoAssetJpg,
+      errorBuilder: (_, _, _) => Container(
         width: width,
         height: height,
-        fit: fit,
-        alignment: alignment,
-        errorBuilder: (_, _, _) => Container(
-          width: width,
-          height: height,
-          color: const Color(0xFF1B0104),
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.image_outlined,
-            color: Color(0xFFD4AF37),
-            size: 28,
-          ),
+        color: const Color(0xFF1B0104),
+        alignment: Alignment.center,
+        child: const Icon(
+          Icons.image_outlined,
+          color: Color(0xFFD4AF37),
+          size: 28,
         ),
       ),
     );

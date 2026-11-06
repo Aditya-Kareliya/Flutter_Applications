@@ -2364,6 +2364,13 @@ class AdminSettings {
 
   String get logoUrl => logoImageUrl;
 
+  String getMandalName(String lang) {
+    if (lang == 'gu') {
+      return mandalNameGu.trim().isNotEmpty ? mandalNameGu.trim() : 'શ્રી પવનપુત્ર ગરબી મંડળ — રાજકોટ';
+    }
+    return mandalNameEn.trim().isNotEmpty ? mandalNameEn.trim() : 'Pavan Putra Garbi Mandal — Rajkot';
+  }
+
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['mandalNameEn'] = mandalNameEn;

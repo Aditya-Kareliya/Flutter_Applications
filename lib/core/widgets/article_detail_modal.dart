@@ -21,9 +21,7 @@ void showArticleDetailModal(
   final styles = serviceLocator<MyAppTextStyles>();
   final isGu = Localizations.maybeLocaleOf(context)?.languageCode == 'gu';
 
-  final effectiveContent = content.trim().isNotEmpty
-      ? content.trim()
-      : (snippet.trim().isNotEmpty ? snippet.trim() : title);
+  final effectiveContent = content.trim().isNotEmpty ? content.trim() : (snippet.trim().isNotEmpty ? snippet.trim() : title);
 
   showMyAppDialog<void>(
     context: context,
@@ -45,66 +43,32 @@ void showArticleDetailModal(
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  HeritageBadge(
-                    label: category.isNotEmpty
-                        ? category.toUpperCase()
-                        : (isGu ? 'સાંસ્કૃતિક વાતો' : 'HERITAGE ARTICLE'),
-                  ),
+                  HeritageBadge(label: category.isNotEmpty ? category.toUpperCase() : (isGu ? 'સાંસ્કૃતિક વાતો' : 'HERITAGE ARTICLE')),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (readTime.isNotEmpty) ...[
-                        Icon(
-                          Icons.access_time_rounded,
-                          size: 14,
-                          color: colors.getSecondaryTextColor(context),
-                        ),
+                        Icon(Icons.access_time_rounded, size: 14, color: colors.getSecondaryTextColor(context)),
                         const SizedBox(width: 4),
-                        Text(
-                          readTime,
-                          style: styles.cleanSans(
-                            context,
-                            size: 11,
-                            color: colors.getSecondaryTextColor(context),
-                          ),
-                        ),
+                        Text(readTime, style: styles.cleanSans(context, size: 11, color: colors.getSecondaryTextColor(context))),
                         const SizedBox(width: 12),
                       ],
-                      IconButton(
-                        tooltip: 'Close',
-                        onPressed: () => Navigator.pop(dialogContext),
-                        icon: const Icon(Icons.close_rounded, size: 22),
-                      ),
+                      IconButton(tooltip: 'Close', onPressed: () => Navigator.pop(dialogContext), icon: const Icon(Icons.close_rounded, size: 22)),
                     ],
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              Text(
-                title,
-                style: styles.editorialSerif(
-                  context,
-                  size: 22,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              Text(title, style: styles.editorialSerif(context, size: 22, fontWeight: FontWeight.w700)),
               if (date.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(
                   date,
-                  style: styles.cleanSans(
-                    context,
-                    size: 12,
-                    color: colors.heritageGold,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: styles.cleanSans(context, size: 12, color: colors.heritageGold, fontWeight: FontWeight.w600),
                 ),
               ],
               const SizedBox(height: 14),
-              Divider(
-                color: colors.heritageGold.withValues(alpha: 0.2),
-                height: 1,
-              ),
+              Divider(color: colors.heritageGold.withValues(alpha: 0.2), height: 1),
               const SizedBox(height: 16),
               Expanded(
                 child: SingleChildScrollView(
@@ -118,31 +82,16 @@ void showArticleDetailModal(
                           decoration: BoxDecoration(
                             color: colors.heritageGold.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: colors.heritageGold.withValues(alpha: 0.25),
-                            ),
+                            border: Border.all(color: colors.heritageGold.withValues(alpha: 0.25)),
                           ),
                           child: Text(
                             snippet.trim(),
-                            style: styles.bodyText(context).copyWith(
-                              fontSize: 13.5,
-                              fontStyle: FontStyle.italic,
-                              color: colors.getPrimaryTextColor(context),
-                              height: 1.5,
-                            ),
+                            style: styles.bodyText(context).copyWith(fontSize: 13.5, fontStyle: FontStyle.italic, color: colors.getPrimaryTextColor(context), height: 1.5),
                           ),
                         ),
                         const SizedBox(height: 16),
                       ],
-                      Text(
-                        effectiveContent,
-                        style: styles.editorialSerif(
-                          context,
-                          size: 15.5,
-                          height: 1.8,
-                          color: colors.getPrimaryTextColor(context),
-                        ),
-                      ),
+                      Text(effectiveContent, style: styles.editorialSerif(context, size: 15.5, height: 1.8, color: colors.getPrimaryTextColor(context))),
                     ],
                   ),
                 ),
